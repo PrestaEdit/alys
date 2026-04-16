@@ -35,7 +35,7 @@ class Dashboard extends Component
         $path = storage_path('app/' . $filename);
         file_put_contents($path, $json);
 
-        \Native\Mobile\Facades\Share::file($path, 'Exporter le calendrier de traitement');
+        \Native\Mobile\Facades\Share::file('Alexis Traitement', 'Export du calendrier de traitement d\'Alexis', $path);
     }
 
     public function render(): \Illuminate\View\View

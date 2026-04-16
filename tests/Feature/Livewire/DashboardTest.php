@@ -35,9 +35,13 @@ it('shows progress percent between 0 and 100', function () {
     expect($component->get('progressPercent'))->toBeLessThanOrEqual(100);
 });
 
-it('export stub flashes a message', function () {
+it('export runs without error and writes a JSON file', function () {
     Livewire::test(Dashboard::class)
         ->call('export')
         ->assertStatus(200);
-    expect(session()->get('message') ?? session()->get('_flash.new'))->not->toBeNull();
+
+    $files = glob(storage_path('app/alexis-traitement-*.json'));
+    expect($files)->not->toBeEmpty();
+    $data = json_decode(file_get_contents($files[0]), true);
+    expect($data)->toHaveKeys(['settings', 'treatments', 'posology_history', 'calendar_events', 'exported_at']);
 });
