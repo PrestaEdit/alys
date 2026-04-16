@@ -34,3 +34,10 @@ it('shows progress percent between 0 and 100', function () {
     expect($component->get('progressPercent'))->toBeGreaterThanOrEqual(0);
     expect($component->get('progressPercent'))->toBeLessThanOrEqual(100);
 });
+
+it('export stub flashes a message', function () {
+    Livewire::test(Dashboard::class)
+        ->call('export')
+        ->assertStatus(200);
+    expect(session()->get('message') ?? session()->get('_flash.new'))->not->toBeNull();
+});

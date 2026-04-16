@@ -15,6 +15,15 @@ class CalendarService
         return (int) $from->copy()->startOfDay()->diffInDays($end->copy()->startOfDay(), false);
     }
 
+    public function getProgressPercent(Carbon $from): int
+    {
+        $start = Carbon::parse(Setting::get('treatment_start', '2025-11-26'));
+        $end = Carbon::parse(Setting::get('treatment_end', '2027-03-31'));
+        $totalDays = $start->diffInDays($end);
+        $elapsed = $start->diffInDays($from->copy()->startOfDay());
+        return (int) min(100, max(0, round(($elapsed / $totalDays) * 100)));
+    }
+
     public function getCounters(Carbon $from): array
     {
         $fromDate = $from->toDateString();

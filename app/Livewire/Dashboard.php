@@ -24,11 +24,7 @@ class Dashboard extends Component
         $nextVisit = $service->getNextHospitalVisit($today);
         $this->nextHospitalDate = $nextVisit?->locale('fr')->isoFormat('dddd D MMMM YYYY');
 
-        $start = Carbon::parse('2025-11-26');
-        $end = Carbon::parse('2027-03-31');
-        $totalDays = $start->diffInDays($end);
-        $elapsed = $start->diffInDays($today);
-        $this->progressPercent = (int) min(100, round(($elapsed / $totalDays) * 100));
+        $this->progressPercent = $service->getProgressPercent($today);
     }
 
     public function export(): void
