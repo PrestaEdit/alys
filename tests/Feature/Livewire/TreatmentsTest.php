@@ -53,3 +53,11 @@ it('does not go below 0 on decrement', function () {
         ->call('decrement');
     expect($component->get('newDose'))->toBe(0.0);
 });
+
+it('IT MTTX treatment is not dosage editable', function () {
+    $itMttx = Treatment::where('name', 'IT MTTX')->first();
+    expect($itMttx->isDosageEditable())->toBeFalse();
+
+    Livewire::test(Treatments::class)
+        ->assertSee('Modifier'); // sanity: at least one editable treatment shows the button
+});
