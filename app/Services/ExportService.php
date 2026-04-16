@@ -54,6 +54,6 @@ class ExportService
             'treatments' => $treatments,
             'posology_history' => $history,
             'calendar_events' => $events,
-        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
     }
 }
