@@ -63,7 +63,7 @@ class Calendar extends Component
 
     public function confirmMove(EventMoveService $moveService, CalendarService $calendarService): void
     {
-        if (!$this->movingEventId || !$this->moveToDate) return;
+        $this->validate(['moveToDate' => 'required|date']);
 
         $event = CalendarEvent::findOrFail($this->movingEventId);
         $moveService->move($event, $this->moveToDate);
