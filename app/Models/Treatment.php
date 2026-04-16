@@ -38,4 +38,9 @@ class Treatment extends Model
     {
         return $this->type !== 'medical_act';
     }
+
+    public function requiresFasting(): bool
+    {
+        return $this->type === 'medical_act';
+    }
 }

@@ -68,3 +68,12 @@ it('getEventsForMonth returns array indexed by date string', function () {
     expect($month)->toBeArray();
     expect($month)->toHaveKey('2026-04-15'); // visite hôpital + VCR on this day
 });
+
+it('getEventsForDay returns correct dose for a date between two posology history entries', function () {
+    // 6-TG has history: 2.80ml from 2025-11-26, then 3.00ml from 2026-04-15
+    // On 2026-03-01 (between the two), it should return 2.80ml
+    $events = $this->service->getEventsForDay(Carbon::parse('2026-03-01'));
+    $sixTg = collect($events)->firstWhere('name', '6-TG');
+    expect($sixTg)->not->toBeNull();
+    expect($sixTg['dose'])->toBe('2.80 ml');
+});

@@ -19,20 +19,19 @@ class CalendarService
     {
         $fromDate = $from->toDateString();
 
-        $countFor = function (string $treatmentName) use ($fromDate): int {
-            $treatment = Treatment::where('name', $treatmentName)->first();
-            if (!$treatment) return 0;
-            return CalendarEvent::where('treatment_id', $treatment->id)
+        $treatments = Treatment::whereIn('name', ['Hôpital', 'VCR', 'IT MTTX', 'MTX'])
+            ->withCount(['calendarEvents as future_count' => fn($q) => $q
                 ->whereDate('scheduled_date', '>', $fromDate)
                 ->where('is_cancelled', false)
-                ->count();
-        };
+            ])
+            ->get()
+            ->keyBy('name');
 
         return [
-            'hospital' => $countFor('Hôpital'),
-            'vcr' => $countFor('VCR'),
-            'it_mttx' => $countFor('IT MTTX'),
-            'mtx' => $countFor('MTX'),
+            'hospital' => (int) ($treatments->get('Hôpital')?->future_count ?? 0),
+            'vcr'      => (int) ($treatments->get('VCR')?->future_count ?? 0),
+            'it_mttx'  => (int) ($treatments->get('IT MTTX')?->future_count ?? 0),
+            'mtx'      => (int) ($treatments->get('MTX')?->future_count ?? 0),
         ];
     }
 
@@ -89,7 +88,7 @@ class CalendarService
                 'unit' => $event->treatment->unit,
                 'dose' => $event->treatment->current_dose,
                 'color' => $event->treatment->color,
-                'requires_fasting' => $event->treatment->name === 'IT MTTX',
+                'requires_fasting' => $event->treatment->requiresFasting(),
                 'can_move' => true,
                 'moved' => $event->hasMoved(),
                 'original_date' => $event->original_date?->toDateString(),
@@ -105,6 +104,7 @@ class CalendarService
         $start = Carbon::create($year, $month, 1)->startOfMonth();
         $end = $start->copy()->endOfMonth();
 
+        // Daily treatments (6-MP, 6-TG) are not shown on the monthly grid — only scheduled events get dots.
         $events = CalendarEvent::with('treatment')
             ->whereBetween('scheduled_date', [$start->toDateString(), $end->toDateString()])
             ->where('is_cancelled', false)
@@ -115,7 +115,7 @@ class CalendarService
             'treatment_id' => $e->treatment_id,
             'name' => $e->treatment->name,
             'color' => $e->treatment->color,
-            'requires_fasting' => $e->treatment->name === 'IT MTTX',
+            'requires_fasting' => $e->treatment->requiresFasting(),
         ])->values()->toArray())->toArray();
     }
 
