@@ -13,6 +13,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->singleton(\App\Services\CalendarService::class);
         $this->app->singleton(\App\Services\EventMoveService::class);
+        $this->app->singleton(\App\Services\ExportService::class);
     }
 
     /**

@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Services\CalendarService;
+use App\Services\ExportService;
 use Carbon\Carbon;
 use Livewire\Component;
 
@@ -27,10 +28,14 @@ class Dashboard extends Component
         $this->progressPercent = $service->getProgressPercent($today);
     }
 
-    public function export(): void
+    public function export(ExportService $exportService): void
     {
-        // Implemented in Task 9
-        session()->flash('message', 'Export à venir');
+        $json = $exportService->generate();
+        $filename = 'alexis-traitement-' . now()->format('Y-m-d') . '.json';
+        $path = storage_path('app/' . $filename);
+        file_put_contents($path, $json);
+
+        \Native\Mobile\Facades\Share::file($path, 'Exporter le calendrier de traitement');
     }
 
     public function render(): \Illuminate\View\View
