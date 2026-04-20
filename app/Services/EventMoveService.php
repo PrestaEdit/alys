@@ -22,6 +22,24 @@ class EventMoveService
         if ($event->treatment->name === 'IT MTTX') {
             $this->applyMtxCoherenceRule($previousDate, $newDate);
         }
+
+        if ($event->treatment->name === 'VCR') {
+            $this->shiftChildEvents($event, $previousDate, $newDate);
+        }
+    }
+
+    private function shiftChildEvents(CalendarEvent $parent, string $previousDate, string $newDate): void
+    {
+        $delta = Carbon::parse($previousDate)->diffInDays(Carbon::parse($newDate), false);
+
+        CalendarEvent::where('parent_event_id', $parent->id)->get()
+            ->each(function (CalendarEvent $child) use ($delta) {
+                if ($child->original_date === null) {
+                    $child->original_date = $child->scheduled_date->toDateString();
+                }
+                $child->scheduled_date = $child->scheduled_date->copy()->addDays($delta)->toDateString();
+                $child->save();
+            });
     }
 
     private function applyMtxCoherenceRule(string $previousDate, string $newDate): void

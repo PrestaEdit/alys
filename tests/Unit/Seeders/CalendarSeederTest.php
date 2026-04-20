@@ -12,8 +12,8 @@ beforeEach(function () {
     $this->seed(DatabaseSeeder::class);
 });
 
-it('seeds 6 treatments', function () {
-    expect(Treatment::count())->toBe(6);
+it('seeds 8 treatments', function () {
+    expect(Treatment::count())->toBe(8);
 });
 
 it('generates 36 hospital visits', function () {
@@ -26,9 +26,9 @@ it('generates 18 VCR events', function () {
     expect(CalendarEvent::where('treatment_id', $vcr->id)->count())->toBe(18);
 });
 
-it('generates 8 IT MTTX events', function () {
+it('generates 6 IT MTTX events', function () {
     $itMttx = Treatment::where('name', 'IT MTTX')->first();
-    expect(CalendarEvent::where('treatment_id', $itMttx->id)->count())->toBe(8);
+    expect(CalendarEvent::where('treatment_id', $itMttx->id)->count())->toBe(6);
 });
 
 it('never creates MTX on an IT MTTX day', function () {

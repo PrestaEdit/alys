@@ -13,13 +13,13 @@ it('isDaily returns false for non-daily treatments', function () {
     expect($treatment->isDaily())->toBeFalse();
 });
 
-it('isDosageEditable returns false for medical_act', function () {
-    $treatment = new Treatment(['type' => 'medical_act']);
+it('isDosageEditable returns false when is_medical_act is true', function () {
+    $treatment = new Treatment(['type' => 'cyclic', 'is_medical_act' => true]);
     expect($treatment->isDosageEditable())->toBeFalse();
 });
 
 it('isDosageEditable returns true for daily treatments', function () {
-    $treatment = new Treatment(['type' => 'daily']);
+    $treatment = new Treatment(['type' => 'daily', 'is_medical_act' => false]);
     expect($treatment->isDosageEditable())->toBeTrue();
 });
 

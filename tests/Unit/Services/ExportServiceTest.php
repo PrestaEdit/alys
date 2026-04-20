@@ -23,9 +23,9 @@ it('export contains all required sections', function () {
     expect($data)->toHaveKeys(['settings', 'treatments', 'posology_history', 'calendar_events', 'exported_at']);
 });
 
-it('export contains all 6 treatments', function () {
+it('export contains all 8 treatments', function () {
     $data = json_decode($this->service->generate(), true);
-    expect(count($data['treatments']))->toBe(6);
+    expect(count($data['treatments']))->toBe(8);
 });
 
 it('export contains calendar events', function () {

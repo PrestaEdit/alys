@@ -56,8 +56,8 @@ it('getEventsForDay does not include cancelled events', function () {
 });
 
 it('getEventsForDay flags IT MTTX as requiring fasting', function () {
-    // 2026-05-13 is an IT MTTX day (2026-01-21 + 16 weeks)
-    $events = $this->service->getEventsForDay(Carbon::parse('2026-05-13'));
+    // 2026-07-08 is an IT MTTX day (2026-01-21 + 24 weeks)
+    $events = $this->service->getEventsForDay(Carbon::parse('2026-07-08'));
     $itMttx = collect($events)->firstWhere('name', 'IT MTTX');
     expect($itMttx)->not->toBeNull();
     expect($itMttx['requires_fasting'])->toBeTrue();

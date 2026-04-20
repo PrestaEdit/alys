@@ -44,6 +44,26 @@ class CalendarService
         ];
     }
 
+    public function getWidgets(Carbon $from): array
+    {
+        $fromDate = $from->toDateString();
+
+        $treatments = Treatment::where('show_widget', true)
+            ->withCount(['calendarEvents as future_count' => fn($q) => $q
+                ->whereDate('scheduled_date', '>', $fromDate)
+                ->where('is_cancelled', false)
+            ])
+            ->get()
+            ->sortBy(fn($t) => $t->name === 'Hôpital' ? 0 : 1);
+
+        return $treatments->map(fn($t) => [
+            'display_name' => $t->displayName(),
+            'count'        => (int) ($t->future_count ?? 0),
+            'icon'         => $t->widget_icon ?? '💊',
+            'color'        => $t->color,
+        ])->values()->toArray();
+    }
+
     public function getNextHospitalVisit(Carbon $from): ?Carbon
     {
         $hopital = Treatment::where('name', 'Hôpital')->first();
@@ -70,6 +90,7 @@ class CalendarService
                 'id' => null,
                 'treatment_id' => $treatment->id,
                 'name' => $treatment->name,
+                'display_name' => $treatment->displayName(),
                 'commercial_name' => $treatment->commercial_name,
                 'type' => 'daily',
                 'unit' => $treatment->unit,
@@ -92,13 +113,14 @@ class CalendarService
                 'id' => $event->id,
                 'treatment_id' => $event->treatment_id,
                 'name' => $event->treatment->name,
+                'display_name' => $event->treatment->displayName(),
                 'commercial_name' => $event->treatment->commercial_name,
                 'type' => $event->treatment->type,
                 'unit' => $event->treatment->unit,
                 'dose' => $event->treatment->current_dose,
                 'color' => $event->treatment->color,
                 'requires_fasting' => $event->treatment->requiresFasting(),
-                'can_move' => true,
+                'can_move' => $event->parent_event_id === null,
                 'moved' => $event->hasMoved(),
                 'original_date' => $event->original_date?->toDateString(),
                 'notes' => $event->notes,
@@ -123,6 +145,7 @@ class CalendarService
         return $events->map(fn($dayEvents) => $dayEvents->map(fn($e) => [
             'treatment_id' => $e->treatment_id,
             'name' => $e->treatment->name,
+            'display_name' => $e->treatment->displayName(),
             'color' => $e->treatment->color,
             'requires_fasting' => $e->treatment->requiresFasting(),
         ])->values()->toArray())->toArray();

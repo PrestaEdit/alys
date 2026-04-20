@@ -60,15 +60,10 @@
     </div>
 
     {{-- Légende --}}
-    <div class="flex flex-wrap gap-x-4 gap-y-1 mb-4 px-1">
-        @foreach([
-            ['color' => '#f97316', 'label' => 'Hôpital'],
-            ['color' => '#ef4444', 'label' => 'MTX'],
-            ['color' => '#8b5cf6', 'label' => 'VCR'],
-            ['color' => '#0ea5e9', 'label' => 'IT MTTX'],
-        ] as $item)
+    <div class="flex flex-wrap gap-x-4 gap-y-1.5 mb-4 px-1">
+        @foreach($legend as $item)
         <div class="flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full" style="background-color: {{ $item['color'] }};"></span>
+            <span class="w-2 h-2 rounded-full flex-shrink-0" style="background-color: {{ $item['color'] }};"></span>
             <span class="text-xs text-slate-500">{{ $item['label'] }}</span>
         </div>
         @endforeach
@@ -90,11 +85,13 @@
                         {{ $event['requires_fasting'] ? 'bg-amber-50 border border-amber-200' : 'bg-slate-50' }}">
                 <span class="w-2 h-2 rounded-full flex-shrink-0" style="background-color: {{ $event['color'] }};"></span>
                 <div class="flex-1 min-w-0">
-                    <p class="text-xs font-semibold text-slate-800">{{ $event['name'] }}</p>
+                    <p class="text-xs font-semibold text-slate-800">{{ $event['display_name'] ?? $event['name'] }}</p>
                     @if($event['requires_fasting'])
                         <p class="text-xs text-amber-600 font-bold">⚠️ Alexis doit être à jeun</p>
                     @endif
-                    @if(isset($event['dose']) && $event['dose'])
+                    @if(!empty($event['notes']))
+                        <p class="text-xs text-slate-400">{{ $event['notes'] }}</p>
+                    @elseif(isset($event['dose']) && $event['dose'])
                         <p class="text-xs text-slate-400">{{ $event['dose'] }}</p>
                     @endif
                     @if(!empty($event['moved']) && $event['moved'])
@@ -116,7 +113,7 @@
 
     {{-- Modal déplacement --}}
     @if($showMoveModal)
-    <div class="fixed inset-0 bg-black/50 z-50 flex items-end justify-center p-4">
+    <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl p-5 w-full max-w-sm shadow-xl">
             <h3 class="text-sm font-bold text-slate-800 mb-1">Déplacer l'événement</h3>
             <p class="text-xs text-slate-400 mb-4">Choisir la nouvelle date :</p>

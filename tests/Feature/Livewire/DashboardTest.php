@@ -19,6 +19,13 @@ it('shows four widget counters', function () {
     expect($component->get('counters'))->toHaveKeys(['hospital', 'vcr', 'it_mttx', 'mtx']);
 });
 
+it('shows widget data', function () {
+    $component = Livewire::test(Dashboard::class);
+    $widgets = $component->get('widgets');
+    expect($widgets)->toBeArray()->not->toBeEmpty();
+    expect($widgets[0])->toHaveKeys(['display_name', 'count', 'icon', 'color']);
+});
+
 it('shows next hospital visit date', function () {
     $component = Livewire::test(Dashboard::class);
     expect($component->get('nextHospitalDate'))->not->toBeNull();

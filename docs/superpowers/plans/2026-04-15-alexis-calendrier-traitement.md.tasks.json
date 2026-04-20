@@ -4,14 +4,14 @@
     {
       "id": 0,
       "subject": "Task 0: Scaffold Laravel + NativePHP Mobile + frontend",
-      "status": "pending",
+      "status": "completed",
       "description": "**Goal:** Projet Laravel 11 opérationnel avec NativePHP Mobile, Livewire 3, Tailwind CSS et Preline configurés.\n\n**Files:**\n- Create: `composer.json`, `package.json`, `tailwind.config.js`, `vite.config.js`\n- Create: `resources/css/app.css`, `resources/js/app.js`\n\n**Acceptance Criteria:**\n- [ ] `php8.4 artisan --version` retourne Laravel 11.x\n- [ ] `npm run dev` compile sans erreur et Preline est disponible\n- [ ] `php8.4 artisan test` passe (0 tests, 0 échecs)\n\n**Verify:** `php8.4 artisan --version` → `Laravel Framework 11.x.x`\n\n```json:metadata\n{\"files\": [\"composer.json\", \"package.json\", \"tailwind.config.js\", \"vite.config.js\", \"resources/css/app.css\", \"resources/js/app.js\"], \"verifyCommand\": \"php8.4 artisan --version\", \"acceptanceCriteria\": [\"Laravel 11.x installed\", \"NativePHP Mobile installed\", \"Livewire 3 installed\", \"Preline + Tailwind configured\", \"SQLite database created\"], \"estimatedScope\": \"medium\"}\n```",
       "activeForm": "Scaffolding Laravel + NativePHP Mobile + frontend"
     },
     {
       "id": 1,
       "subject": "Task 1: Migrations et modèles Eloquent",
-      "status": "pending",
+      "status": "completed",
       "blockedBy": [0],
       "description": "**Goal:** Les 4 tables (settings, treatments, posology_history, calendar_events) sont créées avec leurs modèles Eloquent et relations.\n\n**Files:**\n- Create: `database/migrations/xxxx_create_settings_table.php`\n- Create: `database/migrations/xxxx_create_treatments_table.php`\n- Create: `database/migrations/xxxx_create_posology_history_table.php`\n- Create: `database/migrations/xxxx_create_calendar_events_table.php`\n- Create: `app/Models/Setting.php`, `Treatment.php`, `PosologyHistory.php`, `CalendarEvent.php`\n- Create: `tests/Unit/Models/TreatmentTest.php`\n\n**Acceptance Criteria:**\n- [ ] `php8.4 artisan migrate` passe sans erreur\n- [ ] Relations Eloquent fonctionnelles\n- [ ] Tests unitaires des modèles passent\n\n**Verify:** `php8.4 artisan test --filter TreatmentTest` → 5 tests verts\n\n```json:metadata\n{\"files\": [\"app/Models/Treatment.php\", \"app/Models/PosologyHistory.php\", \"app/Models/CalendarEvent.php\", \"app/Models/Setting.php\", \"database/migrations/\"], \"verifyCommand\": \"php8.4 artisan test --filter TreatmentTest\", \"acceptanceCriteria\": [\"4 migrations créées et appliquées\", \"Models avec relations HasMany/BelongsTo\", \"isDaily() et isDosageEditable() fonctionnels\", \"hasMoved() fonctionnel\"], \"estimatedScope\": \"medium\"}\n```",
       "activeForm": "Creating migrations and Eloquent models"
@@ -19,7 +19,7 @@
     {
       "id": 2,
       "subject": "Task 2: Seeders — traitements et calendrier initial",
-      "status": "pending",
+      "status": "completed",
       "blockedBy": [1],
       "description": "**Goal:** La base est peuplée avec les 6 traitements et tous les événements calendrier pour nov. 2025 → mars 2027.\n\n**Files:**\n- Create: `database/seeders/TreatmentSeeder.php`\n- Create: `database/seeders/CalendarSeeder.php`\n- Modify: `database/seeders/DatabaseSeeder.php`\n- Create: `tests/Unit/Seeders/CalendarSeederTest.php`\n\n**Acceptance Criteria:**\n- [ ] 6 traitements insérés\n- [ ] 35 visites hôpital générées\n- [ ] 18 VCR générés\n- [ ] 8 IT MTTX générés\n- [ ] Aucun MTX le même jour qu'un IT MTTX\n- [ ] Tous les MTX tombent un mardi\n\n**Verify:** `php8.4 artisan test --filter SeederTest` → 6 tests verts\n\n```json:metadata\n{\"files\": [\"database/seeders/TreatmentSeeder.php\", \"database/seeders/CalendarSeeder.php\", \"database/seeders/DatabaseSeeder.php\"], \"verifyCommand\": \"php8.4 artisan test --filter SeederTest\", \"acceptanceCriteria\": [\"6 traitements\", \"35 visites hôpital\", \"18 VCR\", \"8 IT MTTX\", \"MTX jamais le même jour qu'IT MTTX\", \"MTX toujours le mardi\"], \"estimatedScope\": \"medium\"}\n```",
       "activeForm": "Creating treatment and calendar seeders"
@@ -27,7 +27,7 @@
     {
       "id": 3,
       "subject": "Task 3: CalendarService — logique métier et compteurs",
-      "status": "pending",
+      "status": "completed",
       "blockedBy": [2],
       "description": "**Goal:** CalendarService expose les méthodes pour calculer les compteurs widgets, récupérer les événements d'un jour et d'un mois.\n\n**Files:**\n- Create: `app/Services/CalendarService.php`\n- Create: `tests/Unit/Services/CalendarServiceTest.php`\n\n**Acceptance Criteria:**\n- [ ] getCounters() retourne hospital, vcr, it_mttx, mtx\n- [ ] getDaysRemaining(2026-04-15) retourne 350\n- [ ] getNextHospitalVisit() retourne la bonne date\n- [ ] getEventsForDay() inclut traitements quotidiens et événements ponctuels\n- [ ] getEventsForDay() marque IT MTTX avec requires_fasting=true\n- [ ] getEventsForMonth() retourne tableau indexé par date\n\n**Verify:** `php8.4 artisan test --filter CalendarServiceTest` → 8 tests verts\n\n```json:metadata\n{\"files\": [\"app/Services/CalendarService.php\", \"app/Providers/AppServiceProvider.php\"], \"verifyCommand\": \"php8.4 artisan test --filter CalendarServiceTest\", \"acceptanceCriteria\": [\"getDaysRemaining retourne 350 au 15/04/2026\", \"getCounters retourne 4 clés\", \"getNextHospitalVisit correct\", \"requires_fasting=true pour IT MTTX\", \"événements annulés exclus\"], \"estimatedScope\": \"medium\"}\n```",
       "activeForm": "Implementing CalendarService business logic"
@@ -35,7 +35,7 @@
     {
       "id": 4,
       "subject": "Task 4: Layout principal + bottom tab bar",
-      "status": "pending",
+      "status": "completed",
       "blockedBy": [3],
       "description": "**Goal:** Layout Blade avec bottom tab bar (Accueil / Calendrier / Traitements) et routes fonctionnelles.\n\n**Files:**\n- Create: `resources/views/layouts/app.blade.php`\n- Modify: `routes/web.php`\n- Create: `tests/Feature/NavigationTest.php`\n\n**Acceptance Criteria:**\n- [ ] GET / retourne 200\n- [ ] GET /calendar retourne 200\n- [ ] GET /treatments retourne 200\n- [ ] Tab bar met en surbrillance l'onglet actif\n\n**Verify:** `php8.4 artisan test --filter NavigationTest` → 3 tests verts\n\n```json:metadata\n{\"files\": [\"resources/views/layouts/app.blade.php\", \"routes/web.php\"], \"verifyCommand\": \"php8.4 artisan test --filter NavigationTest\", \"acceptanceCriteria\": [\"3 routes retournent 200\", \"Layout inclut Tailwind + Alpine + Preline\", \"Tab bar avec onglet actif en surbrillance\"], \"estimatedScope\": \"small\"}\n```",
       "activeForm": "Building main layout and bottom tab bar"
@@ -43,7 +43,7 @@
     {
       "id": 5,
       "subject": "Task 5: Onglet Accueil — Dashboard Livewire",
-      "status": "pending",
+      "status": "completed",
       "blockedBy": [4],
       "description": "**Goal:** Onglet Accueil avec bannière RDV, barre de progression, 4 widgets compteurs et traitements du jour.\n\n**Files:**\n- Create: `app/Livewire/Dashboard.php`\n- Modify: `resources/views/livewire/dashboard.blade.php`\n- Create: `tests/Feature/Livewire/DashboardTest.php`\n\n**Acceptance Criteria:**\n- [ ] 4 widgets avec bonnes valeurs depuis CalendarService\n- [ ] Bannière avec date du prochain RDV\n- [ ] Barre de progression correcte\n- [ ] Section Aujourd'hui avec traitements du jour\n- [ ] Bouton export présent\n\n**Verify:** `php8.4 artisan test --filter DashboardTest` → 5 tests verts\n\n```json:metadata\n{\"files\": [\"app/Livewire/Dashboard.php\", \"resources/views/livewire/dashboard.blade.php\"], \"verifyCommand\": \"php8.4 artisan test --filter DashboardTest\", \"acceptanceCriteria\": [\"4 compteurs présents\", \"nextHospitalDate non null\", \"daysRemaining > 0\", \"progressPercent entre 0 et 100\"], \"estimatedScope\": \"medium\"}\n```",
       "activeForm": "Implementing Dashboard Livewire component"
@@ -51,7 +51,7 @@
     {
       "id": 6,
       "subject": "Task 6: Onglet Calendrier — grille mensuelle + détail",
-      "status": "pending",
+      "status": "completed",
       "blockedBy": [4],
       "description": "**Goal:** Onglet Calendrier avec grille mensuelle navigable, points de couleur et panneau de détail du jour.\n\n**Files:**\n- Modify: `app/Livewire/Calendar.php`\n- Modify: `resources/views/livewire/calendar.blade.php`\n- Create: `tests/Feature/Livewire/CalendarTest.php`\n\n**Acceptance Criteria:**\n- [ ] Grille du mois courant avec navigation\n- [ ] Points de couleur par type d'événement\n- [ ] Sélection d'un jour → détail avec événements\n- [ ] IT MTTX affiche alerte jeûne\n- [ ] 6-MP et 6-TG dans détail mais pas sur la grille\n\n**Verify:** `php8.4 artisan test --filter CalendarTest` → 6 tests verts\n\n```json:metadata\n{\"files\": [\"app/Livewire/Calendar.php\", \"resources/views/livewire/calendar.blade.php\"], \"verifyCommand\": \"php8.4 artisan test --filter CalendarTest\", \"acceptanceCriteria\": [\"Navigation mois précédent/suivant\", \"Points de couleur sur jours avec événements\", \"Détail du jour avec événements\", \"Alerte jeûne pour IT MTTX\"], \"estimatedScope\": \"large\"}\n```",
       "activeForm": "Implementing Calendar Livewire component"
@@ -59,7 +59,7 @@
     {
       "id": 7,
       "subject": "Task 7: Déplacement d'événements + règle MTX/IT MTTX",
-      "status": "pending",
+      "status": "completed",
       "blockedBy": [6],
       "description": "**Goal:** EventMoveService permet de déplacer un événement avec application automatique de la règle MTX/IT MTTX.\n\n**Files:**\n- Create: `app/Services/EventMoveService.php`\n- Modify: `app/Livewire/Calendar.php`\n- Modify: `resources/views/livewire/calendar.blade.php`\n- Create: `tests/Unit/Services/EventMoveServiceTest.php`\n\n**Acceptance Criteria:**\n- [ ] Déplacer un événement met à jour scheduled_date et original_date\n- [ ] IT MTTX déplacé sur un mardi → MTX annulé\n- [ ] IT MTTX quittant un mardi → MTX restauré\n- [ ] Autres événements n'affectent pas MTX\n\n**Verify:** `php8.4 artisan test --filter EventMoveServiceTest` → 4 tests verts\n\n```json:metadata\n{\"files\": [\"app/Services/EventMoveService.php\", \"app/Livewire/Calendar.php\", \"resources/views/livewire/calendar.blade.php\"], \"verifyCommand\": \"php8.4 artisan test --filter EventMoveServiceTest\", \"acceptanceCriteria\": [\"original_date stocké\", \"MTX annulé quand IT MTTX sur mardi\", \"MTX restauré quand IT MTTX quitte un mardi\", \"Autres événements neutres\"], \"estimatedScope\": \"medium\"}\n```",
       "activeForm": "Implementing event move service with MTX coherence rule"
@@ -67,7 +67,7 @@
     {
       "id": 8,
       "subject": "Task 8: Onglet Traitements — liste + modification posologie",
-      "status": "pending",
+      "status": "completed",
       "blockedBy": [4],
       "description": "**Goal:** Onglet Traitements avec liste des 6 traitements et interface de modification de posologie avec historique.\n\n**Files:**\n- Modify: `app/Livewire/Treatments.php`\n- Modify: `resources/views/livewire/treatments.blade.php`\n- Modify: `app/Livewire/TreatmentEdit.php`\n- Modify: `resources/views/livewire/treatment-edit.blade.php`\n- Create: `tests/Feature/Livewire/TreatmentsTest.php`\n\n**Acceptance Criteria:**\n- [ ] Liste des 6 traitements avec posologie et fréquence\n- [ ] IT MTTX sans bouton Modifier\n- [ ] +/− modifient la dose\n- [ ] Enregistrer insère dans posology_history\n- [ ] Historique affiché en frise\n\n**Verify:** `php8.4 artisan test --filter TreatmentsTest` → 5 tests verts\n\n```json:metadata\n{\"files\": [\"app/Livewire/Treatments.php\", \"app/Livewire/TreatmentEdit.php\", \"resources/views/livewire/treatments.blade.php\", \"resources/views/livewire/treatment-edit.blade.php\"], \"verifyCommand\": \"php8.4 artisan test --filter TreatmentsTest\", \"acceptanceCriteria\": [\"6 traitements listés\", \"IT MTTX sans bouton Modifier\", \"Incrément +0.1ml pour ml\", \"Incrément +1 pour cachets\", \"posology_history créé à l'enregistrement\"], \"estimatedScope\": \"large\"}\n```",
       "activeForm": "Implementing Treatments list and posology edit"
@@ -75,7 +75,7 @@
     {
       "id": 9,
       "subject": "Task 9: Export JSON via Share Sheet Android",
-      "status": "pending",
+      "status": "completed",
       "blockedBy": [5, 8],
       "description": "**Goal:** ExportService génère le JSON complet et le bouton Dashboard déclenche le Share Sheet Android.\n\n**Files:**\n- Create: `app/Services/ExportService.php`\n- Modify: `app/Livewire/Dashboard.php`\n- Create: `tests/Unit/Services/ExportServiceTest.php`\n\n**Acceptance Criteria:**\n- [ ] JSON valide avec sections settings, treatments, posology_history, calendar_events\n- [ ] Contient les 6 traitements\n- [ ] Contient les événements calendrier\n- [ ] Dashboard déclenche Share natif Android\n\n**Verify:** `php8.4 artisan test --filter ExportServiceTest` → 5 tests verts\n\n```json:metadata\n{\"files\": [\"app/Services/ExportService.php\", \"app/Livewire/Dashboard.php\"], \"verifyCommand\": \"php8.4 artisan test --filter ExportServiceTest\", \"acceptanceCriteria\": [\"JSON valide\", \"4 sections présentes\", \"6 traitements dans l'export\", \"Événements calendrier exportés\"], \"estimatedScope\": \"small\"}\n```",
       "activeForm": "Implementing JSON export with Android Share Sheet"
@@ -83,11 +83,11 @@
     {
       "id": 10,
       "subject": "Task 10: Validation finale et build Android",
-      "status": "pending",
+      "status": "completed",
       "blockedBy": [7, 9],
       "description": "**Goal:** Suite de tests 100% verte, app fonctionnelle sur Android via NativePHP.\n\n**Files:** Aucun fichier nouveau — corrections et ajustements.\n\n**Acceptance Criteria:**\n- [ ] `php8.4 artisan test` → 100% verts\n- [ ] `npm run build` sans erreur\n- [ ] App lance sur Android\n- [ ] 3 onglets navigables\n- [ ] Widgets, modification posologie, déplacement et export fonctionnels\n\n**Verify:** `php8.4 artisan test` → tous verts, 0 échecs\n\n```json:metadata\n{\"files\": [], \"verifyCommand\": \"php8.4 artisan test\", \"acceptanceCriteria\": [\"100% tests verts\", \"Build frontend sans erreur\", \"App Android fonctionnelle\"], \"estimatedScope\": \"small\"}\n```",
       "activeForm": "Final validation and Android build"
     }
   ],
-  "lastUpdated": "2026-04-15T10:00:00+02:00"
+  "lastUpdated": "2026-04-15T13:30:00+02:00"
 }

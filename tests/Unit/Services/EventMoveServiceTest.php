@@ -81,6 +81,36 @@ it('restores MTX when IT MTTX moves away from a Tuesday', function () {
     expect($mtxEvent->is_cancelled)->toBeFalse();
 });
 
+it('moving VCR shifts its dexamethasone children by the same delta', function () {
+    $vcr = Treatment::where('name', 'VCR')->first();
+    $dexa = Treatment::where('name', 'Dexaméthasone')->first();
+
+    $vcrEvent = CalendarEvent::where('treatment_id', $vcr->id)->first();
+    $originalVcrDate = $vcrEvent->scheduled_date->toDateString();
+
+    // Dexamethasone children are on J0..J4
+    $childrenBefore = CalendarEvent::where('parent_event_id', $vcrEvent->id)
+        ->orderBy('scheduled_date')
+        ->pluck('scheduled_date')
+        ->map(fn($d) => Carbon::parse($d)->toDateString())
+        ->toArray();
+
+    // Move VCR 3 days forward
+    $newVcrDate = Carbon::parse($originalVcrDate)->addDays(3)->toDateString();
+    $this->service->move($vcrEvent, $newVcrDate);
+
+    $childrenAfter = CalendarEvent::where('parent_event_id', $vcrEvent->id)
+        ->orderBy('scheduled_date')
+        ->pluck('scheduled_date')
+        ->map(fn($d) => Carbon::parse($d)->toDateString())
+        ->toArray();
+
+    foreach ($childrenBefore as $i => $before) {
+        $expected = Carbon::parse($before)->addDays(3)->toDateString();
+        expect($childrenAfter[$i])->toBe($expected);
+    }
+});
+
 it('moving a non-IT-MTTX event does not affect MTX', function () {
     $hopital = Treatment::where('name', 'Hôpital')->first();
     $mtx = Treatment::where('name', 'MTX')->first();

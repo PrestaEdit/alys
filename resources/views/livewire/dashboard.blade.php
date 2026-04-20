@@ -4,7 +4,7 @@
     <div class="flex items-center justify-between mb-5">
         <div>
             <p class="text-xs text-slate-400 font-medium">{{ now()->locale('fr')->isoFormat('dddd D MMMM YYYY') }}</p>
-            <h1 class="text-xl font-extrabold text-slate-900">Alexis 💙</h1>
+            <h1 class="text-xl font-extrabold text-slate-900">{{ $patientName }} 💙</h1>
         </div>
         <button wire:click="export"
                 class="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors">
@@ -36,28 +36,26 @@
             </div>
         </div>
         <div class="flex justify-between mt-1.5">
-            <p class="text-xs text-slate-400">26 nov. 2025</p>
-            <p class="text-xs text-slate-400">31 mars 2027</p>
+            <p class="text-xs text-slate-400">{{ $treatmentStartLabel }}</p>
+            <p class="text-xs text-slate-400">{{ $treatmentEndLabel }}</p>
         </div>
     </div>
 
-    {{-- Widgets 2x2 --}}
+    {{-- Widgets dynamiques --}}
+    @if(count($widgets) > 0)
     <div class="grid grid-cols-2 gap-3 mb-4">
-        @foreach ([
-            ['label' => 'Visites hôpital', 'count' => $counters['hospital'], 'icon' => '🏥', 'color' => 'text-orange-500', 'bg' => 'bg-orange-50'],
-            ['label' => 'Vincristines', 'count' => $counters['vcr'], 'icon' => '💉', 'color' => 'text-violet-500', 'bg' => 'bg-violet-50'],
-            ['label' => 'Ponctions lombaires', 'count' => $counters['it_mttx'], 'icon' => '🔬', 'color' => 'text-emerald-500', 'bg' => 'bg-emerald-50'],
-            ['label' => 'MTX restants', 'count' => $counters['mtx'], 'icon' => '💊', 'color' => 'text-red-500', 'bg' => 'bg-red-50'],
-        ] as $widget)
+        @foreach($widgets as $widget)
         <div class="bg-white rounded-2xl p-3 shadow-sm">
-            <div class="w-8 h-8 rounded-xl {{ $widget['bg'] }} flex items-center justify-center text-lg mb-1">
+            <div class="w-8 h-8 rounded-xl flex items-center justify-center text-lg mb-1"
+                 style="background-color: {{ $widget['color'] }}18;">
                 {{ $widget['icon'] }}
             </div>
-            <p class="text-2xl font-extrabold {{ $widget['color'] }} leading-none">{{ $widget['count'] }}</p>
-            <p class="text-xs text-slate-400 font-medium mt-0.5">{{ $widget['label'] }}</p>
+            <p class="text-2xl font-extrabold leading-none" style="color: {{ $widget['color'] }};">{{ $widget['count'] }}</p>
+            <p class="text-xs text-slate-400 font-medium mt-0.5">{{ $widget['display_name'] }}</p>
         </div>
         @endforeach
     </div>
+    @endif
 
     {{-- Traitements du jour --}}
     <div class="bg-white rounded-2xl p-4 shadow-sm">
@@ -66,9 +64,9 @@
             @forelse($todayEvents as $event)
             <div class="flex items-center gap-3 px-3 py-2 rounded-xl
                         {{ $event['requires_fasting'] ? 'bg-amber-50 border border-amber-200' :
-                           ($event['type'] === 'medical_act' || $event['type'] === 'cyclic' ? 'bg-slate-50 border border-slate-100' : 'bg-slate-50') }}">
+                           ($event['type'] === 'cyclic' ? 'bg-slate-50 border border-slate-100' : 'bg-slate-50') }}">
                 <span class="w-2 h-2 rounded-full flex-shrink-0" style="background-color: {{ $event['color'] }};"></span>
-                <span class="text-xs font-medium text-slate-700 flex-1">{{ $event['name'] }}</span>
+                <span class="text-xs font-medium text-slate-700 flex-1">{{ $event['display_name'] ?? $event['name'] }}</span>
                 @if($event['requires_fasting'])
                     <span class="text-xs text-amber-600 font-bold">À jeun !</span>
                 @elseif(isset($event['dose']) && $event['dose'])

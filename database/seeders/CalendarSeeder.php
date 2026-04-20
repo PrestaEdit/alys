@@ -16,7 +16,7 @@ class CalendarSeeder extends Seeder
         $end = Carbon::parse(Setting::get('treatment_end'));
 
         // 1. Générer les événements cycliques (Hôpital, VCR, IT MTTX)
-        $cyclicTreatments = Treatment::whereIn('type', ['cyclic', 'medical_act'])
+        $cyclicTreatments = Treatment::where('type', 'cyclic')
             ->whereNotNull('frequency_weeks')
             ->whereNotNull('recurrence_start')
             ->get();
@@ -32,7 +32,24 @@ class CalendarSeeder extends Seeder
             }
         }
 
-        // 2. Récupérer les dates IT MTTX générées (pour exclure les mardis MTX)
+        // 2. Générer les événements Dexaméthasone liés aux VCR (J0 à J4)
+        $vcr = Treatment::where('name', 'VCR')->first();
+        $dexa = Treatment::where('name', 'Dexaméthasone')->first();
+        $vcrEvents = CalendarEvent::where('treatment_id', $vcr->id)->get();
+
+        foreach ($vcrEvents as $vcrEvent) {
+            $vcrDate = Carbon::parse($vcrEvent->scheduled_date);
+            for ($day = 0; $day < 5; $day++) {
+                CalendarEvent::create([
+                    'treatment_id' => $dexa->id,
+                    'scheduled_date' => $vcrDate->copy()->addDays($day)->toDateString(),
+                    'parent_event_id' => $vcrEvent->id,
+                    'notes' => 'Matin et soir — 1 cachet × 2',
+                ]);
+            }
+        }
+
+        // 3. Récupérer les dates IT MTTX générées (pour exclure les mardis MTX)
         $itMttx = Treatment::where('name', 'IT MTTX')->first();
         $itMttxDates = CalendarEvent::where('treatment_id', $itMttx->id)
             ->pluck('scheduled_date')

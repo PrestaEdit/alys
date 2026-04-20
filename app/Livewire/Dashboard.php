@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\Setting;
 use App\Services\CalendarService;
 use App\Services\ExportService;
 use Carbon\Carbon;
@@ -10,15 +11,21 @@ use Livewire\Component;
 class Dashboard extends Component
 {
     public array $counters = [];
+    public array $widgets = [];
     public array $todayEvents = [];
     public ?string $nextHospitalDate = null;
     public int $daysRemaining = 0;
     public int $progressPercent = 0;
+    public string $patientName = '';
+    public string $treatmentStartLabel = '';
+    public string $treatmentEndLabel = '';
 
     public function mount(CalendarService $service): void
     {
+        $this->patientName = Setting::get('patient_name', 'Alexis');
         $today = Carbon::today();
         $this->counters = $service->getCounters($today);
+        $this->widgets = $service->getWidgets($today);
         $this->todayEvents = $service->getEventsForDay($today);
         $this->daysRemaining = $service->getDaysRemaining($today);
 
@@ -26,6 +33,11 @@ class Dashboard extends Component
         $this->nextHospitalDate = $nextVisit?->locale('fr')->isoFormat('dddd D MMMM YYYY');
 
         $this->progressPercent = $service->getProgressPercent($today);
+
+        $startStr = Setting::get('treatment_start', '2025-11-26');
+        $endStr   = Setting::get('treatment_end', '2027-03-31');
+        $this->treatmentStartLabel = Carbon::parse($startStr)->locale('fr')->isoFormat('D MMM YYYY');
+        $this->treatmentEndLabel   = Carbon::parse($endStr)->locale('fr')->isoFormat('D MMM YYYY');
     }
 
     public function export(ExportService $exportService): void

@@ -57,7 +57,8 @@ class Calendar extends Component
     public function openMoveModal(int $eventId): void
     {
         $this->movingEventId = $eventId;
-        $this->moveToDate = '';
+        $event = CalendarEvent::findOrFail($eventId);
+        $this->moveToDate = $event->scheduled_date->toDateString();
         $this->showMoveModal = true;
     }
 
@@ -99,12 +100,20 @@ class Calendar extends Component
         $daysInMonth = $firstDay->daysInMonth;
         $startOffset = ($firstDay->dayOfWeek === 0) ? 6 : $firstDay->dayOfWeek - 1;
 
+        $legend = \App\Models\Treatment::orderByRaw("name = 'Hôpital' DESC")
+            ->orderBy('name')
+            ->get()
+            ->map(fn($t) => ['color' => $t->color, 'label' => $t->displayName()])
+            ->values()
+            ->toArray();
+
         return view('livewire.calendar', [
             'firstDay' => $firstDay,
             'daysInMonth' => $daysInMonth,
             'startOffset' => $startOffset,
             'monthName' => $firstDay->locale('fr')->isoFormat('MMMM YYYY'),
             'today' => now()->toDateString(),
+            'legend' => $legend,
         ])->layout('layouts.app', ['title' => 'Calendrier']);
     }
 }
