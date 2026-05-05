@@ -103,7 +103,14 @@ class Calendar extends Component
         $legend = \App\Models\Treatment::orderByRaw("name = 'Hôpital' DESC")
             ->orderBy('name')
             ->get()
-            ->map(fn($t) => ['color' => $t->color, 'label' => $t->displayName()])
+            ->map(fn($t) => [
+                'color'        => $t->color,
+                'label'        => $t->displayName(),
+                'name'         => $t->name,
+                'type'         => $t->type,
+                'is_medical_act' => $t->is_medical_act,
+                'frequency_weeks' => $t->frequency_weeks,
+            ])
             ->values()
             ->toArray();
 

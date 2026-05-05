@@ -11,7 +11,7 @@ use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    private const SEED_VERSION = 7;
+    private const SEED_VERSION = 8;
     /**
      * Register any application services.
      */

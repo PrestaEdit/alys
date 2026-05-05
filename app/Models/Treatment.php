@@ -3,22 +3,30 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Treatment extends Model
 {
     protected $fillable = [
         'name', 'commercial_name', 'type', 'unit', 'current_dose',
-        'color', 'frequency_weeks', 'is_medical_act', 'requires_fasting', 'day_of_week', 'recurrence_start', 'notes',
+        'dose_morning', 'dose_noon', 'dose_evening',
+        'color', 'frequency_weeks', 'is_medical_act', 'requires_fasting',
+        'day_of_week', 'recurrence_start', 'notes',
         'show_widget', 'widget_icon',
+        'parent_treatment_id', 'linked_days',
     ];
 
     protected $casts = [
-        'current_dose' => 'decimal:2',
+        'current_dose'  => 'decimal:2',
+        'dose_morning'  => 'decimal:2',
+        'dose_noon'     => 'decimal:2',
+        'dose_evening'  => 'decimal:2',
         'recurrence_start' => 'date',
-        'frequency_weeks' => 'integer',
-        'day_of_week' => 'integer',
-        'is_medical_act' => 'boolean',
+        'frequency_weeks'  => 'integer',
+        'day_of_week'      => 'integer',
+        'linked_days'      => 'integer',
+        'is_medical_act'   => 'boolean',
         'requires_fasting' => 'boolean',
     ];
 
@@ -30,6 +38,16 @@ class Treatment extends Model
     public function calendarEvents(): HasMany
     {
         return $this->hasMany(CalendarEvent::class);
+    }
+
+    public function parentTreatment(): BelongsTo
+    {
+        return $this->belongsTo(Treatment::class, 'parent_treatment_id');
+    }
+
+    public function childTreatments(): HasMany
+    {
+        return $this->hasMany(Treatment::class, 'parent_treatment_id');
     }
 
     public function isDaily(): bool
@@ -45,6 +63,13 @@ class Treatment extends Model
     public function requiresFasting(): bool
     {
         return (bool) $this->requires_fasting;
+    }
+
+    public function hasDayPartDoses(): bool
+    {
+        return $this->dose_morning !== null
+            || $this->dose_noon !== null
+            || $this->dose_evening !== null;
     }
 
     public function displayName(): string

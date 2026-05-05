@@ -66,12 +66,9 @@
                 <span class="text-sm font-semibold text-slate-700">Acte médical</span>
                 <p class="text-xs text-slate-400">Pas de posologie ni d'unité</p>
             </div>
-            <button type="button"
-                    wire:click="$toggle('editIsMedicalAct')"
-                    class="relative inline-flex w-11 h-6 items-center rounded-full transition-colors focus:outline-none"
-                    style="background-color: {{ $editIsMedicalAct ? '#0ea5e9' : '#94a3b8' }};">
-                <span class="inline-block w-4 h-4 rounded-full bg-white shadow transition-transform"
-                      style="transform: translateX({{ $editIsMedicalAct ? '1.5rem' : '0.25rem' }});"></span>
+            <button type="button" wire:click="$toggle('editIsMedicalAct')"
+                    style="position:relative;display:inline-block;width:44px;height:24px;border-radius:9999px;background-color:{{ $editIsMedicalAct ? '#0ea5e9' : '#94a3b8' }};border:none;cursor:pointer;flex-shrink:0;transition:background-color .2s;">
+                <span style="position:absolute;top:4px;left:{{ $editIsMedicalAct ? '24px' : '4px' }};width:16px;height:16px;border-radius:9999px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:left .15s;"></span>
             </button>
         </div>
 
@@ -81,14 +78,45 @@
                 <span class="text-sm font-semibold text-slate-700">À jeun</span>
                 <p class="text-xs text-slate-400">Affiché en avertissement dans le calendrier</p>
             </div>
-            <button type="button"
-                    wire:click="$toggle('editRequiresFasting')"
-                    class="relative inline-flex w-11 h-6 items-center rounded-full transition-colors focus:outline-none"
-                    style="background-color: {{ $editRequiresFasting ? '#f59e0b' : '#94a3b8' }};">
-                <span class="inline-block w-4 h-4 rounded-full bg-white shadow transition-transform"
-                      style="transform: translateX({{ $editRequiresFasting ? '1.5rem' : '0.25rem' }});"></span>
+            <button type="button" wire:click="$toggle('editRequiresFasting')"
+                    style="position:relative;display:inline-block;width:44px;height:24px;border-radius:9999px;background-color:{{ $editRequiresFasting ? '#f59e0b' : '#94a3b8' }};border:none;cursor:pointer;flex-shrink:0;transition:background-color .2s;">
+                <span style="position:absolute;top:4px;left:{{ $editRequiresFasting ? '24px' : '4px' }};width:16px;height:16px;border-radius:9999px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:left .15s;"></span>
             </button>
         </div>
+
+        {{-- Lié à un traitement --}}
+        <div class="mb-4">
+            <label class="block text-xs font-semibold text-slate-600 mb-1.5">Lié à un traitement</label>
+            <select wire:model.live="editParentTreatmentId"
+                    class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-400 bg-white">
+                <option value="">— Aucun —</option>
+                @foreach($otherTreatments as $t)
+                <option value="{{ $t->id }}">{{ $t->name }}{{ $t->commercial_name ? ' · ' . $t->commercial_name : '' }}</option>
+                @endforeach
+            </select>
+            @error('editParentTreatmentId') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+        </div>
+
+        @if($editParentTreatmentId)
+        <div class="mb-4">
+            <label class="block text-xs font-semibold text-slate-600 mb-1.5">Durée du traitement lié (jours)</label>
+            <div class="flex items-center gap-3">
+                <button wire:click="decrementLinkedDays"
+                        class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 text-xl font-light hover:bg-slate-200 transition-colors flex items-center justify-center">
+                    −
+                </button>
+                <div class="flex-1 text-center">
+                    <p class="text-lg font-extrabold text-slate-800">
+                        {{ $editLinkedDays }} {{ $editLinkedDays === 1 ? 'jour' : 'jours' }}
+                    </p>
+                </div>
+                <button wire:click="incrementLinkedDays"
+                        class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 text-xl font-light hover:bg-slate-200 transition-colors flex items-center justify-center">
+                    +
+                </button>
+            </div>
+        </div>
+        @endif
 
         {{-- Unité --}}
         @if(!$editIsMedicalAct)
@@ -130,10 +158,8 @@
             <span class="text-sm font-semibold text-slate-700">Afficher en page d'accueil</span>
             <button type="button"
                     wire:click="$toggle('showWidget')"
-                    class="relative inline-flex w-11 h-6 items-center rounded-full transition-colors focus:outline-none"
-                    style="background-color: {{ $showWidget ? '#0ea5e9' : '#94a3b8' }};">
-                <span class="inline-block w-4 h-4 rounded-full bg-white shadow transition-transform"
-                      style="transform: translateX({{ $showWidget ? '1.5rem' : '0.25rem' }});"></span>
+                    style="position:relative;display:inline-block;width:44px;height:24px;border-radius:9999px;background-color:{{ $showWidget ? '#0ea5e9' : '#94a3b8' }};border:none;cursor:pointer;flex-shrink:0;transition:background-color .2s;">
+                <span style="position:absolute;top:4px;left:{{ $showWidget ? '24px' : '4px' }};width:16px;height:16px;border-radius:9999px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:left .15s;"></span>
             </button>
         </div>
 
@@ -204,32 +230,80 @@
     <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
         <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-4">Posologie actuelle</p>
 
-        <div class="flex items-center gap-4 mb-4">
-            <button wire:click="decrement"
-                    class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 text-xl font-light hover:bg-slate-200 transition-colors flex items-center justify-center">
-                −
-            </button>
-            <div class="flex-1 text-center">
-                <p class="text-4xl font-extrabold leading-none" style="color: {{ $treatment->color }};">
-                    {{ number_format($newDose ?? 0, $treatment->unit === 'ml' ? 1 : 0, ',', '') }}
-                </p>
-                <p class="text-sm text-slate-400 font-medium mt-1">{{ $treatment->unit }} / {{ $treatment->type === 'daily' ? 'jour' : ($treatment->type === 'weekly' ? 'mardi' : 'prise') }}</p>
-            </div>
-            <button wire:click="increment"
-                    class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 text-xl font-light hover:bg-slate-200 transition-colors flex items-center justify-center">
-                +
-            </button>
+        {{-- Mode selector --}}
+        <div class="grid grid-cols-2 gap-2 mb-5">
+            @foreach([['single', 'Dose unique'], ['dayparts', 'Matin / Midi / Soir']] as [$val, $lbl])
+            <label class="flex items-center gap-2 px-3 py-2.5 rounded-xl border cursor-pointer transition-colors
+                          {{ $dosageMode === $val ? 'border-sky-400 bg-sky-50 text-sky-700' : 'border-slate-200 text-slate-600 hover:border-slate-300' }}">
+                <input type="radio" wire:model.live="dosageMode" value="{{ $val }}" class="hidden">
+                <span class="text-xs font-semibold">{{ $lbl }}</span>
+            </label>
+            @endforeach
         </div>
 
-        {{-- Direct input --}}
-        <input type="number"
-               wire:model.live="newDose"
-               step="{{ $treatment->unit === 'ml' ? '0.1' : '1' }}"
-               min="0"
-               class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 text-center focus:outline-none focus:ring-2 focus:ring-sky-400 mb-3">
+        @if($dosageMode === 'dayparts')
+            {{-- Day-part posology: Matin / Midi / Soir --}}
+            @foreach([
+                ['label' => 'Matin',  'prop' => 'newDoseMorning', 'inc' => 'incrementMorning', 'dec' => 'decrementMorning', 'value' => $newDoseMorning],
+                ['label' => 'Midi',   'prop' => 'newDoseNoon',    'inc' => 'incrementNoon',    'dec' => 'decrementNoon',    'value' => $newDoseNoon],
+                ['label' => 'Soir',   'prop' => 'newDoseEvening', 'inc' => 'incrementEvening', 'dec' => 'decrementEvening', 'value' => $newDoseEvening],
+            ] as $part)
+            <div class="mb-4">
+                <p class="text-xs font-semibold text-slate-500 mb-2">{{ $part['label'] }}</p>
+                <div class="flex items-center gap-4">
+                    <button wire:click="{{ $part['dec'] }}"
+                            class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 text-xl font-light hover:bg-slate-200 transition-colors flex items-center justify-center">
+                        −
+                    </button>
+                    <div class="flex-1 text-center">
+                        <p class="text-3xl font-extrabold leading-none" style="color: {{ $treatment->color }};">
+                            {{ number_format($part['value'] ?? 0, $treatment->unit === 'ml' ? 1 : 0, ',', '') }}
+                        </p>
+                        @if($treatment->unit)
+                        <p class="text-xs text-slate-400 font-medium mt-1">{{ $treatment->unit }}</p>
+                        @endif
+                    </div>
+                    <button wire:click="{{ $part['inc'] }}"
+                            class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 text-xl font-light hover:bg-slate-200 transition-colors flex items-center justify-center">
+                        +
+                    </button>
+                </div>
+                <input type="number"
+                       wire:model.live="{{ $part['prop'] }}"
+                       step="{{ $treatment->unit === 'ml' ? '0.1' : '1' }}"
+                       min="0"
+                       class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 text-center focus:outline-none focus:ring-2 focus:ring-sky-400 mt-2">
+            </div>
+            @endforeach
+        @else
+            {{-- Single-dose posology --}}
+            <div class="flex items-center gap-4 mb-4">
+                <button wire:click="decrement"
+                        class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 text-xl font-light hover:bg-slate-200 transition-colors flex items-center justify-center">
+                    −
+                </button>
+                <div class="flex-1 text-center">
+                    <p class="text-4xl font-extrabold leading-none" style="color: {{ $treatment->color }};">
+                        {{ number_format($newDose ?? 0, $treatment->unit === 'ml' ? 1 : 0, ',', '') }}
+                    </p>
+                    <p class="text-sm text-slate-400 font-medium mt-1">{{ $treatment->unit }} / {{ $treatment->type === 'daily' ? 'jour' : ($treatment->type === 'weekly' ? 'mardi' : 'prise') }}</p>
+                </div>
+                <button wire:click="increment"
+                        class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 text-xl font-light hover:bg-slate-200 transition-colors flex items-center justify-center">
+                    +
+                </button>
+            </div>
+
+            {{-- Direct input --}}
+            <input type="number"
+                   wire:model.live="newDose"
+                   step="{{ $treatment->unit === 'ml' ? '0.1' : '1' }}"
+                   min="0"
+                   class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 text-center focus:outline-none focus:ring-2 focus:ring-sky-400 mb-3">
+        @endif
 
         {{-- Note --}}
-        <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 mb-5">
+        <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 mb-5 mt-2">
             <svg class="w-3 h-3 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
             </svg>
@@ -261,9 +335,22 @@
                             {{ $index === 0 ? 'bg-sky-500' : 'bg-slate-300' }}"></div>
                 <div class="flex items-start justify-between">
                     <div>
+                        @if($entry->dose_morning !== null || $entry->dose_noon !== null || $entry->dose_evening !== null)
+                            @php
+                                $parts = [];
+                                $decimals = $treatment->unit === 'ml' ? 1 : 0;
+                                if ($entry->dose_morning !== null) $parts[] = number_format($entry->dose_morning, $decimals, ',', '') . ($treatment->unit ? ' ' . $treatment->unit : '') . ' matin';
+                                if ($entry->dose_noon    !== null) $parts[] = number_format($entry->dose_noon,    $decimals, ',', '') . ($treatment->unit ? ' ' . $treatment->unit : '') . ' midi';
+                                if ($entry->dose_evening !== null) $parts[] = number_format($entry->dose_evening, $decimals, ',', '') . ($treatment->unit ? ' ' . $treatment->unit : '') . ' soir';
+                            @endphp
+                            <p class="text-sm font-bold {{ $index === 0 ? 'text-slate-800' : 'text-slate-500' }}">
+                                {{ implode(' · ', $parts) }}
+                            </p>
+                        @else
                         <p class="text-sm font-bold {{ $index === 0 ? 'text-slate-800' : 'text-slate-500' }}">
-                            {{ number_format($entry->dose, $treatment->unit === 'ml' ? 1 : 0, ',', '') }} {{ $treatment->unit }} / {{ $treatment->type === 'daily' ? 'jour' : 'prise' }}
+                            {{ number_format($entry->dose ?? 0, $treatment->unit === 'ml' ? 1 : 0, ',', '') }} {{ $treatment->unit }} / {{ $treatment->type === 'daily' ? 'jour' : 'prise' }}
                         </p>
+                        @endif
                         <p class="text-xs text-slate-400">
                             Depuis le {{ $entry->started_at->locale('fr')->isoFormat('D MMM YYYY') }}
                         </p>

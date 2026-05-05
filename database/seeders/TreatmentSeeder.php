@@ -87,9 +87,12 @@ class TreatmentSeeder extends Seeder
                 'commercial_name' => 'Dexaméthasone',
                 'type' => 'cyclic',
                 'unit' => 'cachet',
-                'current_dose' => 1.00,
+                'current_dose' => null,
+                'dose_morning' => 1.00,
+                'dose_evening' => 1.00,
                 'color' => '#ec4899',
                 'frequency_weeks' => null,
+                'linked_days' => 5,
                 'day_of_week' => null,
                 'recurrence_start' => null,
                 'show_widget' => false,
@@ -126,6 +129,11 @@ class TreatmentSeeder extends Seeder
         foreach ($treatments as $data) {
             Treatment::create($data);
         }
+
+        // Lien Dexaméthasone → VCR
+        $vcr  = Treatment::where('name', 'VCR')->first();
+        $dexa = Treatment::where('name', 'Dexaméthasone')->first();
+        $dexa->update(['parent_treatment_id' => $vcr->id]);
 
         // Posologie initiale 6-TG : 2,8 ml depuis le 26/11/2025
         $sixTg = Treatment::where('name', '6-TG')->first();

@@ -6,7 +6,10 @@
            class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors text-lg">
             ‹
         </a>
-        <h1 class="text-xl font-extrabold text-slate-900">Nouveau traitement</h1>
+        <div>
+            <h1 class="text-base font-extrabold text-slate-900">Nouveau traitement</h1>
+            <p class="text-xs text-slate-400">Remplissez les informations ci-dessous</p>
+        </div>
     </div>
 
     @if(session('success'))
@@ -15,6 +18,7 @@
     </div>
     @endif
 
+    {{-- Panel 1 : Informations --}}
     <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
         <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-4">Informations</p>
 
@@ -62,54 +66,72 @@
                 <span class="text-sm font-semibold text-slate-700">Acte médical</span>
                 <p class="text-xs text-slate-400">Pas de posologie ni d'unité</p>
             </div>
-            <button type="button"
-                    wire:click="$toggle('isMedicalAct')"
-                    class="relative inline-flex w-11 h-6 items-center rounded-full transition-colors focus:outline-none"
-                    style="background-color: {{ $isMedicalAct ? '#0ea5e9' : '#94a3b8' }};">
-                <span class="inline-block w-4 h-4 rounded-full bg-white shadow transition-transform"
-                      style="transform: translateX({{ $isMedicalAct ? '1.5rem' : '0.25rem' }});"></span>
+            <button type="button" wire:click="$toggle('isMedicalAct')"
+                    style="position:relative;display:inline-block;width:44px;height:24px;border-radius:9999px;background-color:{{ $isMedicalAct ? '#0ea5e9' : '#94a3b8' }};border:none;cursor:pointer;flex-shrink:0;transition:background-color .2s;">
+                <span style="position:absolute;top:4px;left:{{ $isMedicalAct ? '24px' : '4px' }};width:16px;height:16px;border-radius:9999px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:left .15s;"></span>
             </button>
         </div>
 
         {{-- À jeun --}}
-        <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center justify-between mb-4">
             <div>
                 <span class="text-sm font-semibold text-slate-700">À jeun</span>
                 <p class="text-xs text-slate-400">Affiché en avertissement dans le calendrier</p>
             </div>
-            <button type="button"
-                    wire:click="$toggle('requiresFasting')"
-                    class="relative inline-flex w-11 h-6 items-center rounded-full transition-colors focus:outline-none"
-                    style="background-color: {{ $requiresFasting ? '#f59e0b' : '#94a3b8' }};">
-                <span class="inline-block w-4 h-4 rounded-full bg-white shadow transition-transform"
-                      style="transform: translateX({{ $requiresFasting ? '1.5rem' : '0.25rem' }});"></span>
+            <button type="button" wire:click="$toggle('requiresFasting')"
+                    style="position:relative;display:inline-block;width:44px;height:24px;border-radius:9999px;background-color:{{ $requiresFasting ? '#f59e0b' : '#94a3b8' }};border:none;cursor:pointer;flex-shrink:0;transition:background-color .2s;">
+                <span style="position:absolute;top:4px;left:{{ $requiresFasting ? '24px' : '4px' }};width:16px;height:16px;border-radius:9999px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:left .15s;"></span>
             </button>
         </div>
+
+        {{-- Lié à un traitement --}}
+        <div class="mb-4">
+            <label class="block text-xs font-semibold text-slate-600 mb-1.5">Lié à un traitement</label>
+            <select wire:model.live="parentTreatmentId"
+                    class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-400 bg-white">
+                <option value="">— Aucun —</option>
+                @foreach($otherTreatments as $t)
+                <option value="{{ $t->id }}">{{ $t->name }}{{ $t->commercial_name ? ' · ' . $t->commercial_name : '' }}</option>
+                @endforeach
+            </select>
+            @error('parentTreatmentId') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+        </div>
+
+        @if($parentTreatmentId)
+        <div class="mb-4">
+            <label class="block text-xs font-semibold text-slate-600 mb-1.5">Durée du traitement lié (jours)</label>
+            <div class="flex items-center gap-3">
+                <button wire:click="decrementLinkedDays"
+                        class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 text-xl font-light hover:bg-slate-200 transition-colors flex items-center justify-center">
+                    −
+                </button>
+                <div class="flex-1 text-center">
+                    <p class="text-lg font-extrabold text-slate-800">
+                        {{ $linkedDays }} {{ $linkedDays === 1 ? 'jour' : 'jours' }}
+                    </p>
+                </div>
+                <button wire:click="incrementLinkedDays"
+                        class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 text-xl font-light hover:bg-slate-200 transition-colors flex items-center justify-center">
+                    +
+                </button>
+            </div>
+        </div>
+        @endif
 
         {{-- Unité (masquée si acte médical) --}}
         @if(!$isMedicalAct)
         <div class="mb-3">
-            <label class="block text-xs font-semibold text-slate-600 mb-1.5">Unité *</label>
+            <label class="block text-xs font-semibold text-slate-600 mb-1.5">Unité</label>
             <input type="text"
                    wire:model="unit"
-                   placeholder="ex : mg, ml, cp"
+                   placeholder="ex : mg, ml, cachet"
                    class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-400">
             @error('unit') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
-        </div>
-
-        {{-- Dose initiale --}}
-        <div class="mb-4">
-            <label class="block text-xs font-semibold text-slate-600 mb-1.5">Dose initiale</label>
-            <input type="number"
-                   wire:model="currentDose"
-                   step="0.1"
-                   min="0"
-                   class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-400">
         </div>
         @endif
 
         {{-- Couleur --}}
-        <div class="mb-4">
+        <div class="mb-5">
             <label class="block text-xs font-semibold text-slate-600 mb-2">Couleur</label>
             <div class="flex gap-2 flex-wrap">
                 @foreach($colors as $c)
@@ -121,48 +143,153 @@
             </div>
         </div>
 
-        {{-- Fréquence et date de début (seulement pour cyclic) --}}
-        @if($type === 'cyclic')
-        <div class="border-t border-slate-100 pt-4 mb-4">
-            <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-3">Récurrence</p>
-
-            <div class="mb-3">
-                <label class="block text-xs font-semibold text-slate-600 mb-1.5">Date de début</label>
-                <input type="date"
-                       wire:model="recurrenceStart"
-                       class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-400">
-                @error('recurrenceStart') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
-            </div>
-
-            <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1.5">Fréquence (semaines)</label>
-                <div class="flex items-center gap-3">
-                    <button type="button"
-                            wire:click="$set('frequencyWeeks', max(1, $frequencyWeeks - 1))"
-                            class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 text-xl font-light hover:bg-slate-200 transition-colors flex items-center justify-center">
-                        −
-                    </button>
-                    <div class="flex-1 text-center">
-                        <p class="text-lg font-extrabold text-slate-800">
-                            {{ $frequencyWeeks === 1 ? 'Toutes les semaines' : 'Toutes les ' . $frequencyWeeks . ' semaines' }}
-                        </p>
-                    </div>
-                    <button type="button"
-                            wire:click="$set('frequencyWeeks', $frequencyWeeks + 1)"
-                            class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 text-xl font-light hover:bg-slate-200 transition-colors flex items-center justify-center">
-                        +
-                    </button>
-                </div>
-                @error('frequencyWeeks') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
-            </div>
-        </div>
-        @endif
-
         <button wire:click="save"
                 class="w-full py-3 rounded-xl text-sm font-bold text-white transition-colors hover:opacity-90"
                 style="background: linear-gradient(135deg, #0ea5e9, #6366f1);">
             Créer le traitement
         </button>
     </div>
+
+    {{-- Panel 2 : Widget --}}
+    <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
+        <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-4">Widget accueil</p>
+
+        <div class="flex items-center justify-between mb-4">
+            <span class="text-sm font-semibold text-slate-700">Afficher en page d'accueil</span>
+            <button type="button" wire:click="$toggle('showWidget')"
+                    style="position:relative;display:inline-block;width:44px;height:24px;border-radius:9999px;background-color:{{ $showWidget ? '#0ea5e9' : '#94a3b8' }};border:none;cursor:pointer;flex-shrink:0;transition:background-color .2s;">
+                <span style="position:absolute;top:4px;left:{{ $showWidget ? '24px' : '4px' }};width:16px;height:16px;border-radius:9999px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:left .15s;"></span>
+            </button>
+        </div>
+
+        <div class="mb-2" style="display: {{ $showWidget ? 'block' : 'none' }};"
+             wire:key="widget-icon-picker-{{ $showWidget ? '1' : '0' }}">
+            <label class="block text-xs font-semibold text-slate-600 mb-2">Icône du widget</label>
+            <div class="flex gap-2 flex-wrap">
+                @foreach($widgetIcons as $icon)
+                <button type="button"
+                        wire:click="$set('widgetIcon', '{{ $icon }}')"
+                        class="w-10 h-10 rounded-xl text-xl flex items-center justify-center transition-all
+                               {{ $widgetIcon === $icon ? 'bg-sky-100 ring-2 ring-sky-400' : 'bg-slate-100 hover:bg-slate-200' }}">
+                    {{ $icon }}
+                </button>
+                @endforeach
+            </div>
+        </div>
+    </div>
+
+    {{-- Panel 3 : Récurrence (cyclic uniquement) --}}
+    @if($type === 'cyclic')
+    <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
+        <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-4">Récurrence</p>
+
+        <div class="mb-3">
+            <label class="block text-xs font-semibold text-slate-600 mb-1.5">Date de début</label>
+            <input type="date"
+                   wire:model="recurrenceStart"
+                   class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-400">
+            @error('recurrenceStart') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+        </div>
+
+        <div class="mb-2">
+            <label class="block text-xs font-semibold text-slate-600 mb-1.5">Fréquence (semaines)</label>
+            <div class="flex items-center gap-3">
+                <button wire:click="decrementFrequency"
+                        class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 text-xl font-light hover:bg-slate-200 transition-colors flex items-center justify-center">
+                    −
+                </button>
+                <div class="flex-1 text-center">
+                    <p class="text-lg font-extrabold text-slate-800">
+                        {{ $frequencyWeeks === 1 ? 'Toutes les semaines' : 'Toutes les ' . $frequencyWeeks . ' semaines' }}
+                    </p>
+                </div>
+                <button wire:click="incrementFrequency"
+                        class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 text-xl font-light hover:bg-slate-200 transition-colors flex items-center justify-center">
+                    +
+                </button>
+            </div>
+            @error('frequencyWeeks') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+        </div>
+    </div>
+    @endif
+
+    {{-- Panel 4 : Posologie initiale --}}
+    @if(!$isMedicalAct)
+    <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
+        <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-4">Posologie initiale</p>
+
+        {{-- Mode selector --}}
+        <div class="grid grid-cols-2 gap-2 mb-5">
+            @foreach([['single', 'Dose unique'], ['dayparts', 'Matin / Midi / Soir']] as [$val, $lbl])
+            <label class="flex items-center gap-2 px-3 py-2.5 rounded-xl border cursor-pointer transition-colors
+                          {{ $dosageMode === $val ? 'border-sky-400 bg-sky-50 text-sky-700' : 'border-slate-200 text-slate-600 hover:border-slate-300' }}">
+                <input type="radio" wire:model.live="dosageMode" value="{{ $val }}" class="hidden">
+                <span class="text-xs font-semibold">{{ $lbl }}</span>
+            </label>
+            @endforeach
+        </div>
+
+        @if($dosageMode === 'dayparts')
+            {{-- Day-part posology --}}
+            @foreach([
+                ['label' => 'Matin', 'prop' => 'doseMorning', 'inc' => 'incrementMorning', 'dec' => 'decrementMorning', 'value' => $doseMorning],
+                ['label' => 'Midi',  'prop' => 'doseNoon',    'inc' => 'incrementNoon',    'dec' => 'decrementNoon',    'value' => $doseNoon],
+                ['label' => 'Soir',  'prop' => 'doseEvening', 'inc' => 'incrementEvening', 'dec' => 'decrementEvening', 'value' => $doseEvening],
+            ] as $part)
+            <div class="mb-4">
+                <p class="text-xs font-semibold text-slate-500 mb-2">{{ $part['label'] }}</p>
+                <div class="flex items-center gap-4">
+                    <button wire:click="{{ $part['dec'] }}"
+                            class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 text-xl font-light hover:bg-slate-200 transition-colors flex items-center justify-center">
+                        −
+                    </button>
+                    <div class="flex-1 text-center">
+                        <p class="text-3xl font-extrabold leading-none" style="color: {{ $color }};">
+                            {{ number_format($part['value'] ?? 0, $unit === 'ml' ? 1 : 0, ',', '') }}
+                        </p>
+                        @if($unit)
+                        <p class="text-xs text-slate-400 font-medium mt-1">{{ $unit }}</p>
+                        @endif
+                    </div>
+                    <button wire:click="{{ $part['inc'] }}"
+                            class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 text-xl font-light hover:bg-slate-200 transition-colors flex items-center justify-center">
+                        +
+                    </button>
+                </div>
+                <input type="number"
+                       wire:model.live="{{ $part['prop'] }}"
+                       step="{{ $unit === 'ml' ? '0.1' : '1' }}"
+                       min="0"
+                       class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 text-center focus:outline-none focus:ring-2 focus:ring-sky-400 mt-2">
+            </div>
+            @endforeach
+        @else
+            {{-- Single dose --}}
+            <div class="flex items-center gap-4 mb-4">
+                <button wire:click="decrement"
+                        class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 text-xl font-light hover:bg-slate-200 transition-colors flex items-center justify-center">
+                    −
+                </button>
+                <div class="flex-1 text-center">
+                    <p class="text-4xl font-extrabold leading-none" style="color: {{ $color }};">
+                        {{ number_format($currentDose, $unit === 'ml' ? 1 : 0, ',', '') }}
+                    </p>
+                    <p class="text-sm text-slate-400 font-medium mt-1">
+                        {{ $unit ?: '—' }} / {{ $type === 'daily' ? 'jour' : ($type === 'weekly' ? 'mardi' : 'prise') }}
+                    </p>
+                </div>
+                <button wire:click="increment"
+                        class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 text-xl font-light hover:bg-slate-200 transition-colors flex items-center justify-center">
+                    +
+                </button>
+            </div>
+            <input type="number"
+                   wire:model.live="currentDose"
+                   step="{{ $unit === 'ml' ? '0.1' : '1' }}"
+                   min="0"
+                   class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 text-center focus:outline-none focus:ring-2 focus:ring-sky-400">
+        @endif
+    </div>
+    @endif
 
 </div>

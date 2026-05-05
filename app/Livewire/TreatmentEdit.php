@@ -12,9 +12,19 @@ use Livewire\Component;
 class TreatmentEdit extends Component
 {
     public Treatment $treatment;
-    public ?float $newDose = null;
     public string $note = '';
     public int $frequencyWeeks = 1;
+
+    // Posology mode: single | dayparts
+    public string $dosageMode = 'single';
+
+    // Single-dose posology
+    public ?float $newDose = null;
+
+    // Day-part posology
+    public ?float $newDoseMorning = null;
+    public ?float $newDoseNoon    = null;
+    public ?float $newDoseEvening = null;
 
     // Properties for general info editing
     public string $editName = '';
@@ -26,13 +36,16 @@ class TreatmentEdit extends Component
     public bool $editIsMedicalAct = false;
     public bool $editRequiresFasting = false;
 
+    // Linked treatment
+    public ?int $editParentTreatmentId = null;
+    public int $editLinkedDays = 1;
+
     // Widget config
     public bool $showWidget = false;
     public string $widgetIcon = '💊';
 
     // Modal state
     public bool $showRecalculateModal = false;
-    private bool $needsRecalculate = false;
 
     public const WIDGET_ICONS = ['🏥', '💉', '🔬', '💊', '🧪', '🩺', '🩹', '❤️', '🫀', '🧬'];
 
@@ -44,9 +57,17 @@ class TreatmentEdit extends Component
     public function mount(Treatment $treatment): void
     {
         $this->treatment = $treatment;
-        $this->newDose = $treatment->current_dose !== null ? (float) $treatment->current_dose : null;
         $this->frequencyWeeks = $treatment->frequency_weeks ?? 1;
 
+        // Posology
+        $this->dosageMode     = $treatment->hasDayPartDoses() ? 'dayparts' : 'single';
+        $this->newDose        = $treatment->current_dose !== null ? (float) $treatment->current_dose : null;
+        // In dayparts mode, always expose all three fields (null → 0 so the row is interactive)
+        $this->newDoseMorning = $treatment->dose_morning !== null ? (float) $treatment->dose_morning : ($this->dosageMode === 'dayparts' ? 0 : null);
+        $this->newDoseNoon    = $treatment->dose_noon    !== null ? (float) $treatment->dose_noon    : ($this->dosageMode === 'dayparts' ? 0 : null);
+        $this->newDoseEvening = $treatment->dose_evening !== null ? (float) $treatment->dose_evening : ($this->dosageMode === 'dayparts' ? 0 : null);
+
+        // Info
         $this->editName = $treatment->name;
         $this->editCommercialName = $treatment->commercial_name ?? '';
         $this->editType = $treatment->type === 'medical_act' ? 'cyclic' : $treatment->type;
@@ -55,59 +76,140 @@ class TreatmentEdit extends Component
         $this->editRecurrenceStart = $treatment->recurrence_start?->toDateString() ?? '';
         $this->editIsMedicalAct = (bool) $treatment->is_medical_act;
         $this->editRequiresFasting = (bool) $treatment->requires_fasting;
+
+        // Linked treatment
+        $this->editParentTreatmentId = $treatment->parent_treatment_id;
+        $this->editLinkedDays = $treatment->linked_days ?? 1;
+
+        // Widget
         $this->showWidget = (bool) $treatment->show_widget;
         $this->widgetIcon = $treatment->widget_icon ?? '💊';
     }
 
+    // ── Dosage mode switch ─────────────────────────────────────────────
+
+    public function updatedDosageMode(string $value): void
+    {
+        if ($value === 'dayparts') {
+            $this->newDoseMorning ??= 0;
+            $this->newDoseNoon    ??= 0;
+            $this->newDoseEvening ??= 0;
+        } else {
+            $this->newDose ??= 0;
+        }
+    }
+
+    // ── Single-dose increments ──────────────────────────────────────────
+
     public function increment(): void
     {
         $step = $this->treatment->unit === 'ml' ? 0.1 : 1;
-        $this->newDose = round($this->newDose + $step, 2);
+        $this->newDose = round(($this->newDose ?? 0) + $step, 2);
     }
 
     public function decrement(): void
     {
         $step = $this->treatment->unit === 'ml' ? 0.1 : 1;
-        $this->newDose = max(0, round($this->newDose - $step, 2));
+        $this->newDose = max(0, round(($this->newDose ?? 0) - $step, 2));
     }
 
-    public function incrementFrequency(): void
+    // ── Day-part increments ─────────────────────────────────────────────
+
+    public function incrementMorning(): void
     {
-        $this->frequencyWeeks++;
+        $step = $this->treatment->unit === 'ml' ? 0.1 : 1;
+        $this->newDoseMorning = round(($this->newDoseMorning ?? 0) + $step, 2);
     }
+
+    public function decrementMorning(): void
+    {
+        $step = $this->treatment->unit === 'ml' ? 0.1 : 1;
+        $this->newDoseMorning = max(0, round(($this->newDoseMorning ?? 0) - $step, 2));
+    }
+
+    public function incrementNoon(): void
+    {
+        $step = $this->treatment->unit === 'ml' ? 0.1 : 1;
+        $this->newDoseNoon = round(($this->newDoseNoon ?? 0) + $step, 2);
+    }
+
+    public function decrementNoon(): void
+    {
+        $step = $this->treatment->unit === 'ml' ? 0.1 : 1;
+        $this->newDoseNoon = max(0, round(($this->newDoseNoon ?? 0) - $step, 2));
+    }
+
+    public function incrementEvening(): void
+    {
+        $step = $this->treatment->unit === 'ml' ? 0.1 : 1;
+        $this->newDoseEvening = round(($this->newDoseEvening ?? 0) + $step, 2);
+    }
+
+    public function decrementEvening(): void
+    {
+        $step = $this->treatment->unit === 'ml' ? 0.1 : 1;
+        $this->newDoseEvening = max(0, round(($this->newDoseEvening ?? 0) - $step, 2));
+    }
+
+    // ── Frequency ──────────────────────────────────────────────────────
+
+    public function incrementFrequency(): void { $this->frequencyWeeks++; }
 
     public function decrementFrequency(): void
     {
         $this->frequencyWeeks = max(1, $this->frequencyWeeks - 1);
     }
 
+    public function incrementLinkedDays(): void { $this->editLinkedDays++; }
+
+    public function decrementLinkedDays(): void
+    {
+        $this->editLinkedDays = max(1, $this->editLinkedDays - 1);
+    }
+
+    // ── Save posology ──────────────────────────────────────────────────
+
     public function save(): void
     {
-        $rules = ['frequencyWeeks' => 'required|integer|min:1'];
         if ($this->treatment->isDosageEditable()) {
-            $rules['newDose'] = 'required|numeric|min:0';
-        }
-        $this->validate($rules);
-
-        if ($this->treatment->isDosageEditable() && $this->newDose !== null) {
-            PosologyHistory::create([
-                'treatment_id' => $this->treatment->id,
-                'dose' => $this->newDose,
-                'note' => $this->note ?: null,
-                'started_at' => today()->toDateString(),
-            ]);
-            $this->treatment->update(['current_dose' => $this->newDose]);
-        }
-
-        if ($this->treatment->frequency_weeks !== null) {
-            $this->treatment->update(['frequency_weeks' => $this->frequencyWeeks]);
+            if ($this->dosageMode === 'dayparts') {
+                PosologyHistory::create([
+                    'treatment_id' => $this->treatment->id,
+                    'dose_morning' => $this->newDoseMorning,
+                    'dose_noon'    => $this->newDoseNoon,
+                    'dose_evening' => $this->newDoseEvening,
+                    'note'         => $this->note ?: null,
+                    'started_at'   => today()->toDateString(),
+                ]);
+                $this->treatment->update([
+                    'current_dose' => null,
+                    'dose_morning' => $this->newDoseMorning,
+                    'dose_noon'    => $this->newDoseNoon,
+                    'dose_evening' => $this->newDoseEvening,
+                ]);
+            } else {
+                $this->validate(['newDose' => 'required|numeric|min:0']);
+                PosologyHistory::create([
+                    'treatment_id' => $this->treatment->id,
+                    'dose'         => $this->newDose,
+                    'note'         => $this->note ?: null,
+                    'started_at'   => today()->toDateString(),
+                ]);
+                $this->treatment->update([
+                    'current_dose' => $this->newDose,
+                    'dose_morning' => null,
+                    'dose_noon'    => null,
+                    'dose_evening' => null,
+                ]);
+            }
         }
 
         $this->treatment->refresh();
         $this->note = '';
-
-        session()->flash('success', 'Traitement mis à jour.');
+        session()->flash('success', 'Posologie mise à jour.');
     }
+
+    // ── Save info ──────────────────────────────────────────────────────
 
     public function saveInfo(): void
     {
@@ -116,20 +218,68 @@ class TreatmentEdit extends Component
             'editType'  => 'required|in:daily,weekly,cyclic',
             'editColor' => 'required|string',
             'editUnit'  => 'nullable|string|max:50',
+            'editParentTreatmentId' => 'nullable|integer|exists:treatments,id',
+            'editLinkedDays' => 'required|integer|min:1',
         ]);
 
+        $prevParentId    = $this->treatment->parent_treatment_id;
+        $prevLinkedDays  = $this->treatment->linked_days ?? 1;
+        $parentChanged   = $this->editParentTreatmentId !== $prevParentId;
+        $daysChanged     = $this->editLinkedDays !== $prevLinkedDays;
+
         $this->treatment->update([
-            'name'             => $this->editName,
-            'commercial_name'  => $this->editCommercialName ?: null,
-            'type'             => $this->editType,
-            'is_medical_act'   => $this->editIsMedicalAct,
-            'requires_fasting' => $this->editRequiresFasting,
-            'color'            => $this->editColor,
-            'unit'             => !$this->editIsMedicalAct ? ($this->editUnit ?: null) : null,
+            'name'                 => $this->editName,
+            'commercial_name'      => $this->editCommercialName ?: null,
+            'type'                 => $this->editType,
+            'is_medical_act'       => $this->editIsMedicalAct,
+            'requires_fasting'     => $this->editRequiresFasting,
+            'color'                => $this->editColor,
+            'unit'                 => !$this->editIsMedicalAct ? ($this->editUnit ?: null) : null,
+            'parent_treatment_id'  => $this->editParentTreatmentId,
+            'linked_days'          => $this->editParentTreatmentId ? $this->editLinkedDays : null,
         ]);
+
+        // Regenerate linked events if parent or duration changed
+        if ($parentChanged || $daysChanged) {
+            $this->regenerateLinkedEvents();
+        }
+
         $this->treatment->refresh();
         session()->flash('success', 'Informations mises à jour.');
     }
+
+    private function regenerateLinkedEvents(): void
+    {
+        $today = Carbon::today()->toDateString();
+
+        // Delete future linked events
+        $this->treatment->calendarEvents()
+            ->whereNotNull('parent_event_id')
+            ->where('scheduled_date', '>', $today)
+            ->where('is_cancelled', false)
+            ->delete();
+
+        if (!$this->editParentTreatmentId) return;
+
+        $parentEvents = CalendarEvent::where('treatment_id', $this->editParentTreatmentId)
+            ->where('scheduled_date', '>', $today)
+            ->where('is_cancelled', false)
+            ->get();
+
+        foreach ($parentEvents as $parentEvent) {
+            $base = Carbon::parse($parentEvent->scheduled_date);
+            for ($day = 0; $day < $this->editLinkedDays; $day++) {
+                CalendarEvent::create([
+                    'treatment_id'    => $this->treatment->id,
+                    'scheduled_date'  => $base->copy()->addDays($day)->toDateString(),
+                    'parent_event_id' => $parentEvent->id,
+                    'is_cancelled'    => false,
+                ]);
+            }
+        }
+    }
+
+    // ── Save widget ────────────────────────────────────────────────────
 
     public function saveWidget(): void
     {
@@ -141,12 +291,14 @@ class TreatmentEdit extends Component
         session()->flash('success', 'Widget mis à jour.');
     }
 
+    // ── Save recurrence ────────────────────────────────────────────────
+
     public function saveRecurrence(): void
     {
         $this->validate(['frequencyWeeks' => 'required|integer|min:1']);
 
-        $freqChanged   = $this->frequencyWeeks !== ($this->treatment->frequency_weeks ?? 1);
-        $startChanged  = $this->editRecurrenceStart !== ($this->treatment->recurrence_start?->toDateString() ?? '');
+        $freqChanged  = $this->frequencyWeeks !== ($this->treatment->frequency_weeks ?? 1);
+        $startChanged = $this->editRecurrenceStart !== ($this->treatment->recurrence_start?->toDateString() ?? '');
 
         if ($freqChanged || $startChanged) {
             $this->showRecalculateModal = true;
@@ -182,31 +334,21 @@ class TreatmentEdit extends Component
         session()->flash('success', 'Récurrence mise à jour.');
     }
 
-    // Keep saveProperties as alias for backwards compat with tests
-    public function saveProperties(): void
-    {
-        $this->saveInfo();
-    }
-
     private function recalculateFutureEvents(): void
     {
         $today = Carbon::today();
 
-        // Delete future non-cancelled events
         $this->treatment->calendarEvents()
             ->where('scheduled_date', '>', $today->toDateString())
             ->where('is_cancelled', false)
             ->delete();
 
         $endDateStr = Setting::get('treatment_end');
-        if (!$endDateStr || !$this->editRecurrenceStart) {
-            return;
-        }
+        if (!$endDateStr || !$this->editRecurrenceStart) return;
 
         $endDate = Carbon::parse($endDateStr);
-        $start = Carbon::parse($this->editRecurrenceStart);
+        $start   = Carbon::parse($this->editRecurrenceStart);
 
-        // Find first occurrence >= today
         $current = $start->copy();
         if ($current->lte($today)) {
             $diff = $today->diffInDays($current, false);
@@ -216,20 +358,30 @@ class TreatmentEdit extends Component
 
         while ($current->lte($endDate)) {
             CalendarEvent::create([
-                'treatment_id' => $this->treatment->id,
+                'treatment_id'   => $this->treatment->id,
                 'scheduled_date' => $current->toDateString(),
-                'is_cancelled' => false,
+                'is_cancelled'   => false,
             ]);
             $current->addWeeks($this->frequencyWeeks);
         }
     }
 
+    // Backward compat alias
+    public function saveProperties(): void { $this->saveInfo(); }
+
+    // ── Render ────────────────────────────────────────────────────────
+
     public function render(): \Illuminate\View\View
     {
+        $otherTreatments = Treatment::where('id', '!=', $this->treatment->id)
+            ->orderBy('name')
+            ->get(['id', 'name', 'commercial_name']);
+
         return view('livewire.treatment-edit', [
-            'history' => $this->treatment->posologyHistory()->get(),
-            'colors' => self::COLORS,
-            'widgetIcons' => self::WIDGET_ICONS,
+            'history'          => $this->treatment->posologyHistory()->get(),
+            'colors'           => self::COLORS,
+            'widgetIcons'      => self::WIDGET_ICONS,
+            'otherTreatments'  => $otherTreatments,
         ])->layout('layouts.app', ['title' => $this->treatment->name]);
     }
 }

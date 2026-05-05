@@ -87,18 +87,18 @@ class CalendarService
         $dailyTreatments = Treatment::where('type', 'daily')->with('posologyHistory')->get();
         foreach ($dailyTreatments as $treatment) {
             $events[] = [
-                'id' => null,
-                'treatment_id' => $treatment->id,
-                'name' => $treatment->name,
-                'display_name' => $treatment->displayName(),
+                'id'              => null,
+                'treatment_id'    => $treatment->id,
+                'name'            => $treatment->name,
+                'display_name'    => $treatment->displayName(),
                 'commercial_name' => $treatment->commercial_name,
-                'type' => 'daily',
-                'unit' => $treatment->unit,
-                'dose' => $this->getDoseForDate($treatment, $date),
-                'color' => $treatment->color,
+                'type'            => 'daily',
+                'unit'            => $treatment->unit,
+                'dose'            => $this->getDoseForDate($treatment, $date),
+                'color'           => $treatment->color,
                 'requires_fasting' => false,
-                'can_move' => false,
-                'moved' => false,
+                'can_move'        => false,
+                'moved'           => false,
             ];
         }
 
@@ -110,20 +110,20 @@ class CalendarService
 
         foreach ($calendarEvents as $event) {
             $events[] = [
-                'id' => $event->id,
-                'treatment_id' => $event->treatment_id,
-                'name' => $event->treatment->name,
-                'display_name' => $event->treatment->displayName(),
+                'id'              => $event->id,
+                'treatment_id'    => $event->treatment_id,
+                'name'            => $event->treatment->name,
+                'display_name'    => $event->treatment->displayName(),
                 'commercial_name' => $event->treatment->commercial_name,
-                'type' => $event->treatment->type,
-                'unit' => $event->treatment->unit,
-                'dose' => $event->treatment->current_dose,
-                'color' => $event->treatment->color,
+                'type'            => $event->treatment->type,
+                'unit'            => $event->treatment->unit,
+                'dose'            => $this->formatDose($event->treatment),
+                'color'           => $event->treatment->color,
                 'requires_fasting' => $event->treatment->requiresFasting(),
-                'can_move' => $event->parent_event_id === null,
-                'moved' => $event->hasMoved(),
-                'original_date' => $event->original_date?->toDateString(),
-                'notes' => $event->notes,
+                'can_move'        => $event->parent_event_id === null,
+                'moved'           => $event->hasMoved(),
+                'original_date'   => $event->original_date?->toDateString(),
+                'notes'           => $event->notes,
             ];
         }
 
@@ -135,7 +135,6 @@ class CalendarService
         $start = Carbon::create($year, $month, 1)->startOfMonth();
         $end = $start->copy()->endOfMonth();
 
-        // Daily treatments (6-MP, 6-TG) are not shown on the monthly grid — only scheduled events get dots.
         $events = CalendarEvent::with('treatment')
             ->whereBetween('scheduled_date', [$start->toDateString(), $end->toDateString()])
             ->where('is_cancelled', false)
@@ -143,13 +142,15 @@ class CalendarService
             ->groupBy(fn($e) => $e->scheduled_date->toDateString());
 
         return $events->map(fn($dayEvents) => $dayEvents->map(fn($e) => [
-            'treatment_id' => $e->treatment_id,
-            'name' => $e->treatment->name,
-            'display_name' => $e->treatment->displayName(),
-            'color' => $e->treatment->color,
+            'treatment_id'    => $e->treatment_id,
+            'name'            => $e->treatment->name,
+            'display_name'    => $e->treatment->displayName(),
+            'color'           => $e->treatment->color,
             'requires_fasting' => $e->treatment->requiresFasting(),
         ])->values()->toArray())->toArray();
     }
+
+    // ── Helpers ──────────────────────────────────────────────────────────
 
     private function getDoseForDate(Treatment $treatment, Carbon $date): ?string
     {
@@ -157,8 +158,46 @@ class CalendarService
             ->filter(fn($h) => $h->started_at->lte($date))
             ->first();
 
-        $dose = $history ? $history->dose : $treatment->current_dose;
+        if ($treatment->hasDayPartDoses()) {
+            $morning = (float) ($history?->dose_morning ?? $treatment->dose_morning);
+            $noon    = (float) ($history?->dose_noon    ?? $treatment->dose_noon);
+            $evening = (float) ($history?->dose_evening ?? $treatment->dose_evening);
+            return $this->formatDayParts($treatment, $morning, $noon, $evening);
+        }
 
-        return $dose !== null ? "{$dose} {$treatment->unit}" : null;
+        $dose = $history ? $history->dose : $treatment->current_dose;
+        return $dose !== null ? $this->formatAmount((float) $dose, $treatment->unit) : null;
+    }
+
+    private function formatDose(Treatment $treatment): ?string
+    {
+        if ($treatment->hasDayPartDoses()) {
+            return $this->formatDayParts(
+                $treatment,
+                (float) $treatment->dose_morning,
+                (float) $treatment->dose_noon,
+                (float) $treatment->dose_evening,
+            );
+        }
+
+        if ($treatment->current_dose === null) return null;
+        return $this->formatAmount((float) $treatment->current_dose, $treatment->unit);
+    }
+
+    private function formatDayParts(Treatment $t, float $morning, float $noon, float $evening): string
+    {
+        $parts = [];
+        if ($t->dose_morning !== null) $parts[] = $this->formatAmount($morning, $t->unit) . ' matin';
+        if ($t->dose_noon    !== null) $parts[] = $this->formatAmount($noon,    $t->unit) . ' midi';
+        if ($t->dose_evening !== null) $parts[] = $this->formatAmount($evening, $t->unit) . ' soir';
+        return implode(' · ', $parts);
+    }
+
+    private function formatAmount(float $amount, ?string $unit): string
+    {
+        $formatted = $unit === 'ml'
+            ? number_format($amount, 1, ',', '')
+            : ($amount == (int) $amount ? (string)(int)$amount : number_format($amount, 2, ',', ''));
+        return $unit ? "{$formatted} {$unit}" : $formatted;
     }
 }

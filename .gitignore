@@ -22,3 +22,7 @@ yarn-error.log
 /.vscode
 /.zed
 /.superpowers
+
+# Credential files (keystores, private keys, etc.)
+/credentials/
+/site

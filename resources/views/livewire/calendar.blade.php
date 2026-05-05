@@ -1,4 +1,4 @@
-<div class="p-4 max-w-lg mx-auto" x-data>
+<div class="p-4 max-w-lg mx-auto" x-data="{ legend: false }">
 
     {{-- Navigation mensuelle --}}
     <div class="flex items-center justify-between mb-4">
@@ -7,10 +7,20 @@
             ‹
         </button>
         <h2 class="text-sm font-bold text-slate-800 capitalize">{{ $monthName }}</h2>
-        <button wire:click="nextMonth"
-                class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors text-lg">
-            ›
-        </button>
+        <div class="flex items-center gap-2">
+            <button @click="legend = !legend"
+                    :class="legend ? 'bg-sky-100 text-sky-600' : 'bg-slate-100 text-slate-500'"
+                    class="w-8 h-8 rounded-xl flex items-center justify-center transition-colors hover:bg-sky-100 hover:text-sky-600"
+                    title="Légende">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/>
+                </svg>
+            </button>
+            <button wire:click="nextMonth"
+                    class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors text-lg">
+                ›
+            </button>
+        </div>
     </div>
 
     {{-- Grille du calendrier --}}
@@ -59,14 +69,48 @@
         </div>
     </div>
 
-    {{-- Légende --}}
-    <div class="flex flex-wrap gap-x-4 gap-y-1.5 mb-4 px-1">
-        @foreach($legend as $item)
-        <div class="flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full flex-shrink-0" style="background-color: {{ $item['color'] }};"></span>
-            <span class="text-xs text-slate-500">{{ $item['label'] }}</span>
+    {{-- Légende (masquée par défaut) --}}
+    <div x-show="legend"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 -translate-y-2"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100 translate-y-0"
+         x-transition:leave-end="opacity-0 -translate-y-2"
+         class="bg-white rounded-2xl shadow-sm mb-4 overflow-hidden">
+
+        <div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+            <p class="text-xs font-bold text-slate-500 uppercase tracking-wide">Légende</p>
+            <button @click="legend = false" class="text-slate-400 hover:text-slate-600 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
         </div>
-        @endforeach
+
+        <div class="divide-y divide-slate-50">
+            @foreach($legend as $item)
+            <div class="flex items-center gap-3 px-4 py-2.5">
+                <div class="w-1 self-stretch rounded-full flex-shrink-0"
+                     style="background-color: {{ $item['color'] }};"></div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-xs font-bold text-slate-800 truncate">{{ $item['label'] }}</p>
+                    @if($item['label'] !== $item['name'])
+                    <p class="text-xs text-slate-400">{{ $item['name'] }}</p>
+                    @endif
+                </div>
+                <span class="text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0"
+                      style="color: {{ $item['color'] }}; background-color: {{ $item['color'] }}18;">
+                    @if($item['type'] === 'daily') Quotidien
+                    @elseif($item['type'] === 'weekly') Hebdo
+                    @elseif($item['is_medical_act']) Acte médical
+                    @elseif($item['frequency_weeks']) / {{ $item['frequency_weeks'] }} sem.
+                    @else Cyclique
+                    @endif
+                </span>
+            </div>
+            @endforeach
+        </div>
     </div>
 
     {{-- Panneau de détail du jour sélectionné --}}
@@ -87,7 +131,7 @@
                 <div class="flex-1 min-w-0">
                     <p class="text-xs font-semibold text-slate-800">{{ $event['display_name'] ?? $event['name'] }}</p>
                     @if($event['requires_fasting'])
-                        <p class="text-xs text-amber-600 font-bold">⚠️ Alexis doit être à jeun</p>
+                        <p class="text-xs text-amber-600 font-bold">⚠️ Alys doit être à jeun</p>
                     @endif
                     @if(!empty($event['notes']))
                         <p class="text-xs text-slate-400">{{ $event['notes'] }}</p>

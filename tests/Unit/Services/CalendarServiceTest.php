@@ -75,5 +75,5 @@ it('getEventsForDay returns correct dose for a date between two posology history
     $events = $this->service->getEventsForDay(Carbon::parse('2026-03-01'));
     $sixTg = collect($events)->firstWhere('name', '6-TG');
     expect($sixTg)->not->toBeNull();
-    expect($sixTg['dose'])->toBe('2.80 ml');
+    expect($sixTg['dose'])->toBe('2,8 ml');
 });

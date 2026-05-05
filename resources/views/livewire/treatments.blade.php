@@ -29,14 +29,32 @@
 
             <div class="flex items-center justify-between">
                 <div>
-                    @if($treatment->current_dose !== null)
+                    @if($treatment->hasDayPartDoses())
+                        @php
+                            $decimals = $treatment->unit === 'ml' ? 1 : 0;
+                            $parts = [];
+                            if ($treatment->dose_morning !== null) $parts[] = ['val' => number_format((float)$treatment->dose_morning, $decimals, ',', ''), 'lbl' => 'mat.'];
+                            if ($treatment->dose_noon    !== null) $parts[] = ['val' => number_format((float)$treatment->dose_noon,    $decimals, ',', ''), 'lbl' => 'midi'];
+                            if ($treatment->dose_evening !== null) $parts[] = ['val' => number_format((float)$treatment->dose_evening, $decimals, ',', ''), 'lbl' => 'soir'];
+                        @endphp
+                        <div class="flex items-end gap-2">
+                            @foreach($parts as $p)
+                            <div class="text-center">
+                                <p class="text-lg font-extrabold leading-none" style="color: {{ $treatment->color }};">{{ $p['val'] }}</p>
+                                <p class="text-[10px] text-slate-400 font-medium mt-0.5">{{ $p['lbl'] }}</p>
+                            </div>
+                            @if(!$loop->last)
+                            <span class="text-slate-200 font-light text-lg leading-none mb-3">·</span>
+                            @endif
+                            @endforeach
+                            @if($treatment->unit)
+                            <p class="text-xs text-slate-400 mb-0.5">{{ $treatment->unit }}</p>
+                            @endif
+                        </div>
+                    @elseif($treatment->current_dose !== null)
                     <p class="text-xl font-extrabold leading-none" style="color: {{ $treatment->color }};">
-                        {{ $treatment->current_dose }}
+                        {{ number_format((float)$treatment->current_dose, $treatment->unit === 'ml' ? 1 : 0, ',', '') }}
                         <span class="text-sm font-normal text-slate-400">{{ $treatment->unit }}</span>
-                    </p>
-                    @elseif($treatment->unit)
-                    <p class="text-sm font-bold" style="color: {{ $treatment->color }};">
-                        {{ $treatment->unit }}
                     </p>
                     @endif
                 </div>
