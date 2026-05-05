@@ -1,5 +1,14 @@
 <?php
 
+use App\Models\Setting;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(RefreshDatabase::class);
+
+beforeEach(function () {
+    Setting::set('onboarding_completed', '1');
+});
+
 it('home route returns 200', function () {
     $response = $this->get(route('home'));
     $response->assertStatus(200);

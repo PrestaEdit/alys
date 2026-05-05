@@ -26,3 +26,4 @@ yarn-error.log
 # Credential files (keystores, private keys, etc.)
 /credentials/
 /site
+/docs/superpowers
