@@ -5,7 +5,6 @@ namespace App\Services;
 class CryptoService
 {
     private const HKDF_INFO = 'alys-v1';
-    private const OPENSSL_BIN = '/opt/homebrew/bin/openssl';
 
     public function generateKeyPair(): array
     {
@@ -18,8 +17,9 @@ class CryptoService
             throw new \RuntimeException('Key generation failed: ' . openssl_error_string());
         }
 
-        openssl_pkey_export($key, $pkcs8Pem);
-        $privatePem = $this->pkcs8ToTraditionalEc($pkcs8Pem);
+        // PHP 8.2 + OpenSSL 3.x exports PKCS#8 ("BEGIN PRIVATE KEY").
+        // openssl_pkey_get_private() accepts both PKCS#8 and SEC1 transparently.
+        openssl_pkey_export($key, $privatePem);
 
         $details   = openssl_pkey_get_details($key);
         $publicPem = $details['key'];
@@ -97,32 +97,5 @@ class CryptoService
         }
 
         return $plaintext;
-    }
-
-    /**
-     * Convert a PKCS#8 EC private key PEM to traditional SEC1 format
-     * (BEGIN EC PRIVATE KEY) using the openssl CLI.
-     */
-    private function pkcs8ToTraditionalEc(string $pkcs8Pem): string
-    {
-        $tmpIn = tempnam(sys_get_temp_dir(), 'ec_in') . '.pem';
-
-        try {
-            file_put_contents($tmpIn, $pkcs8Pem);
-
-            $openssl = is_executable(self::OPENSSL_BIN) ? self::OPENSSL_BIN : 'openssl';
-            $cmd     = $openssl . ' pkey -in ' . escapeshellarg($tmpIn) . ' -traditional 2>/dev/null';
-            $output  = shell_exec($cmd);
-
-            if ($output === null || ! str_contains($output, 'EC PRIVATE KEY')) {
-                throw new \RuntimeException('Failed to convert EC key to traditional format');
-            }
-
-            return $output;
-        } finally {
-            if (file_exists($tmpIn)) {
-                unlink($tmpIn);
-            }
-        }
     }
 }

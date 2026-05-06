@@ -7,7 +7,8 @@ it('generates an EC P-256 key pair', function () {
     $pair = $crypto->generateKeyPair();
 
     expect($pair)->toHaveKeys(['private', 'public']);
-    expect($pair['private'])->toContain('EC PRIVATE KEY');
+    // PHP 8.2 + OpenSSL 3.x exports PKCS#8 ("BEGIN PRIVATE KEY"); older versions use SEC1 ("BEGIN EC PRIVATE KEY")
+    expect($pair['private'])->toMatch('/BEGIN( EC)? PRIVATE KEY/');
     expect($pair['public'])->toContain('PUBLIC KEY');
 });
 
