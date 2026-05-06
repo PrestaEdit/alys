@@ -47,7 +47,7 @@ it('export runs without error and writes a JSON file', function () {
         ->call('export')
         ->assertStatus(200);
 
-    $files = glob(storage_path('app/alexis-traitement-*.json'));
+    $files = glob(storage_path('app/alys-traitement-*.json'));
     expect($files)->not->toBeEmpty();
     $data = json_decode(file_get_contents($files[0]), true);
     expect($data)->toHaveKeys(['settings', 'treatments', 'posology_history', 'calendar_events', 'exported_at']);

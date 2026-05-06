@@ -6,12 +6,15 @@
             <p class="text-xs text-slate-400 font-medium">{{ now()->locale('fr')->isoFormat('dddd D MMMM YYYY') }}</p>
             <h1 class="text-xl font-extrabold text-slate-900">{{ $patientName }} 💙</h1>
         </div>
-        <button wire:click="export"
-                class="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
-            </svg>
-        </button>
+        <div class="flex items-center gap-2">
+            <livewire:profile-switcher />
+            <button wire:click="export"
+                    class="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                </svg>
+            </button>
+        </div>
     </div>
 
     {{-- Bannière prochain RDV --}}
@@ -25,6 +28,7 @@
     @endif
 
     {{-- Barre de progression --}}
+    @if($progressPercent !== null)
     <div class="bg-white rounded-2xl p-4 mb-4 shadow-sm">
         <div class="flex justify-between items-center mb-2">
             <p class="text-xs font-semibold text-slate-700">Fin du traitement</p>
@@ -40,6 +44,7 @@
             <p class="text-xs text-slate-400">{{ $treatmentEndLabel }}</p>
         </div>
     </div>
+    @endif
 
     {{-- Widgets dynamiques --}}
     @if(count($widgets) > 0)

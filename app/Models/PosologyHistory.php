@@ -2,14 +2,18 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToActiveProfile;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PosologyHistory extends Model
 {
+    use BelongsToActiveProfile;
+
     protected $table = 'posology_history';
 
     protected $fillable = [
+        'profile_id',
         'treatment_id', 'dose', 'dose_morning', 'dose_noon', 'dose_evening', 'note', 'started_at',
     ];
 

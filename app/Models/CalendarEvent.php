@@ -2,13 +2,17 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToActiveProfile;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class CalendarEvent extends Model
 {
+    use BelongsToActiveProfile;
+
     protected $fillable = [
+        'profile_id',
         'treatment_id', 'scheduled_date', 'original_date', 'is_cancelled', 'notes', 'parent_event_id',
     ];
 

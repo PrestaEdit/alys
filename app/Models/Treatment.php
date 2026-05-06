@@ -2,19 +2,25 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToActiveProfile;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Treatment extends Model
 {
+    use BelongsToActiveProfile;
+
     protected $fillable = [
+        'profile_id',
         'name', 'commercial_name', 'type', 'unit', 'current_dose',
         'dose_morning', 'dose_noon', 'dose_evening',
         'color', 'frequency_weeks', 'is_medical_act', 'requires_fasting',
         'day_of_week', 'recurrence_start', 'notes',
         'show_widget', 'widget_icon',
         'parent_treatment_id', 'linked_days',
+        'archived_at',
     ];
 
     protected $casts = [
@@ -23,12 +29,33 @@ class Treatment extends Model
         'dose_noon'     => 'decimal:2',
         'dose_evening'  => 'decimal:2',
         'recurrence_start' => 'date',
+        'archived_at'      => 'datetime',
         'frequency_weeks'  => 'integer',
         'day_of_week'      => 'integer',
         'linked_days'      => 'integer',
         'is_medical_act'   => 'boolean',
         'requires_fasting' => 'boolean',
     ];
+
+    public function scopeActive(Builder $query): void
+    {
+        $query->whereNull('archived_at');
+    }
+
+    public function scopeArchived(Builder $query): void
+    {
+        $query->whereNotNull('archived_at');
+    }
+
+    public function archive(): void
+    {
+        $this->update(['archived_at' => now()]);
+    }
+
+    public function unarchive(): void
+    {
+        $this->update(['archived_at' => null]);
+    }
 
     public function posologyHistory(): HasMany
     {

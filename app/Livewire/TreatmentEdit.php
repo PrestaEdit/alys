@@ -343,10 +343,10 @@ class TreatmentEdit extends Component
             ->where('is_cancelled', false)
             ->delete();
 
-        $endDateStr = Setting::get('treatment_end');
-        if (!$endDateStr || !$this->editRecurrenceStart) return;
+        $profile = app(\App\Services\ActiveProfile::class)->get();
+        if (! $profile || ! $this->editRecurrenceStart) return;
 
-        $endDate = Carbon::parse($endDateStr);
+        $endDate = $profile->treatment_end;
         $start   = Carbon::parse($this->editRecurrenceStart);
 
         $current = $start->copy();

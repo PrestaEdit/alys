@@ -212,10 +212,10 @@ class TreatmentCreate extends Component
 
     private function generateCyclicEvents(Treatment $treatment): void
     {
-        $endDateStr = Setting::get('treatment_end');
-        if (!$endDateStr) return;
+        $profile = app(\App\Services\ActiveProfile::class)->get();
+        if (! $profile) return;
 
-        $endDate = Carbon::parse($endDateStr);
+        $endDate = $profile->treatment_end;
         $start   = Carbon::parse($this->recurrenceStart);
         $today   = Carbon::today();
 

@@ -1,5 +1,11 @@
 <div class="p-4 max-w-lg mx-auto" x-data="{ legend: false }">
 
+    {{-- Header avec switcher --}}
+    <div class="flex items-center justify-between mb-4">
+        <h1 class="text-xl font-extrabold text-slate-900">Calendrier</h1>
+        <livewire:profile-switcher />
+    </div>
+
     {{-- Navigation mensuelle --}}
     <div class="flex items-center justify-between mb-4">
         <button wire:click="previousMonth"

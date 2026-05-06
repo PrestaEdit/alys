@@ -3,23 +3,34 @@
 namespace App\Services;
 
 use App\Models\CalendarEvent;
-use App\Models\Setting;
 use App\Models\Treatment;
+use App\Services\ActiveProfile;
 use Carbon\Carbon;
 
 class CalendarService
 {
-    public function getDaysRemaining(Carbon $from): int
+    private function profileDates(): array
     {
-        $end = Carbon::parse(Setting::get('treatment_end', '2027-03-31'));
+        $profile = app(ActiveProfile::class)->get();
+        return [
+            'start' => $profile?->treatment_start,
+            'end'   => $profile?->treatment_end,
+        ];
+    }
+
+    public function getDaysRemaining(Carbon $from): ?int
+    {
+        $end = $this->profileDates()['end'];
+        if (!$end) return null;
         return (int) $from->copy()->startOfDay()->diffInDays($end->copy()->startOfDay(), false);
     }
 
-    public function getProgressPercent(Carbon $from): int
+    public function getProgressPercent(Carbon $from): ?int
     {
-        $start = Carbon::parse(Setting::get('treatment_start', '2025-11-26'));
-        $end = Carbon::parse(Setting::get('treatment_end', '2027-03-31'));
+        ['start' => $start, 'end' => $end] = $this->profileDates();
+        if (!$start || !$end) return null;
         $totalDays = $start->diffInDays($end);
+        if ($totalDays === 0) return 0;
         $elapsed = $start->diffInDays($from->copy()->startOfDay());
         return (int) min(100, max(0, round(($elapsed / $totalDays) * 100)));
     }
@@ -28,7 +39,7 @@ class CalendarService
     {
         $fromDate = $from->toDateString();
 
-        $treatments = Treatment::whereIn('name', ['Hôpital', 'VCR', 'IT MTTX', 'MTX'])
+        $treatments = Treatment::active()->whereIn('name', ['Hôpital', 'VCR', 'IT MTTX', 'MTX'])
             ->withCount(['calendarEvents as future_count' => fn($q) => $q
                 ->whereDate('scheduled_date', '>', $fromDate)
                 ->where('is_cancelled', false)
@@ -48,7 +59,7 @@ class CalendarService
     {
         $fromDate = $from->toDateString();
 
-        $treatments = Treatment::where('show_widget', true)
+        $treatments = Treatment::active()->where('show_widget', true)
             ->withCount(['calendarEvents as future_count' => fn($q) => $q
                 ->whereDate('scheduled_date', '>', $fromDate)
                 ->where('is_cancelled', false)
@@ -66,7 +77,7 @@ class CalendarService
 
     public function getNextHospitalVisit(Carbon $from): ?Carbon
     {
-        $hopital = Treatment::where('name', 'Hôpital')->first();
+        $hopital = Treatment::active()->where('name', 'Hôpital')->first();
         if (!$hopital) return null;
 
         $event = CalendarEvent::where('treatment_id', $hopital->id)
@@ -84,7 +95,7 @@ class CalendarService
         $events = [];
 
         // Daily treatments (not stored in calendar_events)
-        $dailyTreatments = Treatment::where('type', 'daily')->with('posologyHistory')->get();
+        $dailyTreatments = Treatment::active()->where('type', 'daily')->with('posologyHistory')->get();
         foreach ($dailyTreatments as $treatment) {
             $events[] = [
                 'id'              => null,

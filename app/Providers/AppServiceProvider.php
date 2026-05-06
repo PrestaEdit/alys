@@ -14,6 +14,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(\App\Services\CalendarService::class);
         $this->app->singleton(\App\Services\EventMoveService::class);
         $this->app->singleton(\App\Services\ExportService::class);
+        $this->app->singleton(\App\Services\ActiveProfile::class);
     }
 
     public function boot(): void
@@ -32,14 +33,14 @@ class AppServiceProvider extends ServiceProvider
 
     private function bootstrapOnboardingFlag(): void
     {
-        if (! Schema::hasTable('settings')) {
+        if (! Schema::hasTable('settings') || ! Schema::hasTable('profiles')) {
             return;
         }
 
-        $hasPatient = Setting::get('patient_name', '') !== '';
+        $hasProfile = \App\Models\Profile::query()->exists();
         $alreadyFlagged = Setting::get('onboarding_completed', '') !== '';
 
-        if ($hasPatient && ! $alreadyFlagged) {
+        if ($hasProfile && ! $alreadyFlagged) {
             Setting::set('onboarding_completed', '1');
         }
     }
