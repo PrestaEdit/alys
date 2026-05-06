@@ -19,7 +19,9 @@ class CryptoService
 
         // PHP 8.2 + OpenSSL 3.x exports PKCS#8 ("BEGIN PRIVATE KEY").
         // openssl_pkey_get_private() accepts both PKCS#8 and SEC1 transparently.
-        openssl_pkey_export($key, $privatePem);
+        if (! openssl_pkey_export($key, $privatePem)) {
+            throw new \RuntimeException('Key export failed: ' . openssl_error_string());
+        }
 
         $details   = openssl_pkey_get_details($key);
         $publicPem = $details['key'];
@@ -71,6 +73,12 @@ class CryptoService
 
         if (($env['v'] ?? null) !== 1 || ($env['alg'] ?? '') !== 'ECIES-P256-HKDF-AES256GCM') {
             throw new \RuntimeException('Unknown envelope format');
+        }
+
+        foreach (['epk', 'iv', 'tag', 'ct'] as $field) {
+            if (! isset($env[$field])) {
+                throw new \RuntimeException("Missing envelope field: {$field}");
+            }
         }
 
         $privKey      = openssl_pkey_get_private($devicePrivatePem);
