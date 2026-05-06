@@ -15,6 +15,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(\App\Services\EventMoveService::class);
         $this->app->singleton(\App\Services\ExportService::class);
         $this->app->singleton(\App\Services\ActiveProfile::class);
+        $this->app->singleton(\App\Services\CryptoService::class);
     }
 
     public function boot(): void
@@ -26,6 +27,7 @@ class AppServiceProvider extends ServiceProvider
         try {
             Artisan::call('migrate', ['--force' => true]);
             $this->bootstrapOnboardingFlag();
+            $this->bootstrapDeviceKeys();
         } catch (\Throwable $e) {
             report($e);
         }
@@ -43,5 +45,16 @@ class AppServiceProvider extends ServiceProvider
         if ($hasProfile && ! $alreadyFlagged) {
             Setting::set('onboarding_completed', '1');
         }
+    }
+
+    private function bootstrapDeviceKeys(): void
+    {
+        if (\Native\Mobile\Facades\SecureStorage::get('device_private_key') !== null) {
+            return;
+        }
+
+        $pair = $this->app->make(\App\Services\CryptoService::class)->generateKeyPair();
+        \Native\Mobile\Facades\SecureStorage::set('device_private_key', $pair['private']);
+        \Native\Mobile\Facades\SecureStorage::set('device_public_key', $pair['public']);
     }
 }
