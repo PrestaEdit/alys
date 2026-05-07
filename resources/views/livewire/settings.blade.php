@@ -24,4 +24,10 @@
         <p class="text-sm text-slate-700">Restaurer les données depuis un fichier .alys chiffré.</p>
     </a>
 
+    <a href="{{ route('key-transfer') }}"
+       class="block bg-white rounded-2xl p-5 shadow-sm mb-4 hover:bg-slate-50 transition-colors">
+        <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Transfert de clés</p>
+        <p class="text-sm text-slate-700">Transférer les clés vers un nouvel appareil via QR code.</p>
+    </a>
+
 </div>

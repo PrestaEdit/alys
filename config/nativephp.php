@@ -322,6 +322,10 @@ return [
     */
     'ipad' => false,
 
+    'permissions' => [
+        'scanner',
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Device Orientation Support
