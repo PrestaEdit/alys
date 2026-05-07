@@ -8,7 +8,13 @@ class CryptoService
 
     private function opensslConfig(): string
     {
-        return base_path('resources/openssl.cnf');
+        $path = storage_path('openssl.cnf');
+
+        if (! file_exists($path)) {
+            file_put_contents($path, "[req]\ndistinguished_name=req_distinguished_name\n[req_distinguished_name]\n");
+        }
+
+        return $path;
     }
 
     public function generateKeyPair(): array
