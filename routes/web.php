@@ -2,6 +2,7 @@
 
 use App\Livewire\Dashboard;
 use App\Livewire\Calendar;
+use App\Livewire\Import;
 use App\Livewire\Onboarding;
 use App\Livewire\ProfileCreate;
 use App\Livewire\Profiles;
@@ -17,6 +18,7 @@ Route::get('/treatments', Treatments::class)->name('treatments');
 Route::get('/treatments/create', TreatmentCreate::class)->name('treatments.create');
 Route::get('/treatments/{treatment}/edit', TreatmentEdit::class)->name('treatments.edit');
 Route::get('/settings', Settings::class)->name('settings');
+Route::get('/import', Import::class)->name('import');
 Route::get('/onboarding', Onboarding::class)->name('onboarding');
 Route::get('/profiles', Profiles::class)->name('profiles');
 Route::get('/profiles/create', ProfileCreate::class)->name('profiles.create');

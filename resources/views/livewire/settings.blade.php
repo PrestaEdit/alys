@@ -18,4 +18,10 @@
         <p class="text-sm text-slate-700">Gérer les profils, les couleurs et les périodes de traitement.</p>
     </a>
 
+    <a href="{{ route('import') }}"
+       class="block bg-white rounded-2xl p-5 shadow-sm mb-4 hover:bg-slate-50 transition-colors">
+        <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Importer</p>
+        <p class="text-sm text-slate-700">Restaurer les données depuis un fichier .alys chiffré.</p>
+    </a>
+
 </div>
