@@ -29,8 +29,16 @@ class KeyTransfer extends Component
         $privatePem = SecureStorage::get('device_private_key');
 
         if ($privatePem === null) {
-            $this->error = 'Aucune clé disponible sur cet appareil.';
-            return;
+            // Boot-time key generation may have failed silently — try now
+            try {
+                $pair = app(CryptoService::class)->generateKeyPair();
+                SecureStorage::set('device_private_key', $pair['private']);
+                SecureStorage::set('device_public_key', $pair['public']);
+                $privatePem = $pair['private'];
+            } catch (\Throwable) {
+                $this->error = 'Impossible de générer les clés. Veuillez relancer l\'application.';
+                return;
+            }
         }
 
         $qr = new QrCode(
@@ -49,9 +57,10 @@ class KeyTransfer extends Component
     {
         $this->error = '';
         Scanner::scan()
-            ->prompt('Scannez le QR de votre ancien appareil')
+            ->prompt('Scannez le QR code de votre ancien appareil')
             ->formats(['qr'])
-            ->id(self::SCAN_ID);
+            ->id(self::SCAN_ID)
+            ->open();
     }
 
     #[OnNative(CodeScanned::class)]

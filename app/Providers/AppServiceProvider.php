@@ -30,7 +30,7 @@ class AppServiceProvider extends ServiceProvider
             $this->bootstrapOnboardingFlag();
             $this->bootstrapDeviceKeys();
         } catch (\Throwable $e) {
-            report($e);
+            \Illuminate\Support\Facades\Log::error('[boot] ' . $e->getMessage());
         }
     }
 

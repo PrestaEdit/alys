@@ -41,23 +41,23 @@
     <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
         <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Appareil source</p>
         <p class="text-sm text-slate-600 mb-4">
-            Affichez le QR de votre clé privée et scannez-le depuis votre nouvel appareil.
+            Générez le QR code de votre clé privée, puis scannez-le depuis votre nouvel appareil pour lui transférer l'accès.
         </p>
 
         <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4">
             <p class="text-xs text-amber-700">
-                ⚠️ La clé suivante donne accès à tous vos exports. Ne la montrez qu'à votre nouvel appareil.
+                ⚠️ Ce QR code donne accès à tous vos exports. Ne le montrez qu'à votre nouvel appareil.
             </p>
         </div>
 
         <button wire:click="showQr"
                 class="w-full bg-slate-800 text-white font-semibold py-3 rounded-2xl text-sm">
-            Afficher le QR de ma clé
+            Afficher le QR code de ma clé
         </button>
 
         @if($qrDataUri)
             <div class="mt-4 flex justify-center">
-                <img src="{{ $qrDataUri }}" alt="QR clé privée" class="w-56 h-56 rounded-xl">
+                <img src="{{ $qrDataUri }}" alt="QR code clé privée" class="w-56 h-56 rounded-xl">
             </div>
         @endif
     </div>
@@ -65,12 +65,12 @@
     <div class="bg-white rounded-2xl p-5 shadow-sm">
         <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Nouvel appareil</p>
         <p class="text-sm text-slate-600 mb-4">
-            Scannez le QR affiché sur votre ancien appareil pour récupérer les clés.
+            Scannez le QR code affiché sur votre ancien appareil pour récupérer les clés de chiffrement.
         </p>
 
         <button wire:click="startScan"
                 class="w-full bg-blue-600 text-white font-semibold py-3 rounded-2xl text-sm">
-            Scanner la clé d'un autre appareil
+            Scanner le QR code d'un autre appareil
         </button>
     </div>
 

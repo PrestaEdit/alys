@@ -27,15 +27,22 @@ it('showQr generates a QR data URI', function () {
     expect($component->get('qrDataUri'))->toStartWith('data:image/png;base64,');
 });
 
-it('showQr shows error when no private key exists', function () {
+it('showQr generates and stores keys when none exist', function () {
     \Native\Mobile\Facades\SecureStorage::shouldReceive('get')
         ->with('device_private_key')
         ->andReturn(null);
+    \Native\Mobile\Facades\SecureStorage::shouldReceive('set')
+        ->with('device_private_key', \Mockery::type('string'))
+        ->once();
+    \Native\Mobile\Facades\SecureStorage::shouldReceive('set')
+        ->with('device_public_key', \Mockery::type('string'))
+        ->once();
 
     $component = Livewire::test(KeyTransfer::class)
         ->call('showQr');
 
-    expect($component->get('error'))->not->toBeEmpty();
+    expect($component->get('qrDataUri'))->toStartWith('data:image/png;base64,');
+    expect($component->get('error'))->toBeEmpty();
 });
 
 it('stores scanned key in SecureStorage when no existing keys', function () {
