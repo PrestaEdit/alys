@@ -50,15 +50,16 @@ class Dashboard extends Component
         $this->exportLoading = true;
 
         try {
+            $this->exportError = 'Étape 1 : récupération de la clé…';
+
             $publicKey = \Native\Mobile\Facades\SecureStorage::get('device_public_key');
 
             if ($publicKey === null) {
                 $privatePem = \Native\Mobile\Facades\SecureStorage::get('device_private_key');
-
                 if ($privatePem !== null) {
                     $key = openssl_pkey_get_private($privatePem);
                     if ($key !== false) {
-                        $details = openssl_pkey_get_details($key);
+                        $details   = openssl_pkey_get_details($key);
                         $publicKey = $details['key'];
                         \Native\Mobile\Facades\SecureStorage::set('device_public_key', $publicKey);
                     }
@@ -66,24 +67,35 @@ class Dashboard extends Component
             }
 
             if ($publicKey === null) {
-                $this->exportError = 'Clés de chiffrement non initialisées. Redémarrez l\'application ou allez dans Réglages > Transfert de clés.';
+                $this->exportError = 'Clés non initialisées. Allez dans Réglages > Transfert de clés.';
                 return;
             }
 
+            $this->exportError = 'Étape 2 : chiffrement…';
+
             $envelope = $exportService->generateEncrypted($publicKey);
+
+            $this->exportError = 'Étape 3 : écriture du fichier…';
+
+            $tempDir  = config('nativephp-internal.tempdir') ?: sys_get_temp_dir();
             $filename = 'alys-traitement-' . now()->format('Y-m-d') . '.alys';
-            $dir  = storage_path('app');
-            if (! is_dir($dir)) {
-                mkdir($dir, 0755, true);
+            $path     = rtrim($tempDir, '/') . '/' . $filename;
+            $written  = file_put_contents($path, $envelope);
+
+            if ($written === false) {
+                $this->exportError = 'Impossible d\'écrire dans : ' . $path;
+                return;
             }
-            $path = $dir . '/' . $filename;
-            file_put_contents($path, $envelope);
+
+            $this->exportError = 'Étape 4 : partage… (' . $path . ', ' . $written . ' o)';
 
             \Native\Mobile\Facades\Share::file(
                 'Alys Traitement',
                 'Export chiffré du calendrier de traitement',
                 $path
             );
+
+            $this->exportError = '';
         } catch (\Throwable $e) {
             $this->exportError = get_class($e) . ': ' . $e->getMessage() . ' — ' . basename($e->getFile()) . ':' . $e->getLine();
         } finally {
