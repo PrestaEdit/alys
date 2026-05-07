@@ -53,8 +53,23 @@ class Dashboard extends Component
             $publicKey = \Native\Mobile\Facades\SecureStorage::get('device_public_key');
 
             if ($publicKey === null) {
-                $this->exportError = 'Clés de chiffrement non disponibles. Vérifiez les réglages de transfert de clés.';
-                return;
+                $privatePem = \Native\Mobile\Facades\SecureStorage::get('device_private_key');
+
+                if ($privatePem !== null) {
+                    $key = openssl_pkey_get_private($privatePem);
+                    if ($key !== false) {
+                        $details = openssl_pkey_get_details($key);
+                        $publicKey = $details['key'];
+                        \Native\Mobile\Facades\SecureStorage::set('device_public_key', $publicKey);
+                    }
+                }
+            }
+
+            if ($publicKey === null) {
+                $pair = app(\App\Services\CryptoService::class)->generateKeyPair();
+                \Native\Mobile\Facades\SecureStorage::set('device_private_key', $pair['private']);
+                \Native\Mobile\Facades\SecureStorage::set('device_public_key', $pair['public']);
+                $publicKey = $pair['public'];
             }
 
             $envelope = $exportService->generateEncrypted($publicKey);
