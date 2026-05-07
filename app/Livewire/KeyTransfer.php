@@ -60,7 +60,7 @@ class KeyTransfer extends Component
             ->prompt('Scannez le QR code de votre ancien appareil')
             ->formats(['qr'])
             ->id(self::SCAN_ID)
-            ->open();
+            ->scan();
     }
 
     #[OnNative(CodeScanned::class)]
