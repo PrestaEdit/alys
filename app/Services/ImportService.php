@@ -14,8 +14,8 @@ class ImportService
     {
         try {
             $json = $this->crypto->decrypt($alysContent, $devicePrivatePem);
-        } catch (\JsonException $e) {
-            throw new \RuntimeException('Invalid alys envelope: ' . $e->getMessage(), 0, $e);
+        } catch (\Throwable $e) {
+            throw new \RuntimeException('Decryption failed: ' . $e->getMessage(), 0, $e);
         }
 
         try {

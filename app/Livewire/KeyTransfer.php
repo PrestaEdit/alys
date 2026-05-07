@@ -91,7 +91,11 @@ class KeyTransfer extends Component
 
     private function storeScannedKey(string $privatePem): void
     {
-        $privKey   = openssl_pkey_get_private($privatePem);
+        $privKey = openssl_pkey_get_private($privatePem);
+        if ($privKey === false) {
+            $this->error = 'Clé invalide — le QR code ne contient pas une clé valide.';
+            return;
+        }
         $details   = openssl_pkey_get_details($privKey);
         $publicPem = $details['key'];
 
