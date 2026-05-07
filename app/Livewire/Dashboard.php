@@ -85,7 +85,7 @@ class Dashboard extends Component
                 $path
             );
         } catch (\Throwable $e) {
-            $this->exportError = 'Erreur lors de l\'export : ' . $e->getMessage();
+            $this->exportError = get_class($e) . ': ' . $e->getMessage() . ' — ' . basename($e->getFile()) . ':' . $e->getLine();
         } finally {
             $this->exportLoading = false;
         }

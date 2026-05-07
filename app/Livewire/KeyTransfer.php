@@ -6,7 +6,6 @@ use App\Services\CryptoService;
 use Livewire\Component;
 use Native\Mobile\Attributes\OnNative;
 use Native\Mobile\Events\Scanner\CodeScanned;
-use Native\Mobile\Facades\Scanner;
 use Native\Mobile\Facades\SecureStorage;
 
 class KeyTransfer extends Component
@@ -40,17 +39,7 @@ class KeyTransfer extends Component
         $this->qrContent = $privatePem;
     }
 
-    public function startScan(): void
-    {
-        $this->error = '';
-        Scanner::scan()
-            ->prompt('Scannez le QR code de votre ancien appareil')
-            ->formats(['qr'])
-            ->id(self::SCAN_ID)
-            ->scan();
-    }
-
-    #[OnNative(CodeScanned::class)]
+#[OnNative(CodeScanned::class)]
     public function handleScan(string $data, string $format, ?string $id = null): void
     {
         if ($id !== self::SCAN_ID) {
