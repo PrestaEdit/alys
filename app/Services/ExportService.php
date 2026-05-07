@@ -56,4 +56,10 @@ class ExportService
             'calendar_events' => $events,
         ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
     }
+
+    public function generateEncrypted(string $publicPem): string
+    {
+        $json = $this->generate();
+        return app(\App\Services\CryptoService::class)->encrypt($json, $publicPem);
+    }
 }

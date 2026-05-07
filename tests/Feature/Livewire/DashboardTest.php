@@ -42,13 +42,27 @@ it('shows progress percent between 0 and 100', function () {
     expect($component->get('progressPercent'))->toBeLessThanOrEqual(100);
 });
 
-it('export runs without error and writes a JSON file', function () {
+it('export runs without error and writes an alys file', function () {
+    $crypto = new \App\Services\CryptoService();
+    $pair = $crypto->generateKeyPair();
+
+    \Native\Mobile\Facades\SecureStorage::shouldReceive('get')
+        ->with('device_public_key')
+        ->andReturn($pair['public']);
+
     Livewire::test(Dashboard::class)
         ->call('export')
         ->assertStatus(200);
 
-    $files = glob(storage_path('app/alys-traitement-*.json'));
+    $files = glob(storage_path('app/alys-traitement-*.alys'));
     expect($files)->not->toBeEmpty();
-    $data = json_decode(file_get_contents($files[0]), true);
+
+    // The .alys file is the encrypted envelope, not raw JSON
+    $envelope = json_decode(file_get_contents($files[0]), true);
+    expect($envelope)->toHaveKeys(['v', 'alg', 'epk', 'iv', 'tag', 'ct']);
+
+    // Decrypt and verify the data structure
+    $json = $crypto->decrypt(file_get_contents($files[0]), $pair['private']);
+    $data = json_decode($json, true);
     expect($data)->toHaveKeys(['settings', 'treatments', 'posology_history', 'calendar_events', 'exported_at']);
 });

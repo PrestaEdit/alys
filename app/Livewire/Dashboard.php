@@ -44,12 +44,23 @@ class Dashboard extends Component
 
     public function export(ExportService $exportService): void
     {
-        $json = $exportService->generate();
-        $filename = 'alys-traitement-' . now()->format('Y-m-d') . '.json';
-        $path = storage_path('app/' . $filename);
-        file_put_contents($path, $json);
+        $publicKey = \Native\Mobile\Facades\SecureStorage::get('device_public_key');
 
-        \Native\Mobile\Facades\Share::file('Alys Traitement', 'Export du calendrier de traitement d\'Alys', $path);
+        if ($publicKey === null) {
+            session()->flash('error', 'Clés de chiffrement non disponibles.');
+            return;
+        }
+
+        $envelope = $exportService->generateEncrypted($publicKey);
+        $filename = 'alys-traitement-' . now()->format('Y-m-d') . '.alys';
+        $path = storage_path('app/' . $filename);
+        file_put_contents($path, $envelope);
+
+        \Native\Mobile\Facades\Share::file(
+            'Alys Traitement',
+            'Export chiffré du calendrier de traitement',
+            $path
+        );
     }
 
     public function render(): \Illuminate\View\View
