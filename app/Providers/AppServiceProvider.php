@@ -50,8 +50,20 @@ class AppServiceProvider extends ServiceProvider
 
     private function bootstrapDeviceKeys(): void
     {
-        if (\Native\Mobile\Facades\SecureStorage::get('device_private_key') !== null) {
+        $privatePem = \Native\Mobile\Facades\SecureStorage::get('device_private_key');
+        $publicPem  = \Native\Mobile\Facades\SecureStorage::get('device_public_key');
+
+        if ($privatePem !== null && $publicPem !== null) {
             return;
+        }
+
+        if ($privatePem !== null && $publicPem === null) {
+            $key = openssl_pkey_get_private($privatePem);
+            if ($key !== false) {
+                $details = openssl_pkey_get_details($key);
+                \Native\Mobile\Facades\SecureStorage::set('device_public_key', $details['key']);
+                return;
+            }
         }
 
         $pair = $this->app->make(\App\Services\CryptoService::class)->generateKeyPair();
