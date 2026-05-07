@@ -8,13 +8,19 @@ class CryptoService
 
     private function opensslConfig(): string
     {
-        $path = storage_path('openssl.cnf');
+        $content = "[req]\ndistinguished_name=req_distinguished_name\n[req_distinguished_name]\n";
 
-        if (! file_exists($path)) {
-            file_put_contents($path, "[req]\ndistinguished_name=req_distinguished_name\n[req_distinguished_name]\n");
+        foreach ([storage_path(), sys_get_temp_dir()] as $dir) {
+            $path = $dir . '/openssl.cnf';
+            if (file_exists($path)) {
+                return $path;
+            }
+            if (@file_put_contents($path, $content) !== false) {
+                return $path;
+            }
         }
 
-        return $path;
+        throw new \RuntimeException('Cannot write OpenSSL config (tried storage/ and sys_get_temp_dir)');
     }
 
     public function generateKeyPair(): array
@@ -46,6 +52,7 @@ class CryptoService
         $ephemeral = openssl_pkey_new([
             'curve_name'       => 'prime256v1',
             'private_key_type' => OPENSSL_KEYTYPE_EC,
+            'config'           => $this->opensslConfig(),
         ]);
         $recipientPub = openssl_pkey_get_public($recipientPublicPem);
 

@@ -3,10 +3,6 @@
 namespace App\Livewire;
 
 use App\Services\CryptoService;
-use Endroid\QrCode\Encoding\Encoding;
-use Endroid\QrCode\ErrorCorrectionLevel;
-use Endroid\QrCode\QrCode;
-use Endroid\QrCode\Writer\PngWriter;
 use Livewire\Component;
 use Native\Mobile\Attributes\OnNative;
 use Native\Mobile\Events\Scanner\CodeScanned;
@@ -15,7 +11,7 @@ use Native\Mobile\Facades\SecureStorage;
 
 class KeyTransfer extends Component
 {
-    public ?string $qrDataUri = null;
+    public ?string $qrContent = null;
     public bool $confirmReplace = false;
     public ?string $pendingKey = null;
     public bool $importSuccess = false;
@@ -41,16 +37,7 @@ class KeyTransfer extends Component
             }
         }
 
-        $qr = new QrCode(
-            data: $privatePem,
-            encoding: new Encoding('UTF-8'),
-            errorCorrectionLevel: ErrorCorrectionLevel::Medium,
-            size: 300,
-            margin: 10,
-        );
-
-        $result = (new PngWriter())->write($qr);
-        $this->qrDataUri = 'data:image/png;base64,' . base64_encode($result->getString());
+        $this->qrContent = $privatePem;
     }
 
     public function startScan(): void

@@ -72,7 +72,11 @@ class Dashboard extends Component
 
             $envelope = $exportService->generateEncrypted($publicKey);
             $filename = 'alys-traitement-' . now()->format('Y-m-d') . '.alys';
-            $path = storage_path('app/' . $filename);
+            $dir  = storage_path('app');
+            if (! is_dir($dir)) {
+                mkdir($dir, 0755, true);
+            }
+            $path = $dir . '/' . $filename;
             file_put_contents($path, $envelope);
 
             \Native\Mobile\Facades\Share::file(

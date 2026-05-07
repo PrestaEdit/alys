@@ -55,9 +55,11 @@
             Afficher le QR code de ma clé
         </button>
 
-        @if($qrDataUri)
-            <div class="mt-4 flex justify-center">
-                <img src="{{ $qrDataUri }}" alt="QR code clé privée" class="w-56 h-56 rounded-xl">
+        @if($qrContent)
+            <div class="mt-4 flex justify-center"
+                 x-data
+                 x-init="QRCode.toCanvas($refs.qrCanvas, @js($qrContent), { width: 224, margin: 1 })">
+                <canvas x-ref="qrCanvas" class="rounded-xl"></canvas>
             </div>
         @endif
     </div>
