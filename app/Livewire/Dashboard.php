@@ -19,6 +19,8 @@ class Dashboard extends Component
     public string $patientName = '';
     public string $treatmentStartLabel = '';
     public string $treatmentEndLabel = '';
+    public string $exportError = '';
+    public bool $exportLoading = false;
 
     public function mount(CalendarService $service, ActiveProfile $activeProfile): void
     {
@@ -44,23 +46,32 @@ class Dashboard extends Component
 
     public function export(ExportService $exportService): void
     {
-        $publicKey = \Native\Mobile\Facades\SecureStorage::get('device_public_key');
+        $this->exportError = '';
+        $this->exportLoading = true;
 
-        if ($publicKey === null) {
-            session()->flash('error', 'Clés de chiffrement non disponibles.');
-            return;
+        try {
+            $publicKey = \Native\Mobile\Facades\SecureStorage::get('device_public_key');
+
+            if ($publicKey === null) {
+                $this->exportError = 'Clés de chiffrement non disponibles. Vérifiez les réglages de transfert de clés.';
+                return;
+            }
+
+            $envelope = $exportService->generateEncrypted($publicKey);
+            $filename = 'alys-traitement-' . now()->format('Y-m-d') . '.alys';
+            $path = storage_path('app/' . $filename);
+            file_put_contents($path, $envelope);
+
+            \Native\Mobile\Facades\Share::file(
+                'Alys Traitement',
+                'Export chiffré du calendrier de traitement',
+                $path
+            );
+        } catch (\Throwable $e) {
+            $this->exportError = 'Erreur lors de l\'export : ' . $e->getMessage();
+        } finally {
+            $this->exportLoading = false;
         }
-
-        $envelope = $exportService->generateEncrypted($publicKey);
-        $filename = 'alys-traitement-' . now()->format('Y-m-d') . '.alys';
-        $path = storage_path('app/' . $filename);
-        file_put_contents($path, $envelope);
-
-        \Native\Mobile\Facades\Share::file(
-            'Alys Traitement',
-            'Export chiffré du calendrier de traitement',
-            $path
-        );
     }
 
     public function render(): \Illuminate\View\View

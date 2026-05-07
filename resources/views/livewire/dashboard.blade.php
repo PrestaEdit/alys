@@ -8,14 +8,24 @@
         </div>
         <div class="flex items-center gap-2">
             <livewire:profile-switcher />
-            <button wire:click="export"
-                    class="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <button wire:click="export" wire:loading.attr="disabled" wire:target="export"
+                    class="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors disabled:opacity-50">
+                <svg wire:loading.remove wire:target="export" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                </svg>
+                <svg wire:loading wire:target="export" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
                 </svg>
             </button>
         </div>
     </div>
+
+    @if($exportError)
+    <div class="bg-red-50 border border-red-200 rounded-2xl p-3 mb-4 text-xs text-red-700">
+        {{ $exportError }}
+    </div>
+    @endif
 
     {{-- Bannière prochain RDV --}}
     @if($nextHospitalDate)
