@@ -6,11 +6,17 @@ class CryptoService
 {
     private const HKDF_INFO = 'alys-v1';
 
+    private function opensslConfig(): string
+    {
+        return base_path('resources/openssl.cnf');
+    }
+
     public function generateKeyPair(): array
     {
         $key = openssl_pkey_new([
             'curve_name'       => 'prime256v1',
             'private_key_type' => OPENSSL_KEYTYPE_EC,
+            'config'           => $this->opensslConfig(),
         ]);
 
         if ($key === false) {
@@ -19,7 +25,7 @@ class CryptoService
 
         // PHP 8.2 + OpenSSL 3.x exports PKCS#8 ("BEGIN PRIVATE KEY").
         // openssl_pkey_get_private() accepts both PKCS#8 and SEC1 transparently.
-        if (! openssl_pkey_export($key, $privatePem)) {
+        if (! openssl_pkey_export($key, $privatePem, null, ['config' => $this->opensslConfig()])) {
             throw new \RuntimeException('Key export failed: ' . openssl_error_string());
         }
 

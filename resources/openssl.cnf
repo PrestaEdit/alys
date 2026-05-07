@@ -1,0 +1,9 @@
+HOME            = .
+oid_section     = new_oids
+
+[ new_oids ]
+
+[ req ]
+distinguished_name = req_distinguished_name
+
+[ req_distinguished_name ]

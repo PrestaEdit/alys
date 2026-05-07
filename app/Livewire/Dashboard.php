@@ -66,10 +66,8 @@ class Dashboard extends Component
             }
 
             if ($publicKey === null) {
-                $pair = app(\App\Services\CryptoService::class)->generateKeyPair();
-                \Native\Mobile\Facades\SecureStorage::set('device_private_key', $pair['private']);
-                \Native\Mobile\Facades\SecureStorage::set('device_public_key', $pair['public']);
-                $publicKey = $pair['public'];
+                $this->exportError = 'Clés de chiffrement non initialisées. Redémarrez l\'application ou allez dans Réglages > Transfert de clés.';
+                return;
             }
 
             $envelope = $exportService->generateEncrypted($publicKey);
