@@ -16,14 +16,13 @@ beforeEach(fn() => $this->seed(DatabaseSeeder::class));
 function makeAlysFile(): array
 {
     $crypto = new CryptoService();
-    $pair = $crypto->generateKeyPair();
-    $export = new ExportService();
-    $alys = $export->generateEncrypted($pair['public']);
-    return ['alys' => $alys, 'private' => $pair['private']];
+    $key    = $crypto->generateKey();
+    $alys   = (new ExportService())->generateEncrypted($key);
+    return ['alys' => $alys, 'key' => $key];
 }
 
 it('imports treatments from alys file', function () {
-    ['alys' => $alys, 'private' => $priv] = makeAlysFile();
+    ['alys' => $alys, 'key' => $key] = makeAlysFile();
 
     $originalCount = Treatment::count();
     expect($originalCount)->toBeGreaterThan(0);
@@ -32,55 +31,55 @@ it('imports treatments from alys file', function () {
     expect(Treatment::withoutGlobalScopes()->count())->toBe(0);
 
     $importer = new ImportService(new CryptoService());
-    $importer->restore($alys, $priv);
+    $importer->restore($alys, $key);
 
     expect(Treatment::count())->toBe($originalCount);
 });
 
 it('imports posology_history from alys file', function () {
-    ['alys' => $alys, 'private' => $priv] = makeAlysFile();
+    ['alys' => $alys, 'key' => $key] = makeAlysFile();
 
     $originalCount = PosologyHistory::count();
     PosologyHistory::withoutGlobalScopes()->delete();
 
     $importer = new ImportService(new CryptoService());
-    $importer->restore($alys, $priv);
+    $importer->restore($alys, $key);
 
     expect(PosologyHistory::count())->toBe($originalCount);
 });
 
 it('imports calendar_events from alys file', function () {
-    ['alys' => $alys, 'private' => $priv] = makeAlysFile();
+    ['alys' => $alys, 'key' => $key] = makeAlysFile();
 
     $originalCount = CalendarEvent::count();
     CalendarEvent::withoutGlobalScopes()->delete();
 
     $importer = new ImportService(new CryptoService());
-    $importer->restore($alys, $priv);
+    $importer->restore($alys, $key);
 
     expect(CalendarEvent::count())->toBe($originalCount);
 });
 
 it('does not duplicate on second import', function () {
-    ['alys' => $alys, 'private' => $priv] = makeAlysFile();
+    ['alys' => $alys, 'key' => $key] = makeAlysFile();
 
     $importer = new ImportService(new CryptoService());
-    $importer->restore($alys, $priv);
+    $importer->restore($alys, $key);
     $countAfterFirst = Treatment::count();
 
-    $importer->restore($alys, $priv);
+    $importer->restore($alys, $key);
     expect(Treatment::count())->toBe($countAfterFirst);
 });
 
-it('throws on wrong private key', function () {
+it('throws on wrong key', function () {
     ['alys' => $alys] = makeAlysFile();
-    $otherPair = (new CryptoService())->generateKeyPair();
+    $otherKey = (new CryptoService())->generateKey();
 
-    expect(fn () => (new ImportService(new CryptoService()))->restore($alys, $otherPair['private']))
+    expect(fn () => (new ImportService(new CryptoService()))->restore($alys, $otherKey))
         ->toThrow(\RuntimeException::class);
 });
 
 it('throws on malformed alys content', function () {
-    expect(fn () => (new ImportService(new CryptoService()))->restore('not-json', 'fake'))
+    expect(fn () => (new ImportService(new CryptoService()))->restore('not-json', 'fakekey'))
         ->toThrow(\RuntimeException::class);
 });

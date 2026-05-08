@@ -10,10 +10,10 @@ class ImportService
 {
     public function __construct(private CryptoService $crypto) {}
 
-    public function restore(string $alysContent, string $devicePrivatePem): void
+    public function restore(string $alysContent, string $keyBase64): void
     {
         try {
-            $json = $this->crypto->decrypt($alysContent, $devicePrivatePem);
+            $json = $this->crypto->decrypt($alysContent, $keyBase64);
         } catch (\Throwable $e) {
             throw new \RuntimeException('Decryption failed: ' . $e->getMessage(), 0, $e);
         }
