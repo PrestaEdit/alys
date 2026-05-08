@@ -18,12 +18,12 @@ it('renders import component', function () {
 
 it('imports successfully with valid alys file', function () {
     $crypto = new CryptoService();
-    $pair = $crypto->generateKeyPair();
-    $alys = (new ExportService())->generateEncrypted($pair['public']);
+    $key    = $crypto->generateKey();
+    $alys   = (new ExportService())->generateEncrypted($key);
 
     \Native\Mobile\Facades\SecureStorage::shouldReceive('get')
-        ->with('device_private_key')
-        ->andReturn($pair['private']);
+        ->with('device_key')
+        ->andReturn($key);
 
     $file = UploadedFile::fake()->createWithContent('backup.alys', $alys);
 
@@ -35,8 +35,8 @@ it('imports successfully with valid alys file', function () {
 
 it('shows error on invalid alys file', function () {
     \Native\Mobile\Facades\SecureStorage::shouldReceive('get')
-        ->with('device_private_key')
-        ->andReturn((new CryptoService())->generateKeyPair()['private']);
+        ->with('device_key')
+        ->andReturn((new CryptoService())->generateKey());
 
     $file = UploadedFile::fake()->createWithContent('bad.alys', 'not-valid-json');
 
@@ -46,9 +46,9 @@ it('shows error on invalid alys file', function () {
         ->assertSet('error', true);
 });
 
-it('shows error when private key is missing', function () {
+it('shows error when key is missing', function () {
     \Native\Mobile\Facades\SecureStorage::shouldReceive('get')
-        ->with('device_private_key')
+        ->with('device_key')
         ->andReturn(null);
 
     $file = UploadedFile::fake()->createWithContent('backup.alys', '{}');

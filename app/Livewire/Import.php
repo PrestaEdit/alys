@@ -19,9 +19,9 @@ class Import extends Component
     {
         $this->validate(['file' => 'required|file|max:10240']);
 
-        $privateKey = SecureStorage::get('device_private_key');
+        $key = SecureStorage::get('device_key');
 
-        if ($privateKey === null) {
+        if ($key === null) {
             $this->error = true;
             $this->errorMessage = 'Clés de chiffrement introuvables. Effectuez un transfert de clés depuis votre ancien appareil.';
             return;
@@ -29,7 +29,7 @@ class Import extends Component
 
         try {
             $content = file_get_contents($this->file->getRealPath());
-            $importer->restore($content, $privateKey);
+            $importer->restore($content, $key);
             $this->dispatch('import-complete');
             $this->redirectRoute('home');
         } catch (\Throwable $e) {
