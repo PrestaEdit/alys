@@ -30,4 +30,6 @@
         <p class="text-sm text-slate-700">Transférer les clés vers un nouvel appareil via QR code.</p>
     </a>
 
+    <p class="text-center text-xs text-slate-300 mt-2">build {{ env('APP_BUILD', '?') }}</p>
+
 </div>

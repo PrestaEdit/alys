@@ -4,44 +4,44 @@
     {
       "id": 0,
       "subject": "Task 1: Refactoriser CryptoService + ExportService",
-      "status": "pending",
+      "status": "completed",
       "description": "**Goal:** Remplacer ECIES-P256 par AES-256-GCM dans CryptoService, adapter ExportService::generateEncrypted(), mettre les tests à jour.\n\n**Files:**\n- Modify: `app/Services/CryptoService.php`\n- Modify: `app/Services/ExportService.php`\n- Modify: `tests/Feature/CryptoServiceTest.php`\n\n**Acceptance Criteria:**\n- [ ] generateKey() retourne base64 de 32 bytes\n- [ ] encrypt() produit enveloppe v:2\n- [ ] decrypt() retrouve le JSON original\n- [ ] decrypt() lève exception sur mauvaise clé\n- [ ] decrypt() lève exception sur ciphertext altéré\n\n**Verify:** `php artisan test --filter=CryptoServiceTest` → 5 tests, 5 passed\n\n```json:metadata\n{\"files\": [\"app/Services/CryptoService.php\", \"app/Services/ExportService.php\", \"tests/Feature/CryptoServiceTest.php\"], \"verifyCommand\": \"php artisan test --filter=CryptoServiceTest\", \"acceptanceCriteria\": [\"generateKey() retourne base64 de 32 bytes\", \"encrypt() produit enveloppe v:2\", \"decrypt() retrouve le JSON original\", \"decrypt() lève exception sur mauvaise clé\", \"decrypt() lève exception sur ciphertext altéré\"]}\n```"
     },
     {
       "id": 1,
       "subject": "Task 2: Adapter ImportService + ses tests",
-      "status": "pending",
+      "status": "completed",
       "blockedBy": [0],
       "description": "**Goal:** Renommer $devicePrivatePem en $keyBase64 dans ImportService::restore() et mettre à jour les tests.\n\n**Files:**\n- Modify: `app/Services/ImportService.php`\n- Modify: `tests/Feature/ImportServiceTest.php`\n\n**Acceptance Criteria:**\n- [ ] restore() accepte une clé AES base64\n- [ ] 6 tests ImportService passent\n\n**Verify:** `php artisan test --filter=ImportServiceTest` → 6 tests, 6 passed\n\n```json:metadata\n{\"files\": [\"app/Services/ImportService.php\", \"tests/Feature/ImportServiceTest.php\"], \"verifyCommand\": \"php artisan test --filter=ImportServiceTest\", \"acceptanceCriteria\": [\"restore() accepte une clé AES base64\", \"6 tests ImportService passent\"]}\n```"
     },
     {
       "id": 2,
       "subject": "Task 3: Simplifier AppServiceProvider",
-      "status": "pending",
+      "status": "completed",
       "blockedBy": [0],
       "description": "**Goal:** bootstrapDeviceKeys() génère une seule clé AES sous device_key.\n\n**Files:**\n- Modify: `app/Providers/AppServiceProvider.php`\n\n**Acceptance Criteria:**\n- [ ] device_key stocké si absent\n- [ ] Plus de device_private_key / device_public_key dans AppServiceProvider\n- [ ] php artisan test passe\n\n**Verify:** `php artisan test` → all passed\n\n```json:metadata\n{\"files\": [\"app/Providers/AppServiceProvider.php\"], \"verifyCommand\": \"php artisan test\", \"acceptanceCriteria\": [\"device_key stocké si absent\", \"Plus de device_private_key / device_public_key\"]}\n```"
     },
     {
       "id": 3,
       "subject": "Task 4: Adapter Dashboard (export) + test",
-      "status": "pending",
+      "status": "completed",
       "blockedBy": [0, 2],
       "description": "**Goal:** Dashboard::export() lit device_key au lieu de device_public_key, test mis à jour.\n\n**Files:**\n- Modify: `app/Livewire/Dashboard.php`\n- Modify: `tests/Feature/Livewire/DashboardTest.php`\n\n**Acceptance Criteria:**\n- [ ] export() lit SecureStorage::get('device_key')\n- [ ] Test vérifie enveloppe v:2\n- [ ] php artisan test --filter=DashboardTest passe\n\n**Verify:** `php artisan test --filter=DashboardTest` → all passed\n\n```json:metadata\n{\"files\": [\"app/Livewire/Dashboard.php\", \"tests/Feature/Livewire/DashboardTest.php\"], \"verifyCommand\": \"php artisan test --filter=DashboardTest\", \"acceptanceCriteria\": [\"export() lit device_key\", \"Test vérifie enveloppe v:2\"]}\n```"
     },
     {
       "id": 4,
       "subject": "Task 5: Adapter Import.php Livewire + test",
-      "status": "pending",
+      "status": "completed",
       "blockedBy": [1, 2],
       "description": "**Goal:** Import::import() lit device_key au lieu de device_private_key.\n\n**Files:**\n- Modify: `app/Livewire/Import.php`\n- Modify: `tests/Feature/Livewire/ImportTest.php`\n\n**Acceptance Criteria:**\n- [ ] import() lit SecureStorage::get('device_key')\n- [ ] php artisan test --filter=ImportTest passe\n\n**Verify:** `php artisan test --filter=ImportTest` → all passed\n\n```json:metadata\n{\"files\": [\"app/Livewire/Import.php\", \"tests/Feature/Livewire/ImportTest.php\"], \"verifyCommand\": \"php artisan test --filter=ImportTest\", \"acceptanceCriteria\": [\"import() lit device_key\", \"Tests passent\"]}\n```"
     },
     {
       "id": 5,
       "subject": "Task 6: Adapter KeyTransfer — scanner PHP + QR + tests + vue",
-      "status": "pending",
+      "status": "completed",
       "blockedBy": [0, 2],
       "description": "**Goal:** Scanner via Scanner::scan() PHP, showQr() encode device_key, tous les tests à jour.\n\n**Files:**\n- Modify: `app/Livewire/KeyTransfer.php`\n- Modify: `resources/views/livewire/key-transfer.blade.php`\n- Modify: `tests/Feature/Livewire/KeyTransferTest.php`\n\n**Acceptance Criteria:**\n- [ ] startScan() appelle Scanner::scan() avec prompt/formats/id\n- [ ] showQr() expose device_key dans qrContent\n- [ ] storeScannedKey() valide la clé AES (32 bytes)\n- [ ] Bouton vue utilise wire:click='startScan'\n- [ ] 6 tests KeyTransferTest passent\n- [ ] php artisan test complet passe\n\n**Verify:** `php artisan test --filter=KeyTransferTest` → 6 tests, 6 passed\n\n```json:metadata\n{\"files\": [\"app/Livewire/KeyTransfer.php\", \"resources/views/livewire/key-transfer.blade.php\", \"tests/Feature/Livewire/KeyTransferTest.php\"], \"verifyCommand\": \"php artisan test --filter=KeyTransferTest && php artisan test\", \"acceptanceCriteria\": [\"startScan() appelle Scanner::scan()\", \"showQr() expose device_key\", \"storeScannedKey() valide AES 32 bytes\", \"Bouton wire:click=startScan\", \"6 tests passent\"]}\n```"
     }
   ],
-  "lastUpdated": "2026-05-08T10:53:00+02:00"
+  "lastUpdated": "2026-05-08T11:30:00+02:00"
 }
