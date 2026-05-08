@@ -51,9 +51,13 @@ class CryptoService
             throw new \RuntimeException('Invalid AES key');
         }
 
-        $iv        = base64_decode($env['iv']);
-        $tag       = base64_decode($env['tag']);
-        $ct        = base64_decode($env['ct']);
+        $iv  = base64_decode($env['iv'], true);
+        $tag = base64_decode($env['tag'], true);
+        $ct  = base64_decode($env['ct'], true);
+
+        if ($iv === false || $tag === false || $ct === false) {
+            throw new \RuntimeException('Invalid envelope field encoding');
+        }
 
         $plaintext = openssl_decrypt($ct, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $iv, $tag);
 
