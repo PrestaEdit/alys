@@ -6,7 +6,7 @@
     "bridge_functions": [
         {
             "name": "Share.File",
-            "android": "com.prestaedit.alexis.share.ShareFunctions.File",
+            "android": "app.prestaedit.alys.share.ShareFunctions.File",
             "description": "Share a file via Android share intent"
         }
     ],

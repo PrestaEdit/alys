@@ -1,4 +1,4 @@
-package com.prestaedit.alexis.share
+package app.prestaedit.alys.share
 
 import android.content.Intent
 import android.util.Log
