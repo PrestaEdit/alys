@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ed4e1c0ca5ed57a119234cbb7f6b75b9",
+    "content-hash": "4f2888faa85d18b40951911f189f7c7e",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -2510,94 +2510,6 @@
             "time": "2026-04-10T19:30:15+00:00"
         },
         {
-            "name": "nativephp/mobile-scanner",
-            "version": "1.0.2",
-            "dist": {
-                "type": "zip",
-                "url": "https://plugins.nativephp.com/dist/nativephp/mobile-scanner/nativephp-mobile-scanner-b819d8eb9521f9f7ad3b067c2171015894c310a5-zip-505868.zip",
-                "reference": "b819d8eb9521f9f7ad3b067c2171015894c310a5",
-                "shasum": "a6ccca07daca2e3507a8fa7a4ebbb1f225e69e68"
-            },
-            "require": {
-                "nativephp/mobile": "^3.0",
-                "php": "^8.2"
-            },
-            "type": "nativephp-plugin",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "Native\\Mobile\\Providers\\ScannerServiceProvider"
-                    ]
-                },
-                "nativephp": {
-                    "manifest": "nativephp.json"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Native\\Mobile\\Providers\\": "src/"
-                }
-            },
-            "license": [
-                "proprietary"
-            ],
-            "authors": [
-                {
-                    "name": "NativePHP",
-                    "email": "support@nativephp.com"
-                }
-            ],
-            "description": "QR code and barcode scanner plugin for NativePHP Mobile - supports multiple barcode formats with continuous scanning",
-            "support": {
-                "issues": "https://github.com/NativePHP/mobile-scanner/issues"
-            },
-            "time": "2026-03-20T22:08:33+00:00"
-        },
-        {
-            "name": "nativephp/mobile-secure-storage",
-            "version": "1.0.1",
-            "dist": {
-                "type": "zip",
-                "url": "https://plugins.nativephp.com/dist/nativephp/mobile-secure-storage/nativephp-mobile-secure-storage-5b87aae690dfe7f216afba4ceedd383233ac1892-zip-30ac0b.zip",
-                "reference": "5b87aae690dfe7f216afba4ceedd383233ac1892",
-                "shasum": "996db6d8be4c8de9ce336624aa8c86de2a24fc5a"
-            },
-            "require": {
-                "nativephp/mobile": "^3.0",
-                "php": "^8.2"
-            },
-            "type": "nativephp-plugin",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "Native\\Mobile\\Providers\\SecureStorageServiceProvider"
-                    ]
-                },
-                "nativephp": {
-                    "manifest": "nativephp.json"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Native\\Mobile\\Providers\\": "src/"
-                }
-            },
-            "license": [
-                "proprietary"
-            ],
-            "authors": [
-                {
-                    "name": "NativePHP",
-                    "email": "support@nativephp.com"
-                }
-            ],
-            "description": "Secure storage plugin for NativePHP Mobile (Keychain/EncryptedSharedPreferences)",
-            "support": {
-                "issues": "https://github.com/NativePHP/mobile-secure-storage/issues"
-            },
-            "time": "2026-03-20T22:08:33+00:00"
-        },
-        {
             "name": "nativephp/mobile-share",
             "version": "1.0.1",
             "source": {
@@ -3133,11 +3045,11 @@
         },
         {
             "name": "prestaedit/alys-native",
-            "version": "dev-master",
+            "version": "1.0.0",
             "dist": {
                 "type": "path",
                 "url": "packages/alys-native",
-                "reference": "2cdaec822883914bbd35ae9a7c6270cd81daacd8"
+                "reference": "4d6dae923f367871172f21016208d8591cca5ef8"
             },
             "require": {
                 "nativephp/mobile": "^3.0",
@@ -10440,9 +10352,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "prestaedit/alys-native": 20
-    },
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

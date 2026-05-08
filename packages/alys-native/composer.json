@@ -1,5 +1,6 @@
 {
     "name": "prestaedit/alys-native",
+    "version": "1.0.0",
     "description": "Native Android bridge functions for Alys",
     "type": "nativephp-plugin",
     "license": "proprietary",
