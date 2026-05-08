@@ -2,55 +2,52 @@
 
 use App\Services\CryptoService;
 
-it('generates an EC P-256 key pair', function () {
+it('generates a 32-byte AES key encoded as base64', function () {
     $crypto = new CryptoService();
-    $pair = $crypto->generateKeyPair();
+    $key = $crypto->generateKey();
+    $decoded = base64_decode($key, true);
 
-    expect($pair)->toHaveKeys(['private', 'public']);
-    // PHP 8.2 + OpenSSL 3.x exports PKCS#8 ("BEGIN PRIVATE KEY"); older versions use SEC1 ("BEGIN EC PRIVATE KEY")
-    expect($pair['private'])->toMatch('/BEGIN( EC)? PRIVATE KEY/');
-    expect($pair['public'])->toContain('PUBLIC KEY');
+    expect(strlen($decoded))->toBe(32);
 });
 
-it('encrypts to a valid envelope JSON', function () {
+it('encrypts to a valid v:2 envelope JSON', function () {
     $crypto = new CryptoService();
-    $pair = $crypto->generateKeyPair();
-    $envelope = $crypto->encrypt('{"hello":"world"}', $pair['public']);
+    $key = $crypto->generateKey();
+    $envelope = $crypto->encrypt('{"hello":"world"}', $key);
 
     $parsed = json_decode($envelope, true);
-    expect($parsed)->toHaveKeys(['v', 'alg', 'epk', 'iv', 'tag', 'ct']);
-    expect($parsed['v'])->toBe(1);
-    expect($parsed['alg'])->toBe('ECIES-P256-HKDF-AES256GCM');
+    expect($parsed)->toHaveKeys(['v', 'iv', 'tag', 'ct']);
+    expect($parsed['v'])->toBe(2);
 });
 
 it('decrypts back to original JSON', function () {
     $crypto = new CryptoService();
-    $pair = $crypto->generateKeyPair();
+    $key = $crypto->generateKey();
     $original = '{"foo":"bar","num":42}';
-    $envelope = $crypto->encrypt($original, $pair['public']);
+    $envelope = $crypto->encrypt($original, $key);
 
-    expect($crypto->decrypt($envelope, $pair['private']))->toBe($original);
+    expect($crypto->decrypt($envelope, $key))->toBe($original);
 });
 
-it('throws on wrong private key', function () {
+it('throws on wrong key', function () {
     $crypto = new CryptoService();
-    $pair1 = $crypto->generateKeyPair();
-    $pair2 = $crypto->generateKeyPair();
-    $envelope = $crypto->encrypt('{"x":1}', $pair1['public']);
+    $key1 = $crypto->generateKey();
+    $key2 = $crypto->generateKey();
+    $envelope = $crypto->encrypt('{"x":1}', $key1);
 
-    expect(fn () => $crypto->decrypt($envelope, $pair2['private']))
+    expect(fn () => $crypto->decrypt($envelope, $key2))
         ->toThrow(\RuntimeException::class);
 });
 
 it('throws on tampered ciphertext', function () {
     $crypto = new CryptoService();
-    $pair = $crypto->generateKeyPair();
-    $envelope = $crypto->encrypt('{"x":1}', $pair['public']);
+    $key = $crypto->generateKey();
+    $envelope = $crypto->encrypt('{"x":1}', $key);
 
     $parsed = json_decode($envelope, true);
     $parsed['ct'] = base64_encode('tampered');
     $tampered = json_encode($parsed);
 
-    expect(fn () => $crypto->decrypt($tampered, $pair['private']))
+    expect(fn () => $crypto->decrypt($tampered, $key))
         ->toThrow(\RuntimeException::class);
 });

@@ -57,9 +57,9 @@ class ExportService
         ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
     }
 
-    public function generateEncrypted(string $publicPem): string
+    public function generateEncrypted(string $keyBase64): string
     {
         $json = $this->generate();
-        return app(\App\Services\CryptoService::class)->encrypt($json, $publicPem);
+        return app(\App\Services\CryptoService::class)->encrypt($json, $keyBase64);
     }
 }
