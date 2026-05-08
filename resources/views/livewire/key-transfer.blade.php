@@ -41,7 +41,7 @@
     <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
         <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Appareil source</p>
         <p class="text-sm text-slate-600 mb-4">
-            Générez le QR code de votre clé privée, puis scannez-le depuis votre nouvel appareil pour lui transférer l'accès.
+            Générez le QR code de votre clé, puis scannez-le depuis votre nouvel appareil pour lui transférer l'accès.
         </p>
 
         <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4">
@@ -70,13 +70,7 @@
             Scannez le QR code affiché sur votre ancien appareil pour récupérer les clés de chiffrement.
         </p>
 
-        <button x-data
-                x-on:click="import('#nativephp').then(({ scanner }) => {
-                    scanner.scan()
-                        .prompt('Scannez le QR code de votre ancien appareil')
-                        .formats(['qr'])
-                        .id('key-transfer');
-                })"
+        <button wire:click="startScan"
                 class="w-full bg-blue-600 text-white font-semibold py-3 rounded-2xl text-sm">
             Scanner le QR code d'un autre appareil
         </button>

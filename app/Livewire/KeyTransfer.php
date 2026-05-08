@@ -6,6 +6,7 @@ use App\Services\CryptoService;
 use Livewire\Component;
 use Native\Mobile\Attributes\OnNative;
 use Native\Mobile\Events\Scanner\CodeScanned;
+use Native\Mobile\Facades\Scanner;
 use Native\Mobile\Facades\SecureStorage;
 
 class KeyTransfer extends Component
@@ -21,32 +22,37 @@ class KeyTransfer extends Component
     public function showQr(): void
     {
         $this->error = '';
-        $privatePem = SecureStorage::get('device_private_key');
+        $key = SecureStorage::get('device_key');
 
-        if ($privatePem === null) {
-            // Boot-time key generation may have failed silently — try now
+        if ($key === null) {
             try {
-                $pair = app(CryptoService::class)->generateKeyPair();
-                SecureStorage::set('device_private_key', $pair['private']);
-                SecureStorage::set('device_public_key', $pair['public']);
-                $privatePem = $pair['private'];
+                $key = app(CryptoService::class)->generateKey();
+                SecureStorage::set('device_key', $key);
             } catch (\Throwable) {
                 $this->error = 'Impossible de générer les clés. Veuillez relancer l\'application.';
                 return;
             }
         }
 
-        $this->qrContent = $privatePem;
+        $this->qrContent = $key;
     }
 
-#[OnNative(CodeScanned::class)]
+    public function startScan(): void
+    {
+        Scanner::scan()
+            ->prompt('Scannez le QR code de votre ancien appareil')
+            ->formats(['qr'])
+            ->id(self::SCAN_ID);
+    }
+
+    #[OnNative(CodeScanned::class)]
     public function handleScan(string $data, string $format, ?string $id = null): void
     {
         if ($id !== self::SCAN_ID) {
             return;
         }
 
-        $existingKey = SecureStorage::get('device_private_key');
+        $existingKey = SecureStorage::get('device_key');
 
         if ($existingKey !== null) {
             $this->pendingKey     = $data;
@@ -74,19 +80,15 @@ class KeyTransfer extends Component
         $this->pendingKey     = null;
     }
 
-    private function storeScannedKey(string $privatePem): void
+    private function storeScannedKey(string $keyBase64): void
     {
-        $privKey = openssl_pkey_get_private($privatePem);
-        if ($privKey === false) {
+        $decoded = base64_decode($keyBase64, true);
+        if ($decoded === false || strlen($decoded) !== 32) {
             $this->error = 'Clé invalide — le QR code ne contient pas une clé valide.';
             return;
         }
-        $details   = openssl_pkey_get_details($privKey);
-        $publicPem = $details['key'];
 
-        SecureStorage::set('device_private_key', $privatePem);
-        SecureStorage::set('device_public_key', $publicPem);
-
+        SecureStorage::set('device_key', $keyBase64);
         $this->importSuccess = true;
     }
 
