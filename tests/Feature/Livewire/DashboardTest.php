@@ -54,7 +54,8 @@ it('export runs without error and writes an alys file', function () {
         ->call('export')
         ->assertStatus(200);
 
-    $files = glob(storage_path('app/alys-traitement-*.alys'));
+    $tempDir = config('nativephp-internal.tempdir') ?: sys_get_temp_dir();
+    $files = glob(rtrim($tempDir, '/') . '/alys-traitement-*.alys');
     expect($files)->not->toBeEmpty();
 
     $envelope = json_decode(file_get_contents($files[0]), true);

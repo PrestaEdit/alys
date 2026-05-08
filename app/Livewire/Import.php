@@ -14,6 +14,41 @@ class Import extends Component
     public $file = null;
     public bool $error = false;
     public string $errorMessage = '';
+    public bool $autoImporting = false;
+    public bool $success = false;
+
+    public function mount(ImportService $importer): void
+    {
+        $alysData = request()->input('alys_data');
+        if ($alysData === null) {
+            return;
+        }
+
+        $this->autoImporting = true;
+
+        $content = base64_decode($alysData, true);
+        if ($content === false || $content === '') {
+            $this->error = true;
+            $this->errorMessage = 'Fichier reçu invalide.';
+            return;
+        }
+
+        $key = SecureStorage::get('device_key');
+        if ($key === null) {
+            $this->error = true;
+            $this->errorMessage = 'Clés de chiffrement introuvables. Effectuez un transfert de clés depuis votre ancien appareil.';
+            return;
+        }
+
+        try {
+            $importer->restore($content, $key);
+            $this->success = true;
+            $this->dispatch('import-complete');
+        } catch (\Throwable) {
+            $this->error = true;
+            $this->errorMessage = 'Fichier invalide ou chiffré avec une autre clé.';
+        }
+    }
 
     public function import(ImportService $importer): void
     {

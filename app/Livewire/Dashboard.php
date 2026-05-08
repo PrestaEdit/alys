@@ -21,6 +21,7 @@ class Dashboard extends Component
     public string $treatmentEndLabel = '';
     public string $exportError = '';
     public bool $exportLoading = false;
+    public bool $exportSuccess = false;
 
     public function mount(CalendarService $service, ActiveProfile $activeProfile): void
     {
@@ -47,6 +48,7 @@ class Dashboard extends Component
     public function export(ExportService $exportService): void
     {
         $this->exportError = '';
+        $this->exportSuccess = false;
         $this->exportLoading = true;
 
         try {
@@ -74,6 +76,8 @@ class Dashboard extends Component
                 'Export chiffré du calendrier de traitement',
                 $path
             );
+
+            $this->exportSuccess = true;
         } catch (\Throwable $e) {
             $this->exportError = get_class($e) . ': ' . $e->getMessage() . ' — ' . basename($e->getFile()) . ':' . $e->getLine();
         } finally {

@@ -21,6 +21,12 @@
         </div>
     </div>
 
+    @if($exportSuccess)
+    <div class="bg-green-50 border border-green-200 rounded-2xl p-3 mb-4 text-xs text-green-700">
+        Export prêt — partagez le fichier depuis la fenêtre qui s'est ouverte.
+    </div>
+    @endif
+
     @if($exportError)
     <div class="bg-red-50 border border-red-200 rounded-2xl p-3 mb-4 text-xs text-red-700">
         {{ $exportError }}
