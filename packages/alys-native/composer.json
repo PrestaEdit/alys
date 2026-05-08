@@ -1,0 +1,25 @@
+{
+    "name": "prestaedit/alys-native",
+    "description": "Native Android bridge functions for Alys",
+    "type": "nativephp-plugin",
+    "license": "proprietary",
+    "require": {
+        "php": "^8.2",
+        "nativephp/mobile": "^3.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Prestaedit\\AlysNative\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Prestaedit\\AlysNative\\AlysNativeServiceProvider"
+            ]
+        },
+        "nativephp": {
+            "manifest": "nativephp.json"
+        }
+    }
+}

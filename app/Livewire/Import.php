@@ -2,19 +2,18 @@
 
 namespace App\Livewire;
 
+use App\Events\Native\FileChosen;
 use App\Services\ImportService;
 use Livewire\Component;
-use Livewire\WithFileUploads;
+use Native\Mobile\Attributes\OnNative;
 use Native\Mobile\Facades\SecureStorage;
 
 class Import extends Component
 {
-    use WithFileUploads;
-
-    public $file = null;
     public bool $error = false;
     public string $errorMessage = '';
-    public bool $autoImporting = false;
+    public bool $picking = false;
+    public bool $importing = false;
     public bool $success = false;
 
     public function mount(ImportService $importer): void
@@ -24,7 +23,7 @@ class Import extends Component
             return;
         }
 
-        $this->autoImporting = true;
+        $this->importing = true;
 
         $content = base64_decode($alysData, true);
         if ($content === false || $content === '') {
@@ -33,43 +32,59 @@ class Import extends Component
             return;
         }
 
+        $this->doImport($importer, $content);
+    }
+
+    public function pickFile(): void
+    {
+        $this->error = false;
+        $this->picking = true;
+
+        if (function_exists('nativephp_call')) {
+            nativephp_call('FilePicker.Pick', json_encode([
+                'mime' => 'application/octet-stream',
+                'event' => FileChosen::class,
+            ]));
+        }
+    }
+
+    #[OnNative(FileChosen::class)]
+    public function handleFileChosen(string $filename, string $content, ImportService $importer): void
+    {
+        $this->picking = false;
+        $this->importing = true;
+
+        $rawContent = base64_decode($content, true);
+        if ($rawContent === false || $rawContent === '') {
+            $this->error = true;
+            $this->errorMessage = 'Fichier reçu invalide.';
+            $this->importing = false;
+            return;
+        }
+
+        $this->doImport($importer, $rawContent);
+    }
+
+    private function doImport(ImportService $importer, string $content): void
+    {
         $key = SecureStorage::get('device_key');
+
         if ($key === null) {
             $this->error = true;
             $this->errorMessage = 'Clés de chiffrement introuvables. Effectuez un transfert de clés depuis votre ancien appareil.';
+            $this->importing = false;
             return;
         }
 
         try {
             $importer->restore($content, $key);
             $this->success = true;
+            $this->importing = false;
             $this->dispatch('import-complete');
         } catch (\Throwable) {
             $this->error = true;
             $this->errorMessage = 'Fichier invalide ou chiffré avec une autre clé.';
-        }
-    }
-
-    public function import(ImportService $importer): void
-    {
-        $this->validate(['file' => 'required|file|max:10240']);
-
-        $key = SecureStorage::get('device_key');
-
-        if ($key === null) {
-            $this->error = true;
-            $this->errorMessage = 'Clés de chiffrement introuvables. Effectuez un transfert de clés depuis votre ancien appareil.';
-            return;
-        }
-
-        try {
-            $content = file_get_contents($this->file->getRealPath());
-            $importer->restore($content, $key);
-            $this->dispatch('import-complete');
-            $this->redirectRoute('home');
-        } catch (\Throwable $e) {
-            $this->error = true;
-            $this->errorMessage = 'Fichier invalide ou chiffré avec une autre clé.';
+            $this->importing = false;
         }
     }
 

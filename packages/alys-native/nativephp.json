@@ -1,0 +1,10 @@
+{
+    "namespace": "AlysNative",
+    "bridge_functions": [
+        {
+            "name": "FilePicker.Pick",
+            "android": "app.prestaedit.alys.filepicker.FilePickerFunctions.Pick",
+            "description": "Pick a file and return its base64 content as a native event"
+        }
+    ]
+}

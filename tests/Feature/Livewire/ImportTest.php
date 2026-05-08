@@ -1,11 +1,11 @@
 <?php
 
+use App\Events\Native\FileChosen;
 use App\Livewire\Import;
 use App\Services\CryptoService;
 use App\Services\ExportService;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\UploadedFile;
 use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
@@ -16,7 +16,7 @@ it('renders import component', function () {
     Livewire::test(Import::class)->assertStatus(200);
 });
 
-it('imports successfully with valid alys file', function () {
+it('imports successfully via FileChosen event', function () {
     $crypto = new CryptoService();
     $key    = $crypto->generateKey();
     $alys   = (new ExportService())->generateEncrypted($key);
@@ -25,11 +25,9 @@ it('imports successfully with valid alys file', function () {
         ->with('device_key')
         ->andReturn($key);
 
-    $file = UploadedFile::fake()->createWithContent('backup.alys', $alys);
-
     Livewire::test(Import::class)
-        ->set('file', $file)
-        ->call('import')
+        ->dispatch('native:' . FileChosen::class, filename: 'backup.alys', content: base64_encode($alys))
+        ->assertSet('success', true)
         ->assertDispatched('import-complete');
 });
 
@@ -38,11 +36,8 @@ it('shows error on invalid alys file', function () {
         ->with('device_key')
         ->andReturn((new CryptoService())->generateKey());
 
-    $file = UploadedFile::fake()->createWithContent('bad.alys', 'not-valid-json');
-
     Livewire::test(Import::class)
-        ->set('file', $file)
-        ->call('import')
+        ->dispatch('native:' . FileChosen::class, filename: 'bad.alys', content: base64_encode('not-valid-json'))
         ->assertSet('error', true);
 });
 
@@ -51,10 +46,7 @@ it('shows error when key is missing', function () {
         ->with('device_key')
         ->andReturn(null);
 
-    $file = UploadedFile::fake()->createWithContent('backup.alys', '{}');
-
     Livewire::test(Import::class)
-        ->set('file', $file)
-        ->call('import')
+        ->dispatch('native:' . FileChosen::class, filename: 'backup.alys', content: base64_encode('{}'))
         ->assertSet('error', true);
 });

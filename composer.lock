@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "21c06cd2a15a28e7882f9c0364417e47",
+    "content-hash": "ed4e1c0ca5ed57a119234cbb7f6b75b9",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -3130,6 +3130,42 @@
                 }
             ],
             "time": "2025-12-27T19:41:33+00:00"
+        },
+        {
+            "name": "prestaedit/alys-native",
+            "version": "dev-master",
+            "dist": {
+                "type": "path",
+                "url": "packages/alys-native",
+                "reference": "2cdaec822883914bbd35ae9a7c6270cd81daacd8"
+            },
+            "require": {
+                "nativephp/mobile": "^3.0",
+                "php": "^8.2"
+            },
+            "type": "nativephp-plugin",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Prestaedit\\AlysNative\\AlysNativeServiceProvider"
+                    ]
+                },
+                "nativephp": {
+                    "manifest": "nativephp.json"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Prestaedit\\AlysNative\\": "src/"
+                }
+            },
+            "license": [
+                "proprietary"
+            ],
+            "description": "Native Android bridge functions for Alys",
+            "transport-options": {
+                "relative": true
+            }
         },
         {
             "name": "psr/clock",
@@ -10404,7 +10440,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "prestaedit/alys-native": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

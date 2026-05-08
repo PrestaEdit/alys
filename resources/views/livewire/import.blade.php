@@ -24,30 +24,26 @@
                 Retour à l'accueil
             </a>
         </div>
-    @elseif($autoImporting && !$error)
+    @elseif($importing)
         <div class="bg-white rounded-2xl p-5 shadow-sm text-center">
             <p class="text-sm text-slate-600">Importation en cours…</p>
         </div>
     @else
         <div class="bg-white rounded-2xl p-5 shadow-sm">
-            <p class="text-sm text-slate-600 mb-4">
-                Ouvrez un fichier <strong>.alys</strong> depuis votre messagerie ou gestionnaire de fichiers,
-                ou sélectionnez-le ci-dessous.
+            <p class="text-sm text-slate-600 mb-5">
+                Sélectionnez votre fichier <strong>.alys</strong> depuis votre gestionnaire de fichiers ou
+                messagerie.
             </p>
 
-            <label class="block">
-                <span class="sr-only">Fichier .alys</span>
-                <input type="file"
-                       wire:model="file"
-                       accept=".alys"
-                       class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-            </label>
-
-            <button wire:click="import"
+            <button wire:click="pickFile"
                     wire:loading.attr="disabled"
-                    class="mt-4 w-full bg-blue-600 text-white font-semibold py-3 rounded-2xl disabled:opacity-50">
-                <span wire:loading.remove>Importer</span>
-                <span wire:loading>Importation…</span>
+                    class="w-full bg-blue-600 text-white font-semibold py-3 rounded-2xl disabled:opacity-50">
+                @if($picking)
+                    Sélection en cours…
+                @else
+                    <span wire:loading.remove wire:target="pickFile">Sélectionner un fichier .alys</span>
+                    <span wire:loading wire:target="pickFile">Ouverture…</span>
+                @endif
             </button>
         </div>
     @endif
