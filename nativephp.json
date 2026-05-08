@@ -2,5 +2,12 @@
     "php": {
         "version": "8.4",
         "icu": false
-    }
+    },
+    "bridge_functions": [
+        {
+            "name": "Share.File",
+            "android": "com.prestaedit.alexis.share.ShareFunctions.File",
+            "description": "Share a file via Android share intent"
+        }
+    ]
 }
