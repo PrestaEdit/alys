@@ -11,5 +11,5 @@ sed -i '' "s/'number' => $CURRENT/'number' => $NEW/" "$CONFIG"
 sed -i '' "s/versionCode = $CURRENT/versionCode = $NEW/" "$GRADLE"
 
 echo "Build bumped: $CURRENT → $NEW"
-git add "$CONFIG" "$GRADLE"
+git add "$CONFIG"
 git commit -m "chore: bump build to $NEW"
