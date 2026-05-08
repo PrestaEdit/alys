@@ -60,7 +60,8 @@ class Dashboard extends Component
             $envelope = $exportService->generateEncrypted($key);
 
             $filename = 'alys-traitement-' . now()->format('Y-m-d') . '.alys';
-            $path     = storage_path('app/' . $filename);
+            $tempDir  = config('nativephp-internal.tempdir') ?: sys_get_temp_dir();
+            $path     = rtrim($tempDir, '/') . '/' . $filename;
             $written  = file_put_contents($path, $envelope);
 
             if ($written === false) {
