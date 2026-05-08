@@ -9,5 +9,11 @@
             "android": "com.prestaedit.alexis.share.ShareFunctions.File",
             "description": "Share a file via Android share intent"
         }
-    ]
+    ],
+    "android": {
+        "permissions": [
+            "android.permission.CAMERA",
+            "android.permission.VIBRATE"
+        ]
+    }
 }
