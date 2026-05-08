@@ -2,18 +2,5 @@
     "php": {
         "version": "8.4",
         "icu": false
-    },
-    "bridge_functions": [
-        {
-            "name": "Share.File",
-            "android": "app.prestaedit.alys.share.ShareFunctions.File",
-            "description": "Share a file via Android share intent"
-        }
-    ],
-    "android": {
-        "permissions": [
-            "android.permission.CAMERA",
-            "android.permission.VIBRATE"
-        ]
     }
 }

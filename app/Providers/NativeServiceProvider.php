@@ -36,6 +36,8 @@ class NativeServiceProvider extends ServiceProvider
         return [
             \Native\Mobile\Providers\ScannerServiceProvider::class,
             \Native\Mobile\Providers\SecureStorageServiceProvider::class,
+            \Native\Mobile\Providers\ShareServiceProvider::class,
+        
         ];
     }
 }
