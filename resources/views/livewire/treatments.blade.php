@@ -30,7 +30,6 @@
                         Modifier
                     </a>
                     <button wire:click="archive({{ $treatment->id }})"
-                            wire:confirm="Archiver ce traitement ?"
                             class="text-xs text-slate-400 font-semibold border border-slate-200 rounded-xl px-2.5 py-1.5 bg-slate-50 hover:bg-slate-100 transition-colors">
                         Archiver
                     </button>
