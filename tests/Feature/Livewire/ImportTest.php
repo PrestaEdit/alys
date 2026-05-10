@@ -84,7 +84,10 @@ it('cancelPreview resets to idle', function () {
         ->assertSet('previewing', true)
         ->call('cancelPreview')
         ->assertSet('previewing', false)
-        ->assertSet('previewData', []);
+        ->assertSet('previewData', [])
+        ->assertSet('selectedProfiles', [])
+        ->assertSet('selectedTreatments', [])
+        ->assertSessionMissing('alys_pending');
 });
 
 it('toggleProfile deselects profile and its treatments', function () {
@@ -94,7 +97,8 @@ it('toggleProfile deselects profile and its treatments', function () {
     $component = Livewire::test(Import::class)
         ->dispatch('native:' . FileChosen::class, filename: 'backup.alys', content: base64_encode($alys));
 
-    $previewData    = $component->get('previewData');
+    $previewData = $component->get('previewData');
+    expect($previewData)->not->toBeEmpty();
     $firstProfileId = $previewData[0]['old_id'];
 
     $component->call('toggleProfile', $firstProfileId);
