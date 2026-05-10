@@ -62,12 +62,12 @@ class ImportService
         $this->importEvents($data['calendar_events'], $profileIdMap, $selectedTreatments);
     }
 
-    private function isSelected(array $item, ?array $selectedTreatments): bool
+    private function isSelected(array $item, ?array $selectedTreatments, string $nameKey = 'name'): bool
     {
         if ($selectedTreatments === null) {
             return true;
         }
-        $key = ($item['profile_id'] ?? 0) . ':' . $item['name'];
+        $key = ($item['profile_id'] ?? 0) . ':' . $item[$nameKey];
         return in_array($key, $selectedTreatments, true);
     }
 
@@ -146,11 +146,8 @@ class ImportService
     private function importHistory(array $history, array $profileIdMap, ?array $selectedTreatments): void
     {
         foreach ($history as $h) {
-            if ($selectedTreatments !== null) {
-                $key = ($h['profile_id'] ?? 0) . ':' . $h['treatment_name'];
-                if (! in_array($key, $selectedTreatments, true)) {
-                    continue;
-                }
+            if (! $this->isSelected($h, $selectedTreatments, 'treatment_name')) {
+                continue;
             }
 
             $profileId = $this->resolveProfileId($h, $profileIdMap);
@@ -181,11 +178,8 @@ class ImportService
     private function importEvents(array $events, array $profileIdMap, ?array $selectedTreatments): void
     {
         foreach ($events as $e) {
-            if ($selectedTreatments !== null) {
-                $key = ($e['profile_id'] ?? 0) . ':' . $e['treatment_name'];
-                if (! in_array($key, $selectedTreatments, true)) {
-                    continue;
-                }
+            if (! $this->isSelected($e, $selectedTreatments, 'treatment_name')) {
+                continue;
             }
 
             $profileId = $this->resolveProfileId($e, $profileIdMap);

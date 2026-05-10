@@ -111,6 +111,12 @@ it('imports only the selected treatment', function () {
 
     expect(Treatment::withoutGlobalScopes()->count())->toBe(1)
         ->and(Treatment::withoutGlobalScopes()->first()->name)->toBe($first['name']);
+
+    // History should only exist for the imported treatment
+    $importedId = Treatment::withoutGlobalScopes()->first()->id;
+    expect(\App\Models\PosologyHistory::withoutGlobalScopes()
+        ->where('treatment_id', '!=', $importedId)
+        ->count())->toBe(0);
 });
 
 it('does not create profile when no treatment is selected for it', function () {
