@@ -11,6 +11,8 @@
         "laravel/tinker": "^3.0",
         "livewire/livewire": "^3.0",
         "nativephp/mobile": "^3.2",
+        "nativephp/mobile-scanner": "^1.0",
+        "nativephp/mobile-secure-storage": "^1.0",
         "nativephp/mobile-share": "^1.0",
         "prestaedit/alys-native": "^1.0"
     },
@@ -77,5 +79,9 @@
     "repositories": [{
         "type": "path",
         "url": "packages/alys-native"
+    },{
+        "name": "nativephp-plugins",
+        "type": "composer",
+        "url": "https://plugins.nativephp.com"
     }]
 }

@@ -43,6 +43,11 @@ it('shows progress percent between 0 and 100', function () {
 });
 
 it('export runs without error and writes an alys file', function () {
+    $tempDir = config('nativephp-internal.tempdir') ?: sys_get_temp_dir();
+    foreach (glob(rtrim($tempDir, '/') . '/alys-traitement-*.alys') ?: [] as $stale) {
+        unlink($stale);
+    }
+
     $crypto = new \App\Services\CryptoService();
     $key = $crypto->generateKey();
 
@@ -54,7 +59,6 @@ it('export runs without error and writes an alys file', function () {
         ->call('export')
         ->assertStatus(200);
 
-    $tempDir = config('nativephp-internal.tempdir') ?: sys_get_temp_dir();
     $files = glob(rtrim($tempDir, '/') . '/alys-traitement-*.alys');
     expect($files)->not->toBeEmpty();
 
