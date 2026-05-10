@@ -35,6 +35,7 @@ class Import extends Component
         if ($content === false || $content === '') {
             $this->error = true;
             $this->errorMessage = 'Fichier reçu invalide.';
+            $this->importing = false;
             return;
         }
 
@@ -171,19 +172,31 @@ class Import extends Component
         }
     }
 
-    public function confirmImport(): void
+    public function confirmImport(ImportService $importer): void
     {
-        $data = json_decode(session('alys_pending', '{}'), true);
+        $this->error = false;
+
+        $json = session()->pull('alys_pending');
+        if (! $json) {
+            $this->error = true;
+            $this->errorMessage = 'Session expirée. Veuillez recommencer.';
+            return;
+        }
+        try {
+            $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+        } catch (\JsonException) {
+            $this->error = true;
+            $this->errorMessage = 'Données de prévisualisation corrompues.';
+            return;
+        }
 
         try {
-            app(ImportService::class)->restoreFromData($data, $this->selectedTreatments);
+            $importer->restoreFromData($data, $this->selectedTreatments);
         } catch (\Throwable) {
             $this->error = true;
             $this->errorMessage = 'Erreur lors de l\'import. Veuillez réessayer.';
             return;
         }
-
-        session()->forget('alys_pending');
 
         $this->previewing = false;
         $this->previewData = [];
