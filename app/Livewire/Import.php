@@ -21,6 +21,7 @@ class Import extends Component
     public array $previewData = [];
     public array $selectedProfiles = [];
     public array $selectedTreatments = [];
+    public string $exportedAt = '';
 
     public function mount(ImportService $importer, ImportPreviewService $preview): void
     {
@@ -92,6 +93,7 @@ class Import extends Component
 
         session(['alys_pending' => json_encode($data)]);
 
+        $this->exportedAt = $data['exported_at'] ?? '';
         $this->previewData = $preview->preview($data);
 
         // Initialize selections — all checked by default
@@ -215,6 +217,7 @@ class Import extends Component
         $this->previewData = [];
         $this->selectedProfiles = [];
         $this->selectedTreatments = [];
+        $this->exportedAt = '';
     }
 
     public function render(): \Illuminate\View\View
