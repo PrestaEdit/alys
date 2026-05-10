@@ -21,16 +21,18 @@ class ImportPreviewService
 
     public function preview(array $data): array
     {
-        $profiles = $data['profiles'] ?? null;
+        $profiles   = $data['profiles'] ?? null;
+        $treatments = $data['treatments'] ?? [];
 
         if ($profiles === null) {
-            $profiles = $this->buildLegacyProfiles($data['treatments']);
+            // Legacy: build virtual profile and annotate treatments locally (no mutation of $data)
+            [$profiles, $treatments] = $this->buildLegacyProfiles($treatments);
         }
 
         $result = [];
         foreach ($profiles as $p) {
             $profileTreatments = array_values(array_filter(
-                $data['treatments'],
+                $treatments,
                 fn($t) => ($t['profile_id'] ?? null) === $p['id']
             ));
 
@@ -55,20 +57,21 @@ class ImportPreviewService
         return $result;
     }
 
-    private function buildLegacyProfiles(array &$treatments): array
+    /** @return array{0: array, 1: array} [profiles, annotated treatments] */
+    private function buildLegacyProfiles(array $treatments): array
     {
-        $id = $this->activeProfile->id() ?? 0;
-        $profile = $id ? Profile::find($id) : null;
+        $id      = $this->activeProfile->id() ?? 0;
+        $profile = $id ? Profile::withoutGlobalScopes()->find($id) : null;
 
-        foreach ($treatments as &$t) {
+        $annotated = array_map(function ($t) use ($id) {
             $t['profile_id'] = $id;
-        }
+            return $t;
+        }, $treatments);
 
-        return [[
-            'id'    => $id,
-            'name'  => $profile?->name ?? 'Profil actuel',
-            'color' => $profile?->color ?? null,
-        ]];
+        return [
+            [['id' => $id, 'name' => $profile?->name ?? 'Profil actuel', 'color' => $profile?->color ?? null]],
+            $annotated,
+        ];
     }
 
     private function classifyTreatment(array $incoming, string $profileName): array
@@ -136,6 +139,9 @@ class ImportPreviewService
         return Treatment::withoutGlobalScopes()
             ->join('profiles', 'treatments.profile_id', '=', 'profiles.id')
             ->where('profiles.name', $profileName)
+            // An empty $incomingNames array is intentionally falsy: when the file sends no treatments,
+            // the ->when() condition is false and no WHERE NOT IN is added, so all DB treatments are
+            // returned as local_only — correct semantic: every DB treatment is absent from the file.
             ->when($incomingNames, fn($q) => $q->whereNotIn('treatments.name', $incomingNames))
             ->select('treatments.name')
             ->pluck('treatments.name')

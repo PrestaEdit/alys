@@ -126,7 +126,8 @@ it('handles legacy file without profiles section using active profile', function
     $result = $this->service->preview($data);
 
     expect($result)->toHaveCount(1)
-        ->and($result[0]['treatments'])->toHaveCount(1);
+        ->and($result[0]['treatments'])->toHaveCount(1)
+        ->and($result[0]['treatments'][0]['status'])->toBe('new');
 });
 
 function makePreviewData(array $treatments, ?Profile $profile = null): array
