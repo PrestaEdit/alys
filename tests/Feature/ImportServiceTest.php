@@ -83,3 +83,41 @@ it('throws on malformed alys content', function () {
     expect(fn () => (new ImportService(new CryptoService()))->restore('not-json', 'fakekey'))
         ->toThrow(\RuntimeException::class);
 });
+
+it('imports nothing when selectedTreatments is empty array', function () {
+    ['alys' => $alys, 'key' => $key] = makeAlysFile();
+
+    Treatment::withoutGlobalScopes()->forceDelete();
+    \App\Models\PosologyHistory::withoutGlobalScopes()->delete();
+
+    $importer = new ImportService(new CryptoService());
+    $importer->restore($alys, $key, selectedTreatments: []);
+
+    expect(Treatment::withoutGlobalScopes()->count())->toBe(0);
+});
+
+it('imports only the selected treatment', function () {
+    ['alys' => $alys, 'key' => $key] = makeAlysFile();
+
+    $crypto  = new CryptoService();
+    $data    = json_decode($crypto->decrypt($alys, $key), true);
+    $first   = $data['treatments'][0];
+    $keyStr  = ($first['profile_id'] ?? 0) . ':' . $first['name'];
+
+    Treatment::withoutGlobalScopes()->forceDelete();
+
+    $importer = new ImportService(new CryptoService());
+    $importer->restore($alys, $key, selectedTreatments: [$keyStr]);
+
+    expect(Treatment::withoutGlobalScopes()->count())->toBe(1)
+        ->and(Treatment::withoutGlobalScopes()->first()->name)->toBe($first['name']);
+});
+
+it('does not create profile when no treatment is selected for it', function () {
+    ['alys' => $alys, 'key' => $key] = makeAlysFile();
+
+    $importer = new ImportService(new CryptoService());
+    $importer->restore($alys, $key, selectedTreatments: []);
+
+    expect(\App\Models\Profile::count())->toBe(1); // only the seeder profile remains
+});
