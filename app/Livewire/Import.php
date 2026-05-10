@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Events\Native\FileChosen;
+use App\Services\ImportPreviewService;
 use App\Services\ImportService;
 use Livewire\Component;
 use Native\Mobile\Attributes\OnNative;
@@ -16,7 +17,12 @@ class Import extends Component
     public bool $importing = false;
     public bool $success = false;
 
-    public function mount(ImportService $importer): void
+    public bool $previewing = false;
+    public array $previewData = [];
+    public array $selectedProfiles = [];
+    public array $selectedTreatments = [];
+
+    public function mount(ImportService $importer, ImportPreviewService $preview): void
     {
         $alysData = request()->input('alys_data');
         if ($alysData === null) {
@@ -32,7 +38,7 @@ class Import extends Component
             return;
         }
 
-        $this->doImport($importer, $content);
+        $this->doPreview($importer, $preview, $content);
     }
 
     public function pickFile(): void
@@ -49,23 +55,21 @@ class Import extends Component
     }
 
     #[OnNative(FileChosen::class)]
-    public function handleFileChosen(string $filename, string $content, ImportService $importer): void
+    public function handleFileChosen(string $filename, string $content, ImportService $importer, ImportPreviewService $preview): void
     {
         $this->picking = false;
-        $this->importing = true;
 
         $rawContent = base64_decode($content, true);
         if ($rawContent === false || $rawContent === '') {
             $this->error = true;
             $this->errorMessage = 'Fichier reçu invalide.';
-            $this->importing = false;
             return;
         }
 
-        $this->doImport($importer, $rawContent);
+        $this->doPreview($importer, $preview, $rawContent);
     }
 
-    private function doImport(ImportService $importer, string $content): void
+    private function doPreview(ImportService $importer, ImportPreviewService $preview, string $content): void
     {
         $key = SecureStorage::get('device_key');
 
@@ -77,15 +81,127 @@ class Import extends Component
         }
 
         try {
-            $importer->restore($content, $key);
-            $this->success = true;
-            $this->importing = false;
-            $this->dispatch('import-complete');
+            $data = $importer->parse($content, $key);
         } catch (\Throwable) {
             $this->error = true;
             $this->errorMessage = 'Fichier invalide ou chiffré avec une autre clé.';
             $this->importing = false;
+            return;
         }
+
+        session(['alys_pending' => json_encode($data)]);
+
+        $this->previewData = $preview->preview($data);
+
+        // Initialize selections — all checked by default
+        $this->selectedProfiles = array_column($this->previewData, 'old_id');
+
+        $this->selectedTreatments = [];
+        foreach ($this->previewData as $profile) {
+            foreach ($profile['treatments'] as $treatment) {
+                $this->selectedTreatments[] = $profile['old_id'] . ':' . $treatment['name'];
+            }
+        }
+
+        $this->previewing = true;
+        $this->importing = false;
+    }
+
+    public function toggleProfile(int $oldId): void
+    {
+        $profileEntry = null;
+        foreach ($this->previewData as $p) {
+            if ($p['old_id'] === $oldId) {
+                $profileEntry = $p;
+                break;
+            }
+        }
+
+        if ($profileEntry === null) {
+            return;
+        }
+
+        $treatmentKeys = array_map(
+            fn($t) => $oldId . ':' . $t['name'],
+            $profileEntry['treatments']
+        );
+
+        if (in_array($oldId, $this->selectedProfiles, true)) {
+            // Uncheck profile and all its treatments
+            $this->selectedProfiles = array_values(array_filter(
+                $this->selectedProfiles,
+                fn($id) => $id !== $oldId
+            ));
+            $this->selectedTreatments = array_values(array_filter(
+                $this->selectedTreatments,
+                fn($key) => ! in_array($key, $treatmentKeys, true)
+            ));
+        } else {
+            // Check profile and all its treatments
+            $this->selectedProfiles = array_values(array_unique([...$this->selectedProfiles, $oldId]));
+            $this->selectedTreatments = array_values(array_unique([...$this->selectedTreatments, ...$treatmentKeys]));
+        }
+    }
+
+    public function toggleTreatment(string $key): void
+    {
+        if (in_array($key, $this->selectedTreatments, true)) {
+            $this->selectedTreatments = array_values(array_filter(
+                $this->selectedTreatments,
+                fn($k) => $k !== $key
+            ));
+        } else {
+            $this->selectedTreatments = array_values(array_unique([...$this->selectedTreatments, $key]));
+        }
+
+        // Recompute selectedProfiles: a profile is selected only if ALL its treatments are selected
+        $this->selectedProfiles = [];
+        foreach ($this->previewData as $profile) {
+            $allSelected = true;
+            foreach ($profile['treatments'] as $treatment) {
+                $tKey = $profile['old_id'] . ':' . $treatment['name'];
+                if (! in_array($tKey, $this->selectedTreatments, true)) {
+                    $allSelected = false;
+                    break;
+                }
+            }
+            if ($allSelected) {
+                $this->selectedProfiles[] = $profile['old_id'];
+            }
+        }
+    }
+
+    public function confirmImport(): void
+    {
+        $data = json_decode(session('alys_pending', '{}'), true);
+
+        try {
+            app(ImportService::class)->restoreFromData($data, $this->selectedTreatments);
+        } catch (\Throwable) {
+            $this->error = true;
+            $this->errorMessage = 'Erreur lors de l\'import. Veuillez réessayer.';
+            return;
+        }
+
+        session()->forget('alys_pending');
+
+        $this->previewing = false;
+        $this->previewData = [];
+        $this->selectedProfiles = [];
+        $this->selectedTreatments = [];
+
+        $this->success = true;
+        $this->dispatch('import-complete');
+    }
+
+    public function cancelPreview(): void
+    {
+        session()->forget('alys_pending');
+
+        $this->previewing = false;
+        $this->previewData = [];
+        $this->selectedProfiles = [];
+        $this->selectedTreatments = [];
     }
 
     public function render(): \Illuminate\View\View
