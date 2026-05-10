@@ -168,7 +168,7 @@ class Import extends Component
                     break;
                 }
             }
-            if ($allSelected) {
+            if ($allSelected && count($profile['treatments']) > 0) {
                 $this->selectedProfiles[] = $profile['old_id'];
             }
         }
@@ -204,6 +204,7 @@ class Import extends Component
         $this->previewData = [];
         $this->selectedProfiles = [];
         $this->selectedTreatments = [];
+        $this->exportedAt = '';
 
         $this->success = true;
         $this->dispatch('import-complete');

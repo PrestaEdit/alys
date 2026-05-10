@@ -159,6 +159,8 @@
         {{-- Action buttons --}}
         <div class="space-y-3">
             <button wire:click="confirmImport"
+                    wire:loading.attr="disabled"
+                    wire:target="confirmImport"
                     @disabled(count($selectedTreatments) === 0)
                     class="w-full bg-blue-600 text-white font-semibold py-3 rounded-2xl text-sm disabled:opacity-50">
                 Importer ({{ count($selectedTreatments) }} traitement{{ count($selectedTreatments) !== 1 ? 's' : '' }})

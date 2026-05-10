@@ -20,7 +20,7 @@ it('generates valid JSON', function () {
 
 it('export contains all required sections', function () {
     $data = json_decode($this->service->generate(), true);
-    expect($data)->toHaveKeys(['settings', 'treatments', 'posology_history', 'calendar_events', 'exported_at']);
+    expect($data)->toHaveKeys(['settings', 'profiles', 'treatments', 'posology_history', 'calendar_events', 'exported_at']);
 });
 
 it('export contains all 8 treatments', function () {
