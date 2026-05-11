@@ -373,7 +373,8 @@ class TreatmentEdit extends Component
 
     public function render(): \Illuminate\View\View
     {
-        $otherTreatments = Treatment::where('id', '!=', $this->treatment->id)
+        $otherTreatments = Treatment::active()
+            ->where('id', '!=', $this->treatment->id)
             ->orderBy('name')
             ->get(['id', 'name', 'commercial_name']);
 
