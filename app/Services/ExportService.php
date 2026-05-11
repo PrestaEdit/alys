@@ -24,7 +24,7 @@ class ExportService
 
         $profileIds = $filtering
             ? $treatmentModels->pluck('profile_id')->unique()->values()->all()
-            : null;
+            : [];
 
         $profilesQuery = Profile::query();
         if ($filtering) {

@@ -73,8 +73,29 @@ it('excludes posology history for unselected treatments', function () {
     $all = json_decode($service->generate(), true);
     expect($all['posology_history'])->not->toBeEmpty();
 
-    // Export with different treatment ID → history excluded
-    $data = json_decode($service->generate([0]), true);
+    // Export with an ID that doesn't match any treatment → history excluded
+    $nonExistentId = \App\Models\Treatment::withoutGlobalScopes()->max('id') + 9999;
+    $data = json_decode($service->generate([$nonExistentId]), true);
     expect($data['posology_history'])->toBeEmpty();
     expect($data['treatments'])->toBeEmpty();
+});
+
+it('excludes calendar events for unselected treatments', function () {
+    $treatment = \App\Models\Treatment::withoutGlobalScopes()->first();
+
+    \App\Models\CalendarEvent::create([
+        'treatment_id'   => $treatment->id,
+        'profile_id'     => $treatment->profile_id,
+        'scheduled_date' => now()->toDateString(),
+        'is_cancelled'   => false,
+    ]);
+
+    $service = new ExportService();
+
+    $all = json_decode($service->generate(), true);
+    expect($all['calendar_events'])->not->toBeEmpty();
+
+    $nonExistentId = \App\Models\Treatment::withoutGlobalScopes()->max('id') + 9999;
+    $data = json_decode($service->generate([$nonExistentId]), true);
+    expect($data['calendar_events'])->toBeEmpty();
 });
