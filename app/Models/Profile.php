@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Profile extends Model
 {
@@ -43,5 +44,10 @@ class Profile extends Model
     public function isArchived(): bool
     {
         return $this->archived_at !== null;
+    }
+
+    public function treatments(): HasMany
+    {
+        return $this->hasMany(Treatment::class);
     }
 }

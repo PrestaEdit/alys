@@ -10,6 +10,7 @@ use App\Livewire\Profiles;
 use App\Livewire\Treatments;
 use App\Livewire\TreatmentEdit;
 use App\Livewire\TreatmentCreate;
+use App\Livewire\Export;
 use App\Livewire\Settings;
 use Illuminate\Support\Facades\Route;
 
@@ -20,6 +21,7 @@ Route::get('/treatments/create', TreatmentCreate::class)->name('treatments.creat
 Route::get('/treatments/{treatment}/edit', TreatmentEdit::class)->name('treatments.edit');
 Route::get('/settings', Settings::class)->name('settings');
 Route::get('/import', Import::class)->name('import');
+Route::get('/export', Export::class)->name('export');
 Route::get('/key-transfer', KeyTransfer::class)->name('key-transfer');
 Route::get('/onboarding', Onboarding::class)->name('onboarding');
 Route::get('/profiles', Profiles::class)->name('profiles');
