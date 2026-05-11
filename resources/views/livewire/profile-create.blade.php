@@ -29,14 +29,14 @@
 
     <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
         <label class="block text-xs font-semibold text-slate-600 mb-1.5">Date de début</label>
-        <input type="date" wire:model="treatmentStart"
-               class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-sky-400">
+        <x-datepicker model="treatmentStart" :value="$treatmentStart" />
         @error('treatmentStart')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
 
-        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Date de fin</label>
-        <input type="date" wire:model="treatmentEnd"
-               class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400">
-        @error('treatmentEnd')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+        <div class="mt-3">
+            <label class="block text-xs font-semibold text-slate-600 mb-1.5">Date de fin</label>
+            <x-datepicker model="treatmentEnd" :value="$treatmentEnd" />
+            @error('treatmentEnd')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+        </div>
     </div>
 
     <button wire:click="save"

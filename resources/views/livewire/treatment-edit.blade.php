@@ -192,9 +192,7 @@
 
         <div class="mb-3">
             <label class="block text-xs font-semibold text-slate-600 mb-1.5">Date de début</label>
-            <input type="date"
-                   wire:model="editRecurrenceStart"
-                   class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-400">
+            <x-datepicker model="editRecurrenceStart" :value="$editRecurrenceStart" />
         </div>
 
         <div class="mb-5">
