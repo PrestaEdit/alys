@@ -69,19 +69,33 @@ class Export extends Component
             $this->selectedTreatments = array_values(array_unique([...$this->selectedTreatments, $key]));
         }
 
-        // A profile is selected only if ALL its treatments are selected
-        $profiles = Profile::active()
-            ->with(['treatments' => fn($q) => $q->withoutGlobalScopes()])
-            ->get();
+        // Recompute selectedProfiles: a profile is selected only if ALL its treatments are selected.
+        // We derive this in-memory from $selectedTreatments by checking the affected profile only,
+        // but we still need the total treatment count for that profile — fetch it once.
+        [$profileId] = explode(':', $key);
+        $profileId = (int) $profileId;
 
-        $this->selectedProfiles = [];
-        foreach ($profiles as $profile) {
-            $allSelected = $profile->treatments->every(
-                fn($t) => in_array($profile->id . ':' . $t->id, $this->selectedTreatments, true)
-            );
-            if ($allSelected && $profile->treatments->isNotEmpty()) {
-                $this->selectedProfiles[] = $profile->id;
+        $profile = Profile::active()
+            ->with(['treatments' => fn($q) => $q->withoutGlobalScopes()])
+            ->find($profileId);
+
+        if (! $profile) {
+            return;
+        }
+
+        $allSelectedForProfile = $profile->treatments->every(
+            fn($t) => in_array($profile->id . ':' . $t->id, $this->selectedTreatments, true)
+        );
+
+        if ($allSelectedForProfile && $profile->treatments->isNotEmpty()) {
+            if (! in_array($profileId, $this->selectedProfiles, true)) {
+                $this->selectedProfiles = array_values(array_unique([...$this->selectedProfiles, $profileId]));
             }
+        } else {
+            $this->selectedProfiles = array_values(array_filter(
+                $this->selectedProfiles,
+                fn($id) => $id !== $profileId
+            ));
         }
     }
 
@@ -119,7 +133,8 @@ class Export extends Component
             session()->flash('export_success', true);
             $this->redirect(route('home'), navigate: true);
         } catch (\Throwable $e) {
-            $this->exportError = get_class($e) . ': ' . $e->getMessage();
+            report($e);
+            $this->exportError = 'Erreur inattendue. Veuillez réessayer.';
         } finally {
             $this->exporting = false;
         }
