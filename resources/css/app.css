@@ -4,3 +4,10 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer utilities {
+    /* Ensure the Preline datepicker popup renders above the bottom nav (z-50) */
+    .hs-datepicker [data-vc=calendar][data-vc-input] {
+        z-index: 9999;
+    }
+}
