@@ -336,7 +336,7 @@ class TreatmentCreate extends Component
 
     public function render(): \Illuminate\View\View
     {
-        $otherTreatments = Treatment::orderBy('name')->get(['id', 'name', 'commercial_name']);
+        $otherTreatments = Treatment::active()->orderBy('name')->get(['id', 'name', 'commercial_name']);
 
         return view('livewire.treatment-create', [
             'colors'          => self::COLORS,
