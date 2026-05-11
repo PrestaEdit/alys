@@ -28,10 +28,14 @@
                 @endforeach
             </div>
 
-            <input type="date" wire:model="editStart"
-                   class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm mb-2 focus:outline-none focus:ring-2 focus:ring-sky-400">
-            <input type="date" wire:model="editEnd"
-                   class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-sky-400">
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Date de début</label>
+            <div class="mb-2">
+                <x-datepicker model="editStart" :value="$editStart" />
+            </div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Date de fin</label>
+            <div class="mb-3">
+                <x-datepicker model="editEnd" :value="$editEnd" />
+            </div>
             @error('editEnd')<p class="text-xs text-red-500 mb-2">{{ $message }}</p>@enderror
 
             <div class="flex gap-2">

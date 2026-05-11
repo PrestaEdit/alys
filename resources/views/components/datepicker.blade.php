@@ -27,7 +27,7 @@ if ($value) {
         });
     "
 >
-    <div class="relative" data-hs-datepicker='@json($dpOptions)'>
+    <div class="hs-datepicker relative" data-hs-datepicker='@json($dpOptions)'>
         <input
             type="text"
             placeholder="{{ $placeholder }}"
