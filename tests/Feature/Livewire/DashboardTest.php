@@ -42,31 +42,9 @@ it('shows progress percent between 0 and 100', function () {
     expect($component->get('progressPercent'))->toBeLessThanOrEqual(100);
 });
 
-it('export runs without error and writes an alys file', function () {
-    $tempDir = config('nativephp-internal.tempdir') ?: sys_get_temp_dir();
-    foreach (glob(rtrim($tempDir, '/') . '/alys-traitement-*.alys') ?: [] as $stale) {
-        unlink($stale);
-    }
-
-    $crypto = new \App\Services\CryptoService();
-    $key = $crypto->generateKey();
-
-    \Native\Mobile\Facades\SecureStorage::shouldReceive('get')
-        ->with('device_key')
-        ->andReturn($key);
+it('shows export_success flash banner when session is set', function () {
+    session()->flash('export_success', true);
 
     Livewire::test(Dashboard::class)
-        ->call('export')
-        ->assertStatus(200);
-
-    $files = glob(rtrim($tempDir, '/') . '/alys-traitement-*.alys');
-    expect($files)->not->toBeEmpty();
-
-    $envelope = json_decode(file_get_contents($files[0]), true);
-    expect($envelope)->toHaveKeys(['v', 'iv', 'tag', 'ct']);
-    expect($envelope['v'])->toBe(2);
-
-    $json = $crypto->decrypt(file_get_contents($files[0]), $key);
-    $data = json_decode($json, true);
-    expect($data)->toHaveKeys(['settings', 'treatments', 'posology_history', 'calendar_events', 'exported_at']);
+        ->assertSee('Export réussi');
 });

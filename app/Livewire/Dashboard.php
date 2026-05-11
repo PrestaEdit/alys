@@ -4,7 +4,6 @@ namespace App\Livewire;
 
 use App\Services\ActiveProfile;
 use App\Services\CalendarService;
-use App\Services\ExportService;
 use Carbon\Carbon;
 use Livewire\Component;
 
@@ -19,9 +18,6 @@ class Dashboard extends Component
     public string $patientName = '';
     public string $treatmentStartLabel = '';
     public string $treatmentEndLabel = '';
-    public string $exportError = '';
-    public bool $exportLoading = false;
-    public bool $exportSuccess = false;
 
     public function mount(CalendarService $service, ActiveProfile $activeProfile): void
     {
@@ -43,46 +39,6 @@ class Dashboard extends Component
         $end   = $profile?->treatment_end;
         $this->treatmentStartLabel = $start?->locale('fr')->isoFormat('D MMM YYYY') ?? '';
         $this->treatmentEndLabel   = $end?->locale('fr')->isoFormat('D MMM YYYY') ?? '';
-    }
-
-    public function export(ExportService $exportService): void
-    {
-        $this->exportError = '';
-        $this->exportSuccess = false;
-        $this->exportLoading = true;
-
-        try {
-            $key = \Native\Mobile\Facades\SecureStorage::get('device_key');
-
-            if ($key === null) {
-                $this->exportError = 'Clés non initialisées. Allez dans Réglages > Transfert de clés.';
-                return;
-            }
-
-            $envelope = $exportService->generateEncrypted($key);
-
-            $filename = 'alys-traitement-' . now()->format('Y-m-d') . '.alys';
-            $tempDir  = config('nativephp-internal.tempdir') ?: sys_get_temp_dir();
-            $path     = rtrim($tempDir, '/') . '/' . $filename;
-            $written  = file_put_contents($path, $envelope);
-
-            if ($written === false) {
-                $this->exportError = 'Impossible d\'écrire dans : ' . $path;
-                return;
-            }
-
-            \Native\Mobile\Facades\Share::file(
-                'Alys Traitement',
-                'Export chiffré du calendrier de traitement',
-                $path
-            );
-
-            $this->exportSuccess = true;
-        } catch (\Throwable $e) {
-            $this->exportError = get_class($e) . ': ' . $e->getMessage() . ' — ' . basename($e->getFile()) . ':' . $e->getLine();
-        } finally {
-            $this->exportLoading = false;
-        }
     }
 
     public function render(): \Illuminate\View\View
