@@ -26,6 +26,7 @@ class ExportService
             ? $treatmentModels->pluck('profile_id')->unique()->values()->all()
             : [];
 
+        // Profile has no global scope; Profile::query() already spans all profiles.
         $profilesQuery = Profile::query();
         if ($filtering) {
             $profilesQuery->whereIn('id', $profileIds);

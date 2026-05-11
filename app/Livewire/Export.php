@@ -12,7 +12,6 @@ class Export extends Component
 {
     public array $selectedProfiles = [];
     public array $selectedTreatments = [];
-    public bool $exporting = false;
     public string $exportError = '';
 
     public function mount(): void
@@ -102,7 +101,6 @@ class Export extends Component
     public function export(ExportService $exportService): void
     {
         $this->exportError = '';
-        $this->exporting   = true;
 
         try {
             $key = SecureStorage::get('device_key');
@@ -135,8 +133,6 @@ class Export extends Component
         } catch (\Throwable $e) {
             report($e);
             $this->exportError = 'Erreur inattendue. Veuillez réessayer.';
-        } finally {
-            $this->exporting = false;
         }
     }
 
