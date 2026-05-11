@@ -139,7 +139,7 @@
                         <details class="border-t border-slate-100">
                             <summary class="px-4 py-3 text-xs text-slate-400 cursor-pointer list-none flex items-center gap-1">
                                 <span>▸</span>
-                                <span>{{ count($profile['local_only']) }} traitement{{ count($profile['local_only']) !== 1 ? 's' : '' }} local{{ count($profile['local_only']) !== 1 ? 'aux' : '' }} non inclus dans le fichier</span>
+                                <span>{{ count($profile['local_only']) }} traitement{{ count($profile['local_only']) !== 1 ? 's' : '' }} loc{{ count($profile['local_only']) !== 1 ? 'aux' : 'al' }} non inclus dans le fichier</span>
                             </summary>
                             <div class="divide-y divide-slate-50">
                                 @foreach($profile['local_only'] as $localTreatment)
