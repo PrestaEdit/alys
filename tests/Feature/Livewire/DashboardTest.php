@@ -42,9 +42,7 @@ it('shows progress percent between 0 and 100', function () {
     expect($component->get('progressPercent'))->toBeLessThanOrEqual(100);
 });
 
-it('shows export_success flash banner when session is set', function () {
-    session()->flash('export_success', true);
-
+it('does not show export banner on dashboard', function () {
     Livewire::test(Dashboard::class)
-        ->assertSee('Export réussi');
+        ->assertDontSee('Export réussi');
 });

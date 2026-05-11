@@ -9,6 +9,18 @@
         <h1 class="text-xl font-extrabold text-slate-900">Exporter</h1>
     </div>
 
+    @if($success)
+        <div class="bg-green-50 border border-green-200 rounded-2xl p-5 shadow-sm text-center">
+            <p class="text-2xl mb-2">✓</p>
+            <p class="text-sm font-semibold text-green-800">Export réussi !</p>
+            <p class="text-xs text-green-600 mt-1">Partagez ou enregistrez le fichier depuis la fenêtre ouverte.</p>
+            <a href="{{ route('home') }}" wire:navigate
+               class="mt-4 inline-block bg-green-600 text-white font-semibold py-2 px-6 rounded-2xl text-sm">
+                Retour à l'accueil
+            </a>
+        </div>
+    @else
+
     @if($exportError)
         <div class="bg-red-50 border border-red-200 rounded-2xl p-4 mb-4">
             <p class="text-sm text-red-700">{{ $exportError }}</p>
@@ -83,5 +95,7 @@
         </span>
         <span wire:loading wire:target="export">Export en cours…</span>
     </button>
+
+    @endif
 
 </div>

@@ -94,15 +94,14 @@ it('export button is disabled when no treatments selected', function () {
     $component->assertSet('selectedTreatments', []);
 });
 
-it('export calls Share and redirects to home with flash on success', function () {
+it('export calls Share and sets success state', function () {
     mockExportStorageKey();
     \Native\Mobile\Facades\Share::shouldReceive('file')->once();
 
     $component = Livewire::test(Export::class);
     $component->call('export');
 
-    $component->assertRedirect(route('home'));
-    expect(session('export_success'))->toBeTrue();
+    $component->assertSet('success', true);
 });
 
 it('export sets error when key is missing', function () {

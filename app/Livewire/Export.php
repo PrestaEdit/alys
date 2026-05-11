@@ -12,6 +12,7 @@ class Export extends Component
 {
     public array $selectedProfiles = [];
     public array $selectedTreatments = [];
+    public bool $success = false;
     public string $exportError = '';
 
     public function mount(): void
@@ -128,11 +129,9 @@ class Export extends Component
 
             Share::file('Alys Traitement', 'Export chiffré du calendrier de traitement', $path);
 
-            session()->flash('export_success', true);
-            $this->redirect(route('home'), navigate: true);
+            $this->success = true;
         } catch (\Throwable $e) {
             report($e);
-            // TODO: revert to generic message once root cause confirmed
             $this->exportError = get_class($e) . ': ' . $e->getMessage();
         }
     }

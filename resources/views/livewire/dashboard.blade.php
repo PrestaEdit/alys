@@ -17,12 +17,6 @@
         </div>
     </div>
 
-    @if(session('export_success'))
-    <div class="bg-green-50 border border-green-200 rounded-2xl p-3 mb-4 text-xs text-green-700">
-        Export réussi — fichier partagé avec succès.
-    </div>
-    @endif
-
     {{-- Bannière prochain RDV --}}
     @if($nextHospitalDate)
     <div class="rounded-2xl p-4 mb-4 text-white overflow-hidden relative"
