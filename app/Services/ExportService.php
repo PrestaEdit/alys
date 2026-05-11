@@ -63,7 +63,9 @@ class ExportService
             'archived_at'      => $t->archived_at?->toIso8601String(),
         ])->toArray();
 
-        $historyQuery = PosologyHistory::withoutGlobalScopes()->with('treatment')->orderBy('started_at');
+        $historyQuery = PosologyHistory::withoutGlobalScopes()
+            ->with(['treatment' => fn($q) => $q->withoutGlobalScopes()])
+            ->orderBy('started_at');
         if ($filtering) {
             $historyQuery->whereIn('treatment_id', $selectedTreatmentIds);
         }
@@ -78,7 +80,9 @@ class ExportService
             'started_at'     => $h->started_at->toDateString(),
         ])->toArray();
 
-        $eventsQuery = CalendarEvent::withoutGlobalScopes()->with('treatment')->orderBy('scheduled_date');
+        $eventsQuery = CalendarEvent::withoutGlobalScopes()
+            ->with(['treatment' => fn($q) => $q->withoutGlobalScopes()])
+            ->orderBy('scheduled_date');
         if ($filtering) {
             $eventsQuery->whereIn('treatment_id', $selectedTreatmentIds);
         }

@@ -132,7 +132,8 @@ class Export extends Component
             $this->redirect(route('home'), navigate: true);
         } catch (\Throwable $e) {
             report($e);
-            $this->exportError = 'Erreur inattendue. Veuillez réessayer.';
+            // TODO: revert to generic message once root cause confirmed
+            $this->exportError = get_class($e) . ': ' . $e->getMessage();
         }
     }
 
