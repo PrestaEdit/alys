@@ -39,14 +39,14 @@ class TreatmentCreate extends Component
     public ?float $doseNoon = null;
     public ?float $doseEvening = null;
 
+    public int $step = 1;
+
     public const WIDGET_ICONS = ['🏥', '💉', '🔬', '💊', '🧪', '🩺', '🩹', '❤️', '🫀', '🧬'];
 
     public const COLORS = [
         '#3b82f6', '#10b981', '#ef4444', '#8b5cf6',
         '#0ea5e9', '#f97316', '#f59e0b', '#ec4899',
     ];
-
-    public int $step = 1;
 
     // ── Wizard navigation ─────────────────────────────────────────────────
 

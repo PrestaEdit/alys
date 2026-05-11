@@ -75,3 +75,28 @@ it('stepLabel retourne le bon titre', function () {
     $component = Livewire::test(TreatmentCreate::class);
     expect($component->instance()->stepLabel())->toBe('Informations de base');
 });
+
+it('updatedIsMedicalAct resets step when current step becomes inapplicable', function () {
+    Livewire::test(TreatmentCreate::class)
+        ->set('name', 'Test')
+        ->set('type', 'daily')
+        ->set('color', '#3b82f6')
+        ->call('nextStep') // → 2
+        ->call('nextStep') // → 3
+        ->assertSet('step', 3)
+        ->set('isMedicalAct', true) // step 3 no longer applicable
+        ->assertSet('step', 1);
+});
+
+it('updatedType resets step when cyclic step becomes inapplicable', function () {
+    Livewire::test(TreatmentCreate::class)
+        ->set('name', 'Test')
+        ->set('type', 'cyclic')
+        ->set('color', '#3b82f6')
+        ->call('nextStep') // → 2
+        ->call('nextStep') // → 3
+        ->call('nextStep') // → 4
+        ->assertSet('step', 4)
+        ->set('type', 'daily') // step 4 no longer applicable
+        ->assertSet('step', 1);
+});
