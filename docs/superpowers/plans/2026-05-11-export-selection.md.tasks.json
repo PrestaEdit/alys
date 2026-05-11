@@ -1,0 +1,26 @@
+{
+  "planPath": "docs/superpowers/plans/2026-05-11-export-selection.md",
+  "tasks": [
+    {
+      "id": 0,
+      "subject": "Task 1: Add selectedTreatmentIds filter to ExportService",
+      "status": "pending",
+      "description": "**Goal:** Make ExportService::generate() accept an optional list of treatment IDs so only selected data is exported.\n\n**Files:**\n- Modify: `app/Services/ExportService.php`\n- Test: `tests/Feature/ExportServiceTest.php`\n\n**Acceptance Criteria:**\n- [ ] generate() with empty $selectedTreatmentIds produces identical output to the current behaviour\n- [ ] generate(['1','2']) only includes treatments with those IDs, their profiles, posology history, and calendar events\n- [ ] Profiles with no selected treatments are excluded from the export\n- [ ] Settings are always exported in full regardless of filter\n\n**Verify:** `php artisan test tests/Feature/ExportServiceTest.php` → all green\n\n```json:metadata\n{\"files\": [\"app/Services/ExportService.php\", \"tests/Feature/ExportServiceTest.php\"], \"verifyCommand\": \"php artisan test tests/Feature/ExportServiceTest.php\", \"acceptanceCriteria\": [\"generate() with empty filter exports all data\", \"generate() with filter exports only selected treatments and their profiles/history/events\", \"Profiles with no selected treatments are excluded\", \"Settings always exported in full\"]}\n```"
+    },
+    {
+      "id": 1,
+      "subject": "Task 2: Create the Export Livewire component",
+      "status": "pending",
+      "blockedBy": [0],
+      "description": "**Goal:** Build the /export page with profile/treatment selection, cascade logic, and the export action.\n\n**Files:**\n- Create: `app/Livewire/Export.php`\n- Create: `resources/views/livewire/export.blade.php`\n- Modify: `routes/web.php`\n- Test: `tests/Feature/Livewire/ExportTest.php`\n\n**Acceptance Criteria:**\n- [ ] Page loads and shows all active (non-archived) profiles with their treatments, all pre-selected\n- [ ] Archived profiles are not shown\n- [ ] Toggling a profile selects/deselects all its treatments\n- [ ] Toggling a treatment recomputes the parent profile checked state\n- [ ] Export button shows 'Exporter (N traitements)' and is disabled when 0 selected\n- [ ] Summary header shows correct reactive counts\n- [ ] export() calls ExportService::generateEncrypted() with correct treatment IDs\n\n**Verify:** `php artisan test tests/Feature/Livewire/ExportTest.php` → all green\n\n```json:metadata\n{\"files\": [\"app/Livewire/Export.php\", \"resources/views/livewire/export.blade.php\", \"routes/web.php\", \"tests/Feature/Livewire/ExportTest.php\"], \"verifyCommand\": \"php artisan test tests/Feature/Livewire/ExportTest.php\", \"acceptanceCriteria\": [\"Page loads showing active profiles + treatments all pre-selected\", \"Archived profiles not shown\", \"Toggle profile cascades to treatments\", \"Toggle treatment recomputes profile state\", \"Export button disabled when 0 treatments\", \"Successful export redirects to home with flash\"]}\n```"
+    },
+    {
+      "id": 2,
+      "subject": "Task 3: Update Dashboard — replace export button with navigation to /export",
+      "status": "pending",
+      "blockedBy": [1],
+      "description": "**Goal:** The Dashboard export icon navigates to /export instead of triggering export directly. On return, display the export_success flash message.\n\n**Files:**\n- Modify: `resources/views/livewire/dashboard.blade.php`\n- Modify: `app/Livewire/Dashboard.php`\n\n**Acceptance Criteria:**\n- [ ] Export icon navigates to /export with wire:navigate\n- [ ] export() method and related properties removed from Dashboard.php\n- [ ] Dashboard shows success banner when session('export_success') is set\n- [ ] No regression on existing dashboard rendering\n\n**Verify:** `php artisan test` → full suite green\n\n```json:metadata\n{\"files\": [\"resources/views/livewire/dashboard.blade.php\", \"app/Livewire/Dashboard.php\"], \"verifyCommand\": \"php artisan test\", \"acceptanceCriteria\": [\"Export icon is a link to /export\", \"Dashboard.php has no export() method\", \"Flash banner displayed when export_success session key set\", \"Full test suite passes\"]}\n```"
+    }
+  ],
+  "lastUpdated": "2026-05-11T00:00:00Z"
+}
