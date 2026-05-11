@@ -50,7 +50,7 @@ class Import extends Component
 
         if (function_exists('nativephp_call')) {
             nativephp_call('FilePicker.Pick', json_encode([
-                'mime' => 'application/octet-stream',
+                'mime' => '*/*',
                 'event' => FileChosen::class,
             ]));
         }

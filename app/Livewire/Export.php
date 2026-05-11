@@ -2,9 +2,11 @@
 
 namespace App\Livewire;
 
+use App\Events\Native\FileSaved;
 use App\Models\Profile;
 use App\Services\ExportService;
 use Livewire\Component;
+use Native\Mobile\Attributes\OnNative;
 use Native\Mobile\Facades\SecureStorage;
 use Native\Mobile\Facades\Share;
 
@@ -12,6 +14,11 @@ class Export extends Component
 {
     public array $selectedProfiles = [];
     public array $selectedTreatments = [];
+
+    /** Set once the file is generated, before the user chooses share vs. save. */
+    public string $generatedPath = '';
+    public string $generatedFilename = '';
+
     public bool $success = false;
     public string $exportError = '';
 
@@ -70,8 +77,6 @@ class Export extends Component
         }
 
         // Recompute selectedProfiles: a profile is selected only if ALL its treatments are selected.
-        // We derive this in-memory from $selectedTreatments by checking the affected profile only,
-        // but we still need the total treatment count for that profile — fetch it once.
         [$profileId] = explode(':', $key);
         $profileId = (int) $profileId;
 
@@ -99,9 +104,14 @@ class Export extends Component
         }
     }
 
-    public function export(ExportService $exportService): void
+    /**
+     * Generate the encrypted export file and store its path for subsequent share/save actions.
+     */
+    public function generate(ExportService $exportService): void
     {
-        $this->exportError = '';
+        $this->exportError   = '';
+        $this->generatedPath = '';
+        $this->generatedFilename = '';
 
         try {
             $key = SecureStorage::get('device_key');
@@ -123,16 +133,60 @@ class Export extends Component
             $path     = rtrim($tempDir, '/') . '/' . $filename;
 
             if (file_put_contents($path, $envelope) === false) {
-                $this->exportError = 'Impossible d\'écrire dans : ' . $path;
+                $this->exportError = 'Impossible d\'écrire le fichier temporaire.';
                 return;
             }
 
-            Share::file('Alys Traitement', 'Export chiffré du calendrier de traitement', $path);
-
-            $this->success = true;
+            $this->generatedPath     = $path;
+            $this->generatedFilename = $filename;
         } catch (\Throwable $e) {
             report($e);
-            $this->exportError = get_class($e) . ': ' . $e->getMessage();
+            $this->exportError = 'Une erreur est survenue lors de l\'export.';
+        }
+    }
+
+    /**
+     * Open the native share sheet with the already-generated file.
+     */
+    public function share(): void
+    {
+        if ($this->generatedPath === '') {
+            return;
+        }
+
+        Share::file('Alys Traitement', 'Export chiffré du calendrier de traitement', $this->generatedPath);
+        $this->success = true;
+    }
+
+    /**
+     * Open the native "Save to device" document picker with the already-generated file.
+     */
+    public function saveToDevice(): void
+    {
+        if ($this->generatedPath === '') {
+            return;
+        }
+
+        if (function_exists('nativephp_call')) {
+            nativephp_call('FileSaver.Save', json_encode([
+                'filePath' => $this->generatedPath,
+                'filename' => $this->generatedFilename,
+                'event'    => FileSaved::class,
+            ]));
+        }
+    }
+
+    #[OnNative(FileSaved::class)]
+    public function handleFileSaved(bool $success, string $error = ''): void
+    {
+        if ($success) {
+            $this->success = true;
+            $this->generatedPath     = '';
+            $this->generatedFilename = '';
+        } else {
+            if ($error !== 'cancelled') {
+                $this->exportError = 'Impossible d\'enregistrer le fichier.';
+            }
         }
     }
 

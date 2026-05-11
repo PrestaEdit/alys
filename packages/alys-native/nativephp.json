@@ -4,7 +4,14 @@
         {
             "name": "FilePicker.Pick",
             "android": "app.prestaedit.alys.filepicker.FilePickerFunctions.Pick",
+            "ios": "FilePickerFunctions.Pick",
             "description": "Pick a file and return its base64 content as a native event"
+        },
+        {
+            "name": "FileSaver.Save",
+            "android": "app.prestaedit.alys.filesaver.FileSaverFunctions.Save",
+            "ios": "FileSaverFunctions.Save",
+            "description": "Save a file to device storage using the native document picker"
         }
     ],
     "android": {
