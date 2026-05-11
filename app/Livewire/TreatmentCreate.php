@@ -46,6 +46,69 @@ class TreatmentCreate extends Component
         '#0ea5e9', '#f97316', '#f59e0b', '#ec4899',
     ];
 
+    public int $step = 1;
+
+    // ── Wizard navigation ─────────────────────────────────────────────────
+
+    public function applicableSteps(): array
+    {
+        $steps = [1, 2];
+        if (!$this->isMedicalAct) $steps[] = 3;
+        if ($this->type === 'cyclic') $steps[] = 4;
+        $steps[] = 5;
+        return $steps;
+    }
+
+    public function nextStep(): void
+    {
+        $this->validateCurrentStep();
+
+        $applicable    = $this->applicableSteps();
+        $currentIndex  = array_search($this->step, $applicable);
+
+        if ($currentIndex !== false && isset($applicable[$currentIndex + 1])) {
+            $this->step = $applicable[$currentIndex + 1];
+        }
+    }
+
+    public function prevStep(): void
+    {
+        $applicable   = $this->applicableSteps();
+        $currentIndex = array_search($this->step, $applicable);
+
+        if ($currentIndex > 0) {
+            $this->step = $applicable[$currentIndex - 1];
+        }
+    }
+
+    public function stepLabel(): string
+    {
+        return match ($this->step) {
+            1       => 'Informations de base',
+            2       => 'Widget accueil',
+            3       => 'Posologie',
+            4       => 'Récurrence',
+            5       => 'Récapitulatif',
+            default => '',
+        };
+    }
+
+    private function validateCurrentStep(): void
+    {
+        if ($this->step === 1) {
+            $this->validate([
+                'name'  => 'required|string|max:255',
+                'type'  => 'required|in:daily,weekly,cyclic',
+                'color' => 'required|string',
+            ]);
+        } elseif ($this->step === 4) {
+            $this->validate([
+                'frequencyWeeks'  => 'required|integer|min:1',
+                'recurrenceStart' => 'nullable|date',
+            ]);
+        }
+    }
+
     // ── Switch mode ──────────────────────────────────────────────────────
 
     public function updatedDosageMode(string $value): void
@@ -54,6 +117,20 @@ class TreatmentCreate extends Component
             $this->doseMorning ??= 0;
             $this->doseNoon    ??= 0;
             $this->doseEvening ??= 0;
+        }
+    }
+
+    public function updatedIsMedicalAct(): void
+    {
+        if (!in_array($this->step, $this->applicableSteps())) {
+            $this->step = 1;
+        }
+    }
+
+    public function updatedType(): void
+    {
+        if (!in_array($this->step, $this->applicableSteps())) {
+            $this->step = 1;
         }
     }
 
@@ -265,6 +342,8 @@ class TreatmentCreate extends Component
             'colors'          => self::COLORS,
             'widgetIcons'     => self::WIDGET_ICONS,
             'otherTreatments' => $otherTreatments,
+            'applicableSteps' => $this->applicableSteps(),
+            'stepLabel'       => $this->stepLabel(),
         ])->layout('layouts.app', ['title' => 'Nouveau traitement']);
     }
 }
