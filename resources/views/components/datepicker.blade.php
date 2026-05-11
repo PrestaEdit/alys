@@ -17,12 +17,7 @@ if ($value) {
 <div
     class="hs-datepicker relative"
     data-hs-datepicker='@json($dpOptions)'
-    x-init="
-        $el.addEventListener('change.hs.datepicker', (e) => {
-            const dates = e.detail?.selectedDates;
-            $wire.set('{{ $model }}', dates?.length ? dates[0] : '');
-        });
-    "
+    data-livewire-model="{{ $model }}"
 >
     <input
         type="text"
