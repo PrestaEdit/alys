@@ -6,8 +6,9 @@
 @tailwind utilities;
 
 @layer utilities {
-    /* Ensure the Preline datepicker popup renders above the bottom nav (z-50) */
-    .hs-datepicker [data-vc=calendar][data-vc-input] {
+    /* Ensure the Preline datepicker popup renders above the bottom nav (z-50).
+       The calendar is appended to document.body, not inside .hs-datepicker. */
+    [data-vc=calendar][data-vc-input] {
         z-index: 9999;
     }
 }
