@@ -224,7 +224,7 @@
     @endif
 
     {{-- Panel 4 : Posologie actuelle --}}
-    @if($treatment->isDosageEditable())
+    @if(!$editIsMedicalAct)
     <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
         <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-4">Posologie actuelle</p>
 
@@ -320,7 +320,7 @@
     @endif
 
     {{-- Historique --}}
-    @if($treatment->isDosageEditable() && $history->isNotEmpty())
+    @if(!$editIsMedicalAct && $history->isNotEmpty())
     <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
         <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-4">Historique</p>
 
