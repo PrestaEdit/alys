@@ -27,3 +27,6 @@ yarn-error.log
 /credentials/
 /site
 /docs/superpowers
+
+# Standalone plugin repos (installed via Composer VCS)
+/packages/nativephp-android-widgets/
