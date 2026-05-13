@@ -32,12 +32,13 @@ class TreatmentCreate extends Component
     public int $frequencyWeeks = 4;
     public string $recurrenceStart = '';
 
-    // Posology mode: single | dayparts
+    // Posology mode: single | dayparts | interval
     public string $dosageMode = 'single';
     public float $currentDose = 0;
     public ?float $doseMorning = null;
     public ?float $doseNoon = null;
     public ?float $doseEvening = null;
+    public int $timesPerDay = 4;
 
     public int $step = 1;
 
@@ -134,7 +135,7 @@ class TreatmentCreate extends Component
         }
     }
 
-    // ── Single dose ──────────────────────────────────────────────────────
+    // ── Single / interval dose ───────────────────────────────────────────
 
     public function increment(): void
     {
@@ -146,6 +147,16 @@ class TreatmentCreate extends Component
     {
         $step = $this->unit === 'ml' ? 0.1 : 1;
         $this->currentDose = max(0, round($this->currentDose - $step, 2));
+    }
+
+    public function incrementTimesPerDay(): void
+    {
+        $this->timesPerDay = min(24, $this->timesPerDay + 1);
+    }
+
+    public function decrementTimesPerDay(): void
+    {
+        $this->timesPerDay = max(2, $this->timesPerDay - 1);
     }
 
     // ── Day-part doses ───────────────────────────────────────────────────
@@ -242,6 +253,9 @@ class TreatmentCreate extends Component
                 $treatmentData['dose_morning'] = $this->doseMorning;
                 $treatmentData['dose_noon']    = $this->doseNoon;
                 $treatmentData['dose_evening'] = $this->doseEvening;
+            } elseif ($this->dosageMode === 'interval') {
+                $treatmentData['current_dose']  = $this->currentDose;
+                $treatmentData['times_per_day'] = $this->timesPerDay;
             } else {
                 $treatmentData['current_dose'] = $this->currentDose;
             }
@@ -265,6 +279,13 @@ class TreatmentCreate extends Component
                     'dose_noon'    => $this->doseNoon,
                     'dose_evening' => $this->doseEvening,
                     'started_at'   => today()->toDateString(),
+                ]);
+            } elseif ($this->dosageMode === 'interval' && $this->currentDose > 0) {
+                PosologyHistory::create([
+                    'treatment_id'  => $treatment->id,
+                    'dose'          => $this->currentDose,
+                    'times_per_day' => $this->timesPerDay,
+                    'started_at'    => today()->toDateString(),
                 ]);
             } elseif ($this->dosageMode === 'single' && $this->currentDose > 0) {
                 PosologyHistory::create([

@@ -15,7 +15,7 @@ class Treatment extends Model
     protected $fillable = [
         'profile_id',
         'name', 'commercial_name', 'type', 'unit', 'current_dose',
-        'dose_morning', 'dose_noon', 'dose_evening',
+        'dose_morning', 'dose_noon', 'dose_evening', 'times_per_day',
         'color', 'frequency_weeks', 'is_medical_act', 'requires_fasting',
         'day_of_week', 'recurrence_start', 'notes',
         'show_widget', 'widget_icon',
@@ -28,6 +28,7 @@ class Treatment extends Model
         'dose_morning'  => 'decimal:2',
         'dose_noon'     => 'decimal:2',
         'dose_evening'  => 'decimal:2',
+        'times_per_day'    => 'integer',
         'recurrence_start' => 'date',
         'archived_at'      => 'datetime',
         'frequency_weeks'  => 'integer',
@@ -97,6 +98,18 @@ class Treatment extends Model
         return $this->dose_morning !== null
             || $this->dose_noon !== null
             || $this->dose_evening !== null;
+    }
+
+    public function hasIntervalDose(): bool
+    {
+        return $this->times_per_day !== null && $this->times_per_day > 1;
+    }
+
+    public function intervalHours(): ?int
+    {
+        if (!$this->hasIntervalDose() || $this->times_per_day === 0) return null;
+        $h = 24 / $this->times_per_day;
+        return (int) $h === $h ? (int) $h : null;
     }
 
     public function displayName(): string

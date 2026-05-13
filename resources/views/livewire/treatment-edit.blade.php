@@ -229,12 +229,12 @@
         <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-4">Posologie actuelle</p>
 
         {{-- Mode selector --}}
-        <div class="grid grid-cols-2 gap-2 mb-5">
-            @foreach([['single', 'Dose unique'], ['dayparts', 'Matin / Midi / Soir']] as [$val, $lbl])
-            <label class="flex items-center gap-2 px-3 py-2.5 rounded-xl border cursor-pointer transition-colors
+        <div class="grid grid-cols-3 gap-2 mb-5">
+            @foreach([['single', 'Dose unique'], ['dayparts', 'Matin / Midi / Soir'], ['interval', 'Intervalle régulier']] as [$val, $lbl])
+            <label class="flex items-center justify-center px-2 py-2.5 rounded-xl border cursor-pointer transition-colors text-center
                           {{ $dosageMode === $val ? 'border-sky-400 bg-sky-50 text-sky-700' : 'border-slate-200 text-slate-600 hover:border-slate-300' }}">
                 <input type="radio" wire:model.live="dosageMode" value="{{ $val }}" class="hidden">
-                <span class="text-xs font-semibold">{{ $lbl }}</span>
+                <span class="text-xs font-semibold leading-tight">{{ $lbl }}</span>
             </label>
             @endforeach
         </div>
@@ -242,9 +242,9 @@
         @if($dosageMode === 'dayparts')
             {{-- Day-part posology: Matin / Midi / Soir --}}
             @foreach([
-                ['label' => 'Matin',  'prop' => 'newDoseMorning', 'inc' => 'incrementMorning', 'dec' => 'decrementMorning', 'value' => $newDoseMorning],
-                ['label' => 'Midi',   'prop' => 'newDoseNoon',    'inc' => 'incrementNoon',    'dec' => 'decrementNoon',    'value' => $newDoseNoon],
-                ['label' => 'Soir',   'prop' => 'newDoseEvening', 'inc' => 'incrementEvening', 'dec' => 'decrementEvening', 'value' => $newDoseEvening],
+                ['label' => 'Matin',  'inc' => 'incrementMorning', 'dec' => 'decrementMorning', 'value' => $newDoseMorning],
+                ['label' => 'Midi',   'inc' => 'incrementNoon',    'dec' => 'decrementNoon',    'value' => $newDoseNoon],
+                ['label' => 'Soir',   'inc' => 'incrementEvening', 'dec' => 'decrementEvening', 'value' => $newDoseEvening],
             ] as $part)
             <div class="mb-4">
                 <p class="text-xs font-semibold text-slate-500 mb-2">{{ $part['label'] }}</p>
@@ -266,13 +266,46 @@
                         +
                     </button>
                 </div>
-                <input type="number"
-                       wire:model.live="{{ $part['prop'] }}"
-                       step="{{ $treatment->unit === 'ml' ? '0.1' : '1' }}"
-                       min="0"
-                       class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 text-center focus:outline-none focus:ring-2 focus:ring-sky-400 mt-2">
             </div>
             @endforeach
+        @elseif($dosageMode === 'interval')
+            {{-- Dose par prise --}}
+            <p class="text-xs font-semibold text-slate-500 mb-2">Dose par prise</p>
+            <div class="flex items-center gap-4 mb-5">
+                <button wire:click="decrement"
+                        class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 text-xl font-light hover:bg-slate-200 transition-colors flex items-center justify-center">
+                    −
+                </button>
+                <div class="flex-1 text-center">
+                    <p class="text-4xl font-extrabold leading-none" style="color: {{ $treatment->color }};">
+                        {{ number_format($newDose ?? 0, $treatment->unit === 'ml' ? 1 : 0, ',', '') }}
+                    </p>
+                    @if($treatment->unit)
+                    <p class="text-sm text-slate-400 font-medium mt-1">{{ $treatment->unit }} / prise</p>
+                    @endif
+                </div>
+                <button wire:click="increment"
+                        class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 text-xl font-light hover:bg-slate-200 transition-colors flex items-center justify-center">
+                    +
+                </button>
+            </div>
+            {{-- Nombre de prises --}}
+            <p class="text-xs font-semibold text-slate-500 mb-2">Nombre de prises par jour</p>
+            <div class="flex items-center gap-4 mb-2">
+                <button wire:click="decrementTimesPerDay"
+                        class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 text-xl font-light hover:bg-slate-200 transition-colors flex items-center justify-center">
+                    −
+                </button>
+                <div class="flex-1 text-center">
+                    @php $intervalH = $newTimesPerDay > 0 ? round(24 / $newTimesPerDay) : 0; @endphp
+                    <p class="text-4xl font-extrabold leading-none" style="color: {{ $treatment->color }};">{{ $newTimesPerDay }}</p>
+                    <p class="text-sm text-slate-400 font-medium mt-1">× / jour · toutes les {{ $intervalH }}h</p>
+                </div>
+                <button wire:click="incrementTimesPerDay"
+                        class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 text-xl font-light hover:bg-slate-200 transition-colors flex items-center justify-center">
+                    +
+                </button>
+            </div>
         @else
             {{-- Single-dose posology --}}
             <div class="flex items-center gap-4 mb-4">
@@ -291,13 +324,6 @@
                     +
                 </button>
             </div>
-
-            {{-- Direct input --}}
-            <input type="number"
-                   wire:model.live="newDose"
-                   step="{{ $treatment->unit === 'ml' ? '0.1' : '1' }}"
-                   min="0"
-                   class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 text-center focus:outline-none focus:ring-2 focus:ring-sky-400 mb-3">
         @endif
 
         {{-- Note --}}
@@ -334,16 +360,24 @@
                 <div class="flex items-start justify-between">
                     <div>
                         @if($entry->dose_morning !== null || $entry->dose_noon !== null || $entry->dose_evening !== null)
-                            @php
-                                $parts = [];
-                                $decimals = $treatment->unit === 'ml' ? 1 : 0;
-                                if ($entry->dose_morning !== null) $parts[] = number_format($entry->dose_morning, $decimals, ',', '') . ($treatment->unit ? ' ' . $treatment->unit : '') . ' matin';
-                                if ($entry->dose_noon    !== null) $parts[] = number_format($entry->dose_noon,    $decimals, ',', '') . ($treatment->unit ? ' ' . $treatment->unit : '') . ' midi';
-                                if ($entry->dose_evening !== null) $parts[] = number_format($entry->dose_evening, $decimals, ',', '') . ($treatment->unit ? ' ' . $treatment->unit : '') . ' soir';
-                            @endphp
+                            @php $decimals = $treatment->unit === 'ml' ? 1 : 0; @endphp
+                            <div class="{{ $index === 0 ? 'text-slate-800' : 'text-slate-500' }}">
+                                @if($entry->dose_morning !== null)
+                                <p class="text-xs font-semibold">Matin · {{ number_format($entry->dose_morning, $decimals, ',', '') }}{{ $treatment->unit ? ' ' . $treatment->unit : '' }}</p>
+                                @endif
+                                @if($entry->dose_noon !== null)
+                                <p class="text-xs font-semibold">Midi · {{ number_format($entry->dose_noon, $decimals, ',', '') }}{{ $treatment->unit ? ' ' . $treatment->unit : '' }}</p>
+                                @endif
+                                @if($entry->dose_evening !== null)
+                                <p class="text-xs font-semibold">Soir · {{ number_format($entry->dose_evening, $decimals, ',', '') }}{{ $treatment->unit ? ' ' . $treatment->unit : '' }}</p>
+                                @endif
+                            </div>
+                        @elseif($entry->times_per_day)
+                            @php $intervalH = $entry->times_per_day > 0 ? round(24 / $entry->times_per_day) : 0; @endphp
                             <p class="text-sm font-bold {{ $index === 0 ? 'text-slate-800' : 'text-slate-500' }}">
-                                {{ implode(' · ', $parts) }}
+                                {{ number_format($entry->dose ?? 0, $treatment->unit === 'ml' ? 1 : 0, ',', '') }} {{ $treatment->unit }} / prise
                             </p>
+                            <p class="text-xs {{ $index === 0 ? 'text-slate-500' : 'text-slate-400' }}">{{ $entry->times_per_day }}×/jour · toutes les {{ $intervalH }}h</p>
                         @else
                         <p class="text-sm font-bold {{ $index === 0 ? 'text-slate-800' : 'text-slate-500' }}">
                             {{ number_format($entry->dose ?? 0, $treatment->unit === 'ml' ? 1 : 0, ',', '') }} {{ $treatment->unit }} / {{ $treatment->type === 'daily' ? 'jour' : 'prise' }}

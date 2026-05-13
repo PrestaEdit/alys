@@ -57,27 +57,31 @@
             <div class="flex items-center justify-between">
                 <div>
                     @if($treatment->hasDayPartDoses())
-                        @php
-                            $decimals = $treatment->unit === 'ml' ? 1 : 0;
-                            $parts = [];
-                            if ($treatment->dose_morning !== null) $parts[] = ['val' => number_format((float)$treatment->dose_morning, $decimals, ',', ''), 'lbl' => 'mat.'];
-                            if ($treatment->dose_noon    !== null) $parts[] = ['val' => number_format((float)$treatment->dose_noon,    $decimals, ',', ''), 'lbl' => 'midi'];
-                            if ($treatment->dose_evening !== null) $parts[] = ['val' => number_format((float)$treatment->dose_evening, $decimals, ',', ''), 'lbl' => 'soir'];
-                        @endphp
-                        <div class="flex items-end gap-2">
-                            @foreach($parts as $p)
-                            <div class="text-center">
-                                <p class="text-lg font-extrabold leading-none" style="color: {{ $treatment->color }};">{{ $p['val'] }}</p>
-                                <p class="text-[10px] text-slate-400 font-medium mt-0.5">{{ $p['lbl'] }}</p>
-                            </div>
-                            @if(!$loop->last)
-                            <span class="text-slate-200 font-light text-lg leading-none mb-3">·</span>
+                        @php $decimals = $treatment->unit === 'ml' ? 1 : 0; @endphp
+                        <div class="space-y-0.5">
+                            @if($treatment->dose_morning !== null)
+                            <p class="text-xs font-semibold" style="color: {{ $treatment->color }};">
+                                Matin · {{ number_format((float)$treatment->dose_morning, $decimals, ',', '') }}{{ $treatment->unit ? ' ' . $treatment->unit : '' }}
+                            </p>
                             @endif
-                            @endforeach
-                            @if($treatment->unit)
-                            <p class="text-xs text-slate-400 mb-0.5">{{ $treatment->unit }}</p>
+                            @if($treatment->dose_noon !== null)
+                            <p class="text-xs font-semibold" style="color: {{ $treatment->color }};">
+                                Midi · {{ number_format((float)$treatment->dose_noon, $decimals, ',', '') }}{{ $treatment->unit ? ' ' . $treatment->unit : '' }}
+                            </p>
+                            @endif
+                            @if($treatment->dose_evening !== null)
+                            <p class="text-xs font-semibold" style="color: {{ $treatment->color }};">
+                                Soir · {{ number_format((float)$treatment->dose_evening, $decimals, ',', '') }}{{ $treatment->unit ? ' ' . $treatment->unit : '' }}
+                            </p>
                             @endif
                         </div>
+                    @elseif($treatment->hasIntervalDose())
+                        @php $intervalH = $treatment->times_per_day > 0 ? round(24 / $treatment->times_per_day) : 0; @endphp
+                        <p class="text-xl font-extrabold leading-none" style="color: {{ $treatment->color }};">
+                            {{ number_format((float)$treatment->current_dose, $treatment->unit === 'ml' ? 1 : 0, ',', '') }}
+                            <span class="text-sm font-normal text-slate-400">{{ $treatment->unit }}</span>
+                        </p>
+                        <p class="text-xs text-slate-400 mt-0.5">{{ $treatment->times_per_day }}×/jour · toutes les {{ $intervalH }}h</p>
                     @elseif($treatment->current_dose !== null)
                     <p class="text-xl font-extrabold leading-none" style="color: {{ $treatment->color }};">
                         {{ number_format((float)$treatment->current_dose, $treatment->unit === 'ml' ? 1 : 0, ',', '') }}
