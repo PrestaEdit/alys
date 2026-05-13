@@ -2,6 +2,7 @@ package com.nativephp.androidwidgets
 
 import androidx.fragment.app.FragmentActivity
 import com.nativephp.mobile.bridge.BridgeFunction
+import com.nativephp.mobile.bridge.BridgeResponse
 
 object WidgetFunctions {
 
@@ -14,7 +15,7 @@ object WidgetFunctions {
             WidgetDataStore.save(activity, WidgetData(title = title, content = content, badge = badge))
             NativeWidgetProvider.requestUpdate(activity)
 
-            return emptyMap()
+            return BridgeResponse.success(emptyMap<String, Any>())
         }
     }
 }
