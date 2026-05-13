@@ -12,7 +12,24 @@
         "permissions": [],
         "dependencies": {
             "implementation": []
-        }
+        },
+        "receivers": [
+            {
+                "name": "com.nativephp.androidwidgets.NativeWidgetProvider",
+                "exported": true,
+                "intent-filters": [
+                    {
+                        "action": "android.appwidget.action.APPWIDGET_UPDATE"
+                    }
+                ],
+                "meta-data": [
+                    {
+                        "name": "android.appwidget.provider",
+                        "resource": "@xml/nativephp_widget_info"
+                    }
+                ]
+            }
+        ]
     },
     "ios": {
         "min_version": "18.2"
