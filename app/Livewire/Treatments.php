@@ -4,31 +4,31 @@ namespace App\Livewire;
 
 use App\Models\Treatment;
 use Livewire\Component;
-use Native\Mobile\Attributes\OnNative;
-use Native\Mobile\Events\Alert\ButtonPressed;
-use Native\Mobile\Facades\Dialog;
 
 class Treatments extends Component
 {
     public ?int $pendingArchiveId = null;
+    public bool $showArchiveModal = false;
 
     public function archive(int $id): void
     {
         $this->pendingArchiveId = $id;
-
-        Dialog::alert('Archiver le traitement', 'Ce traitement sera masqué de la liste active. Vous pourrez le désarchiver à tout moment.', ['Annuler', 'Archiver'])
-            ->id('archive-treatment')
-            ->event(ButtonPressed::class)
-            ->show();
+        $this->showArchiveModal = true;
     }
 
-    #[OnNative(ButtonPressed::class)]
-    public function handleArchiveButton(int $index, string $label, ?string $id = null): void
+    public function confirmArchive(): void
     {
-        if ($id === 'archive-treatment' && $label === 'Archiver' && $this->pendingArchiveId !== null) {
+        if ($this->pendingArchiveId !== null) {
             Treatment::findOrFail($this->pendingArchiveId)->archive();
-            $this->pendingArchiveId = null;
         }
+        $this->pendingArchiveId = null;
+        $this->showArchiveModal = false;
+    }
+
+    public function cancelArchive(): void
+    {
+        $this->pendingArchiveId = null;
+        $this->showArchiveModal = false;
     }
 
     public function unarchive(int $id): void

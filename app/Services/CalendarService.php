@@ -113,10 +113,11 @@ class CalendarService
             ];
         }
 
-        // Scheduled calendar events for this day
+        // Scheduled calendar events for this day (excluding archived treatments)
         $calendarEvents = CalendarEvent::with('treatment')
             ->whereDate('scheduled_date', $dateStr)
             ->where('is_cancelled', false)
+            ->whereHas('treatment', fn($q) => $q->whereNull('archived_at'))
             ->get();
 
         foreach ($calendarEvents as $event) {
