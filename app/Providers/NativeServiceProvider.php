@@ -38,6 +38,7 @@ class NativeServiceProvider extends ServiceProvider
             \Native\Mobile\Providers\SecureStorageServiceProvider::class,
             \Native\Mobile\Providers\ShareServiceProvider::class,
             \Prestaedit\AlysNative\AlysNativeServiceProvider::class,
+            \NativePhp\AndroidWidgets\AndroidWidgetsServiceProvider::class,
         ];
     }
 }

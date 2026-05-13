@@ -1,0 +1,20 @@
+{
+    "namespace": "AndroidWidgets",
+    "bridge_functions": [
+        {
+            "name": "Widget.Update",
+            "android": "com.nativephp.androidwidgets.WidgetFunctions.Update",
+            "description": "Update all home screen widgets with new data (title, content, badge)"
+        }
+    ],
+    "android": {
+        "min_version": 26,
+        "permissions": [],
+        "dependencies": {
+            "implementation": []
+        }
+    },
+    "ios": {
+        "min_version": "18.2"
+    }
+}
