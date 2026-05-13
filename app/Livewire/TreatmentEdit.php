@@ -15,11 +15,12 @@ class TreatmentEdit extends Component
     public string $note = '';
     public int $frequencyWeeks = 1;
 
-    // Posology mode: single | dayparts
+    // Posology mode: single | dayparts | interval
     public string $dosageMode = 'single';
 
-    // Single-dose posology
+    // Single / interval dose
     public ?float $newDose = null;
+    public int $newTimesPerDay = 4;
 
     // Day-part posology
     public ?float $newDoseMorning = null;
@@ -60,8 +61,16 @@ class TreatmentEdit extends Component
         $this->frequencyWeeks = $treatment->frequency_weeks ?? 1;
 
         // Posology
-        $this->dosageMode     = $treatment->hasDayPartDoses() ? 'dayparts' : 'single';
+        if ($treatment->hasDayPartDoses()) {
+            $this->dosageMode = 'dayparts';
+        } elseif ($treatment->hasIntervalDose()) {
+            $this->dosageMode = 'interval';
+        } else {
+            $this->dosageMode = 'single';
+        }
+
         $this->newDose        = $treatment->current_dose !== null ? (float) $treatment->current_dose : null;
+        $this->newTimesPerDay = $treatment->times_per_day ?? 4;
         // In dayparts mode, always expose all three fields (null → 0 so the row is interactive)
         $this->newDoseMorning = $treatment->dose_morning !== null ? (float) $treatment->dose_morning : ($this->dosageMode === 'dayparts' ? 0 : null);
         $this->newDoseNoon    = $treatment->dose_noon    !== null ? (float) $treatment->dose_noon    : ($this->dosageMode === 'dayparts' ? 0 : null);
@@ -111,6 +120,18 @@ class TreatmentEdit extends Component
     {
         $step = $this->treatment->unit === 'ml' ? 0.1 : 1;
         $this->newDose = max(0, round(($this->newDose ?? 0) - $step, 2));
+    }
+
+    // ── Times per day ───────────────────────────────────────────────────
+
+    public function incrementTimesPerDay(): void
+    {
+        $this->newTimesPerDay = min(24, $this->newTimesPerDay + 1);
+    }
+
+    public function decrementTimesPerDay(): void
+    {
+        $this->newTimesPerDay = max(2, $this->newTimesPerDay - 1);
     }
 
     // ── Day-part increments ─────────────────────────────────────────────
@@ -182,10 +203,27 @@ class TreatmentEdit extends Component
                     'started_at'   => today()->toDateString(),
                 ]);
                 $this->treatment->update([
-                    'current_dose' => null,
-                    'dose_morning' => $this->newDoseMorning,
-                    'dose_noon'    => $this->newDoseNoon,
-                    'dose_evening' => $this->newDoseEvening,
+                    'current_dose'  => null,
+                    'times_per_day' => null,
+                    'dose_morning'  => $this->newDoseMorning,
+                    'dose_noon'     => $this->newDoseNoon,
+                    'dose_evening'  => $this->newDoseEvening,
+                ]);
+            } elseif ($this->dosageMode === 'interval') {
+                $this->validate(['newDose' => 'required|numeric|min:0']);
+                PosologyHistory::create([
+                    'treatment_id'  => $this->treatment->id,
+                    'dose'          => $this->newDose,
+                    'times_per_day' => $this->newTimesPerDay,
+                    'note'          => $this->note ?: null,
+                    'started_at'    => today()->toDateString(),
+                ]);
+                $this->treatment->update([
+                    'current_dose'  => $this->newDose,
+                    'times_per_day' => $this->newTimesPerDay,
+                    'dose_morning'  => null,
+                    'dose_noon'     => null,
+                    'dose_evening'  => null,
                 ]);
             } else {
                 $this->validate(['newDose' => 'required|numeric|min:0']);
@@ -196,10 +234,11 @@ class TreatmentEdit extends Component
                     'started_at'   => today()->toDateString(),
                 ]);
                 $this->treatment->update([
-                    'current_dose' => $this->newDose,
-                    'dose_morning' => null,
-                    'dose_noon'    => null,
-                    'dose_evening' => null,
+                    'current_dose'  => $this->newDose,
+                    'times_per_day' => null,
+                    'dose_morning'  => null,
+                    'dose_noon'     => null,
+                    'dose_evening'  => null,
                 ]);
             }
         }
@@ -236,6 +275,7 @@ class TreatmentEdit extends Component
             'color'                => $this->editColor,
             'unit'                 => !$this->editIsMedicalAct ? ($this->editUnit ?: null) : null,
             'current_dose'         => !$this->editIsMedicalAct ? $this->treatment->current_dose : null,
+            'times_per_day'        => !$this->editIsMedicalAct ? $this->treatment->times_per_day : null,
             'dose_morning'         => !$this->editIsMedicalAct ? $this->treatment->dose_morning : null,
             'dose_noon'            => !$this->editIsMedicalAct ? $this->treatment->dose_noon : null,
             'dose_evening'         => !$this->editIsMedicalAct ? $this->treatment->dose_evening : null,

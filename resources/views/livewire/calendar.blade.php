@@ -131,9 +131,9 @@
         @else
         <div class="space-y-2">
             @foreach($selectedDayEvents as $event)
-            <div class="flex items-center gap-3 px-3 py-2 rounded-xl
+            <div class="flex items-start gap-3 px-3 py-2 rounded-xl
                         {{ $event['requires_fasting'] ? 'bg-amber-50 border border-amber-200' : 'bg-slate-50' }}">
-                <span class="w-2 h-2 rounded-full flex-shrink-0" style="background-color: {{ $event['color'] }};"></span>
+                <span class="w-2 h-2 rounded-full flex-shrink-0 mt-1" style="background-color: {{ $event['color'] }};"></span>
                 <div class="flex-1 min-w-0">
                     <p class="text-xs font-semibold text-slate-800">{{ $event['display_name'] ?? $event['name'] }}</p>
                     @if($event['requires_fasting'])
@@ -142,7 +142,9 @@
                     @if(!empty($event['notes']))
                         <p class="text-xs text-slate-400">{{ $event['notes'] }}</p>
                     @elseif(isset($event['dose']) && $event['dose'])
-                        <p class="text-xs text-slate-400">{{ $event['dose'] }}</p>
+                        @foreach(explode(' · ', $event['dose']) as $dosePart)
+                        <p class="text-xs text-slate-400">{{ $dosePart }}</p>
+                        @endforeach
                     @endif
                     @if(!empty($event['moved']) && $event['moved'])
                         <p class="text-xs text-orange-500 italic">Déplacé (était le {{ \Carbon\Carbon::parse($event['original_date'])->locale('fr')->isoFormat('D MMM') }})</p>

@@ -67,16 +67,20 @@
         <p class="text-xs font-bold text-slate-600 uppercase tracking-wide mb-3">Aujourd'hui</p>
         <div class="space-y-2">
             @forelse($todayEvents as $event)
-            <div class="flex items-center gap-3 px-3 py-2 rounded-xl
+            <div class="flex items-start gap-3 px-3 py-2 rounded-xl
                         {{ $event['requires_fasting'] ? 'bg-amber-50 border border-amber-200' :
                            ($event['type'] === 'cyclic' ? 'bg-slate-50 border border-slate-100' : 'bg-slate-50') }}">
-                <span class="w-2 h-2 rounded-full flex-shrink-0" style="background-color: {{ $event['color'] }};"></span>
-                <span class="text-xs font-medium text-slate-700 flex-1">{{ $event['display_name'] ?? $event['name'] }}</span>
-                @if($event['requires_fasting'])
-                    <span class="text-xs text-amber-600 font-bold">À jeun !</span>
-                @elseif(isset($event['dose']) && $event['dose'])
-                    <span class="text-xs text-slate-400">{{ $event['dose'] }}</span>
-                @endif
+                <span class="w-2 h-2 rounded-full flex-shrink-0 mt-1" style="background-color: {{ $event['color'] }};"></span>
+                <div class="flex-1 min-w-0">
+                    <p class="text-xs font-medium text-slate-700">{{ $event['display_name'] ?? $event['name'] }}</p>
+                    @if($event['requires_fasting'])
+                        <p class="text-xs text-amber-600 font-bold">À jeun !</p>
+                    @elseif(isset($event['dose']) && $event['dose'])
+                        @foreach(explode(' · ', $event['dose']) as $dosePart)
+                        <p class="text-xs text-slate-400">{{ $dosePart }}</p>
+                        @endforeach
+                    @endif
+                </div>
             </div>
             @empty
             <p class="text-xs text-slate-400 text-center py-2">Aucun événement particulier aujourd'hui.</p>
