@@ -82,8 +82,8 @@
         "type": "path",
         "url": "packages/alys-native"
     },{
-        "type": "path",
-        "url": "packages/nativephp-android-widgets"
+        "type": "vcs",
+        "url": "git@github.com:prestaedit/nativephp-android-widgets.git"
     },{
         "name": "nativephp-plugins",
         "type": "composer",
