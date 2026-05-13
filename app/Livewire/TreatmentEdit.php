@@ -235,6 +235,10 @@ class TreatmentEdit extends Component
             'requires_fasting'     => $this->editRequiresFasting,
             'color'                => $this->editColor,
             'unit'                 => !$this->editIsMedicalAct ? ($this->editUnit ?: null) : null,
+            'current_dose'         => !$this->editIsMedicalAct ? $this->treatment->current_dose : null,
+            'dose_morning'         => !$this->editIsMedicalAct ? $this->treatment->dose_morning : null,
+            'dose_noon'            => !$this->editIsMedicalAct ? $this->treatment->dose_noon : null,
+            'dose_evening'         => !$this->editIsMedicalAct ? $this->treatment->dose_evening : null,
             'parent_treatment_id'  => $this->editParentTreatmentId,
             'linked_days'          => $this->editParentTreatmentId ? $this->editLinkedDays : null,
         ]);
