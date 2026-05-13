@@ -100,7 +100,7 @@ class Calendar extends Component
         $daysInMonth = $firstDay->daysInMonth;
         $startOffset = ($firstDay->dayOfWeek === 0) ? 6 : $firstDay->dayOfWeek - 1;
 
-        $legend = \App\Models\Treatment::orderByRaw("name = 'Hôpital' DESC")
+        $legend = \App\Models\Treatment::active()->orderByRaw("name = 'Hôpital' DESC")
             ->orderBy('name')
             ->get()
             ->map(fn($t) => [
