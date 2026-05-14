@@ -101,11 +101,21 @@ class TreatmentCreate extends Component
                 'name'  => 'required|string|max:255',
                 'type'  => 'required|in:daily,weekly,cyclic',
                 'color' => 'required|string',
+            ], [
+                'name.required'   => 'Le nom est obligatoire.',
+                'name.max'        => 'Le nom ne peut pas dépasser 255 caractères.',
+                'type.required'   => 'Le type est obligatoire.',
+                'type.in'         => 'Le type sélectionné est invalide.',
+                'color.required'  => 'La couleur est obligatoire.',
             ]);
         } elseif ($this->step === 4) {
             $this->validate([
                 'frequencyWeeks'  => 'required|integer|min:1',
                 'recurrenceStart' => 'nullable|date',
+            ], [
+                'frequencyWeeks.required' => 'La fréquence est obligatoire.',
+                'frequencyWeeks.min'      => 'La fréquence doit être d\'au moins 1 semaine.',
+                'recurrenceStart.date'    => 'La date de début est invalide.',
             ]);
         }
     }
@@ -231,7 +241,19 @@ class TreatmentCreate extends Component
             $rules['recurrenceStart'] = 'nullable|date';
         }
 
-        $this->validate($rules);
+        $this->validate($rules, [
+            'name.required'              => 'Le nom est obligatoire.',
+            'name.max'                   => 'Le nom ne peut pas dépasser 255 caractères.',
+            'type.required'              => 'Le type est obligatoire.',
+            'type.in'                    => 'Le type sélectionné est invalide.',
+            'color.required'             => 'La couleur est obligatoire.',
+            'linkedDays.required'        => 'La durée liée est obligatoire.',
+            'linkedDays.min'             => 'La durée liée doit être d\'au moins 1 jour.',
+            'frequencyWeeks.required'    => 'La fréquence est obligatoire.',
+            'frequencyWeeks.min'         => 'La fréquence doit être d\'au moins 1 semaine.',
+            'recurrenceStart.date'       => 'La date de début est invalide.',
+            'parentTreatmentId.exists'   => 'Le traitement lié n\'existe pas.',
+        ]);
 
         $treatmentData = [
             'name'                => $this->name,
