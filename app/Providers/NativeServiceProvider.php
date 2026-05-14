@@ -34,6 +34,7 @@ class NativeServiceProvider extends ServiceProvider
     public function plugins(): array
     {
         return [
+            \Native\Mobile\Providers\DialogServiceProvider::class,
             \Native\Mobile\Providers\ScannerServiceProvider::class,
             \Native\Mobile\Providers\SecureStorageServiceProvider::class,
             \Native\Mobile\Providers\ShareServiceProvider::class,

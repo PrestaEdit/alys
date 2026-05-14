@@ -113,10 +113,11 @@ class CalendarService
             ];
         }
 
-        // Scheduled calendar events for this day
+        // Scheduled calendar events for this day (excluding archived treatments)
         $calendarEvents = CalendarEvent::with('treatment')
             ->whereDate('scheduled_date', $dateStr)
             ->where('is_cancelled', false)
+            ->whereHas('treatment', fn($q) => $q->whereNull('archived_at'))
             ->get();
 
         foreach ($calendarEvents as $event) {
@@ -176,6 +177,12 @@ class CalendarService
             return $this->formatDayParts($treatment, $morning, $noon, $evening);
         }
 
+        if ($treatment->hasIntervalDose()) {
+            $dose   = $history ? (float) $history->dose : (float) $treatment->current_dose;
+            $times  = $history?->times_per_day ?? $treatment->times_per_day;
+            return $this->formatInterval($treatment, $dose, (int) $times);
+        }
+
         $dose = $history ? $history->dose : $treatment->current_dose;
         return $dose !== null ? $this->formatAmount((float) $dose, $treatment->unit) : null;
     }
@@ -191,6 +198,10 @@ class CalendarService
             );
         }
 
+        if ($treatment->hasIntervalDose()) {
+            return $this->formatInterval($treatment, (float) $treatment->current_dose, (int) $treatment->times_per_day);
+        }
+
         if ($treatment->current_dose === null) return null;
         return $this->formatAmount((float) $treatment->current_dose, $treatment->unit);
     }
@@ -202,6 +213,13 @@ class CalendarService
         if ($t->dose_noon    !== null) $parts[] = $this->formatAmount($noon,    $t->unit) . ' midi';
         if ($t->dose_evening !== null) $parts[] = $this->formatAmount($evening, $t->unit) . ' soir';
         return implode(' · ', $parts);
+    }
+
+    private function formatInterval(Treatment $t, float $dose, int $times): string
+    {
+        $doseStr = $this->formatAmount($dose, $t->unit);
+        $hours   = $times > 0 ? (int) round(24 / $times) : 0;
+        return "{$doseStr} · {$times}×/jour · toutes les {$hours}h";
     }
 
     private function formatAmount(float $amount, ?string $unit): string

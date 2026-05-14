@@ -57,27 +57,31 @@
             <div class="flex items-center justify-between">
                 <div>
                     @if($treatment->hasDayPartDoses())
-                        @php
-                            $decimals = $treatment->unit === 'ml' ? 1 : 0;
-                            $parts = [];
-                            if ($treatment->dose_morning !== null) $parts[] = ['val' => number_format((float)$treatment->dose_morning, $decimals, ',', ''), 'lbl' => 'mat.'];
-                            if ($treatment->dose_noon    !== null) $parts[] = ['val' => number_format((float)$treatment->dose_noon,    $decimals, ',', ''), 'lbl' => 'midi'];
-                            if ($treatment->dose_evening !== null) $parts[] = ['val' => number_format((float)$treatment->dose_evening, $decimals, ',', ''), 'lbl' => 'soir'];
-                        @endphp
-                        <div class="flex items-end gap-2">
-                            @foreach($parts as $p)
-                            <div class="text-center">
-                                <p class="text-lg font-extrabold leading-none" style="color: {{ $treatment->color }};">{{ $p['val'] }}</p>
-                                <p class="text-[10px] text-slate-400 font-medium mt-0.5">{{ $p['lbl'] }}</p>
-                            </div>
-                            @if(!$loop->last)
-                            <span class="text-slate-200 font-light text-lg leading-none mb-3">·</span>
+                        @php $decimals = $treatment->unit === 'ml' ? 1 : 0; @endphp
+                        <div class="space-y-0.5">
+                            @if($treatment->dose_morning !== null)
+                            <p class="text-xs font-semibold" style="color: {{ $treatment->color }};">
+                                Matin · {{ number_format((float)$treatment->dose_morning, $decimals, ',', '') }}{{ $treatment->unit ? ' ' . $treatment->unit : '' }}
+                            </p>
                             @endif
-                            @endforeach
-                            @if($treatment->unit)
-                            <p class="text-xs text-slate-400 mb-0.5">{{ $treatment->unit }}</p>
+                            @if($treatment->dose_noon !== null)
+                            <p class="text-xs font-semibold" style="color: {{ $treatment->color }};">
+                                Midi · {{ number_format((float)$treatment->dose_noon, $decimals, ',', '') }}{{ $treatment->unit ? ' ' . $treatment->unit : '' }}
+                            </p>
+                            @endif
+                            @if($treatment->dose_evening !== null)
+                            <p class="text-xs font-semibold" style="color: {{ $treatment->color }};">
+                                Soir · {{ number_format((float)$treatment->dose_evening, $decimals, ',', '') }}{{ $treatment->unit ? ' ' . $treatment->unit : '' }}
+                            </p>
                             @endif
                         </div>
+                    @elseif($treatment->hasIntervalDose())
+                        @php $intervalH = $treatment->times_per_day > 0 ? round(24 / $treatment->times_per_day) : 0; @endphp
+                        <p class="text-xl font-extrabold leading-none" style="color: {{ $treatment->color }};">
+                            {{ number_format((float)$treatment->current_dose, $treatment->unit === 'ml' ? 1 : 0, ',', '') }}
+                            <span class="text-sm font-normal text-slate-400">{{ $treatment->unit }}</span>
+                        </p>
+                        <p class="text-xs text-slate-400 mt-0.5">{{ $treatment->times_per_day }}×/jour · toutes les {{ $intervalH }}h</p>
                     @elseif($treatment->current_dose !== null)
                     <p class="text-xl font-extrabold leading-none" style="color: {{ $treatment->color }};">
                         {{ number_format((float)$treatment->current_dose, $treatment->unit === 'ml' ? 1 : 0, ',', '') }}
@@ -107,6 +111,36 @@
             @endif
         </div>
         @endforeach
+    </div>
+    @endif
+
+    {{-- Modal confirmation archivage --}}
+    @if($showArchiveModal)
+    <div class="fixed inset-0 bg-black/50 z-50 flex items-end justify-center p-4 sm:items-center">
+        <div class="bg-white rounded-2xl p-5 w-full max-w-sm shadow-xl">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-.375c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v.375c0 .621.504 1.125 1.125 1.125Z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-slate-800">Archiver le traitement</h3>
+                    <p class="text-xs text-slate-400 mt-0.5">Ce traitement sera masqué de la liste active.</p>
+                </div>
+            </div>
+            <p class="text-xs text-slate-500 mb-4 pl-13">Vous pourrez le désarchiver à tout moment depuis la section traitements archivés.</p>
+            <div class="flex gap-2">
+                <button wire:click="cancelArchive"
+                        class="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors">
+                    Annuler
+                </button>
+                <button wire:click="confirmArchive"
+                        class="flex-1 py-2.5 rounded-xl bg-slate-700 text-sm font-semibold text-white hover:bg-slate-800 transition-colors">
+                    Archiver
+                </button>
+            </div>
+        </div>
     </div>
     @endif
 
