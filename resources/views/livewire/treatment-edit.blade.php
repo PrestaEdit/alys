@@ -229,12 +229,15 @@
         <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-4">Posologie actuelle</p>
 
         {{-- Mode selector --}}
-        <div class="grid grid-cols-3 gap-2 mb-5">
+        <div class="flex flex-col gap-2 mb-5">
             @foreach([['single', 'Dose unique'], ['dayparts', 'Matin / Midi / Soir'], ['interval', 'Intervalle régulier']] as [$val, $lbl])
-            <label class="flex items-center justify-center px-2 py-2.5 rounded-xl border cursor-pointer transition-colors text-center
+            <label class="flex items-center px-4 py-3 rounded-xl border cursor-pointer transition-colors
                           {{ $dosageMode === $val ? 'border-sky-400 bg-sky-50 text-sky-700' : 'border-slate-200 text-slate-600 hover:border-slate-300' }}">
                 <input type="radio" wire:model.live="dosageMode" value="{{ $val }}" class="hidden">
-                <span class="text-xs font-semibold leading-tight">{{ $lbl }}</span>
+                <span class="text-sm font-semibold">{{ $lbl }}</span>
+                @if($dosageMode === $val)
+                <svg class="ml-auto w-4 h-4 text-sky-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                @endif
             </label>
             @endforeach
         </div>
@@ -248,7 +251,7 @@
             ] as $part)
             <div class="mb-4">
                 <p class="text-xs font-semibold text-slate-500 mb-2">{{ $part['label'] }}</p>
-                <div class="flex items-center gap-4">
+                <div class="flex flex-row items-center gap-4">
                     <button wire:click="{{ $part['dec'] }}"
                             class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 text-xl font-light hover:bg-slate-200 transition-colors flex items-center justify-center">
                         −
@@ -271,7 +274,7 @@
         @elseif($dosageMode === 'interval')
             {{-- Dose par prise --}}
             <p class="text-xs font-semibold text-slate-500 mb-2">Dose par prise</p>
-            <div class="flex items-center gap-4 mb-5">
+            <div class="flex flex-row items-center gap-4 mb-5">
                 <button wire:click="decrement"
                         class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 text-xl font-light hover:bg-slate-200 transition-colors flex items-center justify-center">
                     −
@@ -291,7 +294,7 @@
             </div>
             {{-- Nombre de prises --}}
             <p class="text-xs font-semibold text-slate-500 mb-2">Nombre de prises par jour</p>
-            <div class="flex items-center gap-4 mb-2">
+            <div class="flex flex-row items-center gap-4 mb-2">
                 <button wire:click="decrementTimesPerDay"
                         class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 text-xl font-light hover:bg-slate-200 transition-colors flex items-center justify-center">
                     −
@@ -308,7 +311,7 @@
             </div>
         @else
             {{-- Single-dose posology --}}
-            <div class="flex items-center gap-4 mb-4">
+            <div class="flex flex-row items-center gap-4 mb-4">
                 <button wire:click="decrement"
                         class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 text-xl font-light hover:bg-slate-200 transition-colors flex items-center justify-center">
                     −
