@@ -3220,16 +3220,16 @@
         },
         {
             "name": "prestaedit/nativephp-android-widgets",
-            "version": "1.0.0",
+            "version": "1.0.1",
             "source": {
                 "type": "git",
-                "url": "git@github.com:PrestaEdit/nativephp-android-widgets.git",
-                "reference": "8a3ea53ea6cd2d22a7932fa601d190b9a740f58a"
+                "url": "https://github.com/prestaedit/nativephp-android-widgets.git",
+                "reference": "bfcc9ee4094545adbec6d3e325933f80a3061527"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PrestaEdit/nativephp-android-widgets/zipball/8a3ea53ea6cd2d22a7932fa601d190b9a740f58a",
-                "reference": "8a3ea53ea6cd2d22a7932fa601d190b9a740f58a",
+                "url": "https://api.github.com/repos/PrestaEdit/nativephp-android-widgets/zipball/bfcc9ee4094545adbec6d3e325933f80a3061527",
+                "reference": "bfcc9ee4094545adbec6d3e325933f80a3061527",
                 "shasum": ""
             },
             "require": {
@@ -3257,7 +3257,7 @@
             ],
             "description": "NativePHP plugin to create and update Android home screen widgets",
             "support": {
-                "source": "https://github.com/PrestaEdit/nativephp-android-widgets/tree/1.0.0",
+                "source": "https://github.com/PrestaEdit/nativephp-android-widgets/tree/1.0.1",
                 "issues": "https://github.com/PrestaEdit/nativephp-android-widgets/issues"
             },
             "time": "2026-05-14T08:52:36+00:00"
