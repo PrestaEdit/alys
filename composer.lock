@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "81951421f148a1e1ff812f30b47d40c7",
+    "content-hash": "0deb9e9334224377642cf3918e143f6c",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -3217,6 +3217,50 @@
             "transport-options": {
                 "relative": true
             }
+        },
+        {
+            "name": "prestaedit/nativephp-android-widgets",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "git@github.com:PrestaEdit/nativephp-android-widgets.git",
+                "reference": "8a3ea53ea6cd2d22a7932fa601d190b9a740f58a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/PrestaEdit/nativephp-android-widgets/zipball/8a3ea53ea6cd2d22a7932fa601d190b9a740f58a",
+                "reference": "8a3ea53ea6cd2d22a7932fa601d190b9a740f58a",
+                "shasum": ""
+            },
+            "require": {
+                "nativephp/mobile": "^3.0",
+                "php": "^8.2"
+            },
+            "type": "nativephp-plugin",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "NativePhp\\AndroidWidgets\\AndroidWidgetsServiceProvider"
+                    ]
+                },
+                "nativephp": {
+                    "manifest": "nativephp.json"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "NativePhp\\AndroidWidgets\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "NativePHP plugin to create and update Android home screen widgets",
+            "support": {
+                "source": "https://github.com/PrestaEdit/nativephp-android-widgets/tree/1.0.0",
+                "issues": "https://github.com/PrestaEdit/nativephp-android-widgets/issues"
+            },
+            "time": "2026-05-14T08:52:36+00:00"
         },
         {
             "name": "psr/clock",
