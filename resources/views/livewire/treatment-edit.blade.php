@@ -1,7 +1,10 @@
 <div>
 
+    {{-- Fond fixe qui couvre la safe-area au-dessus du sticky header --}}
+    <div class="fixed top-0 left-0 right-0 bg-slate-50" style="height: var(--safe-top); z-index: 49;"></div>
+
     {{-- Header sticky --}}
-    <div class="sticky z-40 bg-slate-50 border-b border-slate-100 px-4 py-3" style="top: var(--safe-top);">
+    <div class="sticky bg-slate-50 border-b border-slate-100 px-4 py-3" style="top: var(--safe-top); z-index: 50;">
         <div class="max-w-lg mx-auto flex items-center gap-3">
             <a href="{{ route('treatments') }}"
                class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors text-lg flex-shrink-0">

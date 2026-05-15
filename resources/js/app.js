@@ -22,32 +22,30 @@ function formatDateForDisplay(isoDate, format) {
     return format.replace('YYYY', y).replace('MM', m).replace('DD', d);
 }
 
-// Tracks which datepicker container last received a click, so the body
-// MutationObserver below can reposition the popup relative to its input.
-let _activePickerContainer = null;
-
 // Reposition the calendar popup above the input when it overflows the viewport.
-// The popup is appended to document.body by vanilla-calendar-pro with absolute
-// positioning, so we adjust its `top` after it is inserted.
+// vanilla-calendar-pro appends the popup to document.body; we reposition via a
+// delegated click listener with a short delay so the popup is visible/measured.
+// This covers both the first open (childList mutation) and subsequent opens
+// (popup already in DOM, toggled visible on click).
 (function setupCalendarRepositioner() {
-    new MutationObserver((mutations) => {
-        for (const mutation of mutations) {
-            for (const node of mutation.addedNodes) {
-                if (node.nodeType !== 1 || !node.hasAttribute('data-vc-input')) continue;
-                const container = _activePickerContainer;
-                if (!container) return;
-                requestAnimationFrame(() => {
-                    const popupRect = node.getBoundingClientRect();
-                    // 80 px margin keeps the popup clear of Android's nav buttons
-                    if (popupRect.bottom > window.innerHeight - 80) {
-                        const inputRect = container.getBoundingClientRect();
-                        const newTop = window.scrollY + inputRect.top - node.offsetHeight - 8;
-                        node.style.top = Math.max(window.scrollY + 8, newTop) + 'px';
-                    }
-                });
-            }
-        }
-    }).observe(document.body, { childList: true });
+    function reposition(container) {
+        // The popup element has both data-vc="calendar" and data-vc-input
+        const popup = document.body.querySelector('[data-vc-input]');
+        if (!popup || window.getComputedStyle(popup).display === 'none') return;
+        const rect = popup.getBoundingClientRect();
+        // 100 px from the bottom: clears Android 3-button nav bar in all densities
+        if (rect.bottom <= window.innerHeight - 100) return;
+        const inputRect = container.getBoundingClientRect();
+        const newTop = window.scrollY + inputRect.top - popup.offsetHeight - 8;
+        popup.style.top = Math.max(window.scrollY + 8, newTop) + 'px';
+    }
+
+    document.addEventListener('click', (e) => {
+        const container = e.target.closest?.('.hs-datepicker');
+        if (!container) return;
+        // 60 ms is enough for vanilla-calendar-pro to show the popup
+        setTimeout(() => reposition(container), 60);
+    });
 })();
 
 // Direct vanilla-calendar-pro initialization, bypassing Preline's HSDatepicker
@@ -82,8 +80,5 @@ function initDatepickers() {
             },
         });
         cal.init();
-
-        // Register this container as active when the user opens its datepicker
-        input?.addEventListener('click', () => { _activePickerContainer = container; });
     });
 }
