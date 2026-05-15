@@ -21,14 +21,14 @@ class Calendar extends Component
     public bool $showMoveModal = false;
     public ?int $movingEventId = null;
     public string $moveToDate = '';
-    public string $activeProfileName = self::FASTING_SUBJECT_FALLBACK;
+    public string $activeProfileName;
 
     public function mount(CalendarService $service, ActiveProfile $activeProfile): void
     {
         $this->year = now()->year;
         $this->month = now()->month;
         $this->selectedDate = now()->toDateString();
-        $this->activeProfileName = $activeProfile->get()?->name ?: self::FASTING_SUBJECT_FALLBACK;
+        $this->activeProfileName = $activeProfile->get()?->name ?? self::FASTING_SUBJECT_FALLBACK;
         $this->loadMonth($service);
         $this->loadDay($service);
     }
