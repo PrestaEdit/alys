@@ -29,11 +29,12 @@ class Calendar extends Component
         $this->month = now()->month;
         $this->selectedDate = now()->toDateString();
         $profileName = $activeProfile->get()?->name ?? '';
-        $normalizedName = trim(preg_replace('/\s+/', ' ', $profileName) ?? '');
+        $normalizedName = trim(preg_replace('/\s+/', ' ', $profileName) ?: '');
         if ($normalizedName === '') {
             $this->activeProfileName = self::FASTING_SUBJECT_FALLBACK;
         } else {
-            $firstName = explode(' ', $normalizedName)[0];
+            $nameParts = explode(' ', $normalizedName);
+            $firstName = $nameParts[0] ?? '';
             $this->activeProfileName = $firstName !== '' ? $firstName : self::FASTING_SUBJECT_FALLBACK;
         }
         $this->loadMonth($service);
