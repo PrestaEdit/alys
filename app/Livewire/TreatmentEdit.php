@@ -245,7 +245,7 @@ class TreatmentEdit extends Component
 
         $this->treatment->refresh();
         $this->note = '';
-        session()->flash('success', 'Posologie mise à jour.');
+        $this->dispatch('toast', message: 'Posologie mise à jour.');
     }
 
     // ── Save info ──────────────────────────────────────────────────────
@@ -289,7 +289,7 @@ class TreatmentEdit extends Component
         }
 
         $this->treatment->refresh();
-        session()->flash('success', 'Informations mises à jour.');
+        $this->dispatch('toast', message: 'Informations mises à jour.');
     }
 
     private function regenerateLinkedEvents(): void
@@ -332,7 +332,7 @@ class TreatmentEdit extends Component
             'widget_icon' => $this->showWidget ? $this->widgetIcon : null,
         ]);
         $this->treatment->refresh();
-        session()->flash('success', 'Widget mis à jour.');
+        $this->dispatch('toast', message: 'Widget mis à jour.');
     }
 
     // ── Save recurrence ────────────────────────────────────────────────
@@ -375,7 +375,7 @@ class TreatmentEdit extends Component
             $this->recalculateFutureEvents();
         }
 
-        session()->flash('success', 'Récurrence mise à jour.');
+        $this->dispatch('toast', message: 'Récurrence mise à jour.');
     }
 
     private function recalculateFutureEvents(): void

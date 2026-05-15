@@ -54,5 +54,23 @@ function initDatepickers() {
             },
         });
         cal.init();
+
+        // Reposition popup above input when it would overflow the viewport bottom.
+        // The popup is appended to document.body with absolute positioning.
+        if (input) {
+            input.addEventListener('click', () => {
+                requestAnimationFrame(() => requestAnimationFrame(() => {
+                    const popup = document.querySelector('[data-vc-input]');
+                    if (!popup) return;
+                    const popupRect = popup.getBoundingClientRect();
+                    // 80px margin: keeps the popup clear of Android's navigation bar
+                    if (popupRect.bottom > window.innerHeight - 80) {
+                        const inputRect = container.getBoundingClientRect();
+                        const newTop = window.scrollY + inputRect.top - popup.offsetHeight - 8;
+                        popup.style.top = Math.max(window.scrollY + 8, newTop) + 'px';
+                    }
+                }));
+            });
+        }
     });
 }
