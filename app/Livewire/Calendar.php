@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\CalendarEvent;
 use App\Services\CalendarService;
 use App\Services\EventMoveService;
+use App\Services\ActiveProfile;
 use Carbon\Carbon;
 use Livewire\Component;
 
@@ -18,12 +19,14 @@ class Calendar extends Component
     public bool $showMoveModal = false;
     public ?int $movingEventId = null;
     public string $moveToDate = '';
+    public string $activeProfileName = 'Ce traitement';
 
-    public function mount(CalendarService $service): void
+    public function mount(CalendarService $service, ActiveProfile $activeProfile): void
     {
         $this->year = now()->year;
         $this->month = now()->month;
         $this->selectedDate = now()->toDateString();
+        $this->activeProfileName = $activeProfile->get()?->name ?: 'Ce traitement';
         $this->loadMonth($service);
         $this->loadDay($service);
     }

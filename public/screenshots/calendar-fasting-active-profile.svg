@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="500" viewBox="0 0 1200 500">
+  <rect width="1200" height="500" fill="#f1f5f9"/>
+  <rect x="80" y="80" width="1040" height="340" rx="28" fill="#ffffff" stroke="#e2e8f0" stroke-width="2"/>
+  <text x="140" y="165" font-family="Inter, Arial, sans-serif" font-size="34" font-weight="700" fill="#0f172a">IT MTTX</text>
+  <text x="140" y="235" font-family="Inter, Arial, sans-serif" font-size="30" font-weight="700" fill="#d97706">⚠️ Alys doit être à jeun</text>
+  <text x="140" y="290" font-family="Inter, Arial, sans-serif" font-size="20" fill="#64748b">Aperçu visuel : le prénom vient du profil actif.</text>
+</svg>
