@@ -44,6 +44,8 @@ it('selecting a day loads day events', function () {
 it('IT MTTX day events have requires_fasting true', function () {
     $component = Livewire::test(Calendar::class);
     $component->call('selectDay', '2026-07-08'); // IT MTTX day (2026-01-21 + 24 weeks)
+    $component->assertSee('Ce traitement doit être à jeun');
+    $component->assertDontSee('Alys doit être à jeun');
     $events = collect($component->get('selectedDayEvents'));
     $itMttx = $events->firstWhere('name', 'IT MTTX');
     expect($itMttx)->not->toBeNull();
