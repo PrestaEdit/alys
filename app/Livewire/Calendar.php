@@ -11,7 +11,7 @@ use Livewire\Component;
 
 class Calendar extends Component
 {
-    public const FASTING_SUBJECT_FALLBACK = 'Ce traitement';
+    public const FASTING_SUBJECT_FALLBACK = 'Le patient';
 
     public int $year;
     public int $month;
