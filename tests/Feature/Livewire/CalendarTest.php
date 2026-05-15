@@ -1,8 +1,6 @@
 <?php
 
 use App\Livewire\Calendar;
-use App\Models\Profile;
-use App\Services\ActiveProfile;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -46,9 +44,8 @@ it('selecting a day loads day events', function () {
 it('IT MTTX day events have requires_fasting true', function () {
     $component = Livewire::test(Calendar::class);
     $component->call('selectDay', '2026-07-08'); // IT MTTX day (2026-01-21 + 24 weeks)
-    $activeProfileName = Profile::find(app(ActiveProfile::class)->id())?->name ?? 'Ce traitement';
-    $component->assertSee($activeProfileName . ' doit être à jeun');
-    $component->assertDontSee('Ce traitement doit être à jeun');
+    $component->assertSee('Alys doit être à jeun');
+    $component->assertDontSee(Calendar::FASTING_SUBJECT_FALLBACK . ' doit être à jeun');
     $events = collect($component->get('selectedDayEvents'));
     $itMttx = $events->firstWhere('name', 'IT MTTX');
     expect($itMttx)->not->toBeNull();

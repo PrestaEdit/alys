@@ -11,6 +11,8 @@ use Livewire\Component;
 
 class Calendar extends Component
 {
+    public const FASTING_SUBJECT_FALLBACK = 'Ce traitement';
+
     public int $year;
     public int $month;
     public ?string $selectedDate = null;
@@ -19,14 +21,14 @@ class Calendar extends Component
     public bool $showMoveModal = false;
     public ?int $movingEventId = null;
     public string $moveToDate = '';
-    public string $activeProfileName = 'Ce traitement';
+    public string $activeProfileName = self::FASTING_SUBJECT_FALLBACK;
 
     public function mount(CalendarService $service, ActiveProfile $activeProfile): void
     {
         $this->year = now()->year;
         $this->month = now()->month;
         $this->selectedDate = now()->toDateString();
-        $this->activeProfileName = $activeProfile->get()?->name ?: 'Ce traitement';
+        $this->activeProfileName = $activeProfile->get()?->name ?: self::FASTING_SUBJECT_FALLBACK;
         $this->loadMonth($service);
         $this->loadDay($service);
     }
