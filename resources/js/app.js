@@ -22,6 +22,34 @@ function formatDateForDisplay(isoDate, format) {
     return format.replace('YYYY', y).replace('MM', m).replace('DD', d);
 }
 
+// Tracks which datepicker container last received a click, so the body
+// MutationObserver below can reposition the popup relative to its input.
+let _activePickerContainer = null;
+
+// Reposition the calendar popup above the input when it overflows the viewport.
+// The popup is appended to document.body by vanilla-calendar-pro with absolute
+// positioning, so we adjust its `top` after it is inserted.
+(function setupCalendarRepositioner() {
+    new MutationObserver((mutations) => {
+        for (const mutation of mutations) {
+            for (const node of mutation.addedNodes) {
+                if (node.nodeType !== 1 || !node.hasAttribute('data-vc-input')) continue;
+                const container = _activePickerContainer;
+                if (!container) return;
+                requestAnimationFrame(() => {
+                    const popupRect = node.getBoundingClientRect();
+                    // 80 px margin keeps the popup clear of Android's nav buttons
+                    if (popupRect.bottom > window.innerHeight - 80) {
+                        const inputRect = container.getBoundingClientRect();
+                        const newTop = window.scrollY + inputRect.top - node.offsetHeight - 8;
+                        node.style.top = Math.max(window.scrollY + 8, newTop) + 'px';
+                    }
+                });
+            }
+        }
+    }).observe(document.body, { childList: true });
+})();
+
 // Direct vanilla-calendar-pro initialization, bypassing Preline's HSDatepicker
 // (which requires lodash globally — not available in the Vite/ESM build).
 function initDatepickers() {
@@ -55,22 +83,7 @@ function initDatepickers() {
         });
         cal.init();
 
-        // Reposition popup above input when it would overflow the viewport bottom.
-        // The popup is appended to document.body with absolute positioning.
-        if (input) {
-            input.addEventListener('click', () => {
-                requestAnimationFrame(() => requestAnimationFrame(() => {
-                    const popup = document.querySelector('[data-vc-input]');
-                    if (!popup) return;
-                    const popupRect = popup.getBoundingClientRect();
-                    // 80px margin: keeps the popup clear of Android's navigation bar
-                    if (popupRect.bottom > window.innerHeight - 80) {
-                        const inputRect = container.getBoundingClientRect();
-                        const newTop = window.scrollY + inputRect.top - popup.offsetHeight - 8;
-                        popup.style.top = Math.max(window.scrollY + 8, newTop) + 'px';
-                    }
-                }));
-            });
-        }
+        // Register this container as active when the user opens its datepicker
+        input?.addEventListener('click', () => { _activePickerContainer = container; });
     });
 }

@@ -1,40 +1,22 @@
-<div class="p-4 max-w-lg mx-auto">
+<div>
 
-    {{-- Header --}}
-    <div class="flex items-center gap-3 mb-5">
-        <a href="{{ route('treatments') }}"
-           class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors text-lg">
-            ‹
-        </a>
-        <div>
-            <h1 class="text-base font-extrabold text-slate-900">{{ $treatment->name }} · {{ $treatment->commercial_name }}</h1>
-            <p class="text-xs text-slate-400">
-                Traitement {{ $treatment->type === 'daily' ? 'quotidien' : ($treatment->type === 'weekly' ? 'hebdomadaire' : 'cyclique') }}{{ $treatment->is_medical_act ? ' · acte médical' : '' }}
-            </p>
+    {{-- Header sticky --}}
+    <div class="sticky z-40 bg-slate-50 border-b border-slate-100 px-4 py-3" style="top: var(--safe-top);">
+        <div class="max-w-lg mx-auto flex items-center gap-3">
+            <a href="{{ route('treatments') }}"
+               class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors text-lg flex-shrink-0">
+                ‹
+            </a>
+            <div class="min-w-0">
+                <h1 class="text-base font-extrabold text-slate-900 truncate">{{ $treatment->name }}{{ $treatment->commercial_name ? ' · ' . $treatment->commercial_name : '' }}</h1>
+                <p class="text-xs text-slate-400">
+                    Traitement {{ $treatment->type === 'daily' ? 'quotidien' : ($treatment->type === 'weekly' ? 'hebdomadaire' : 'cyclique') }}{{ $treatment->is_medical_act ? ' · acte médical' : '' }}
+                </p>
+            </div>
         </div>
     </div>
 
-    {{-- Toast de confirmation (bas de l'écran) --}}
-    <div
-        x-data="{ show: false, message: '' }"
-        x-on:toast.window="message = $event.detail.message; show = true; setTimeout(() => show = false, 3000)"
-        x-show="show"
-        x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="opacity-0 translate-y-4"
-        x-transition:enter-end="opacity-100 translate-y-0"
-        x-transition:leave="transition ease-in duration-200"
-        x-transition:leave-start="opacity-100 translate-y-0"
-        x-transition:leave-end="opacity-0 translate-y-4"
-        class="fixed bottom-6 inset-x-4 z-50 max-w-sm mx-auto pointer-events-none"
-        style="display: none;"
-    >
-        <div class="bg-emerald-500 text-white rounded-2xl px-4 py-3 shadow-xl flex items-center gap-3">
-            <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-            </svg>
-            <p class="text-sm font-semibold" x-text="message"></p>
-        </div>
-    </div>
+    <div class="p-4 max-w-lg mx-auto">
 
     {{-- Panel 1 : Informations --}}
     <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
@@ -442,4 +424,5 @@
     </div>
     @endif
 
+    </div>{{-- /p-4 max-w-lg --}}
 </div>
