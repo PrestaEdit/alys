@@ -32,8 +32,9 @@ class Calendar extends Component
         if ($profileName === '') {
             $this->activeProfileName = self::FASTING_SUBJECT_FALLBACK;
         } else {
-            $normalizedName = preg_replace('/\s+/', ' ', $profileName) ?? $profileName;
-            $this->activeProfileName = explode(' ', $normalizedName)[0] ?: self::FASTING_SUBJECT_FALLBACK;
+            $normalizedName = trim((string) preg_replace('/\s+/', ' ', $profileName));
+            $firstName = preg_split('/\s+/', $normalizedName, 2)[0] ?? '';
+            $this->activeProfileName = $firstName !== '' ? $firstName : self::FASTING_SUBJECT_FALLBACK;
         }
         $this->loadMonth($service);
         $this->loadDay($service);
