@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\CalendarEvent;
+use App\Services\ActiveProfile;
 use App\Services\CalendarService;
 use App\Services\EventMoveService;
 use Carbon\Carbon;
@@ -114,6 +115,9 @@ class Calendar extends Component
             ->values()
             ->toArray();
 
+        $profile = app(ActiveProfile::class)->get();
+        $profileName = $profile?->name ?? 'Alys';
+
         return view('livewire.calendar', [
             'firstDay' => $firstDay,
             'daysInMonth' => $daysInMonth,
@@ -121,6 +125,7 @@ class Calendar extends Component
             'monthName' => $firstDay->locale('fr')->isoFormat('MMMM YYYY'),
             'today' => now()->toDateString(),
             'legend' => $legend,
+            'profileName' => $profileName,
         ])->layout('layouts.app', ['title' => 'Calendrier']);
     }
 }
