@@ -415,27 +415,31 @@
                 <div class="flex items-start justify-between">
                     <div>
                         @if($entry->dose_morning !== null || $entry->dose_noon !== null || $entry->dose_evening !== null)
-                            @php $decimals = $treatment->unit === 'ml' ? 1 : 0; @endphp
                             <div class="{{ $index === 0 ? 'text-slate-800' : 'text-slate-500' }}">
                                 @if($entry->dose_morning !== null)
-                                <p class="text-xs font-semibold">Matin · {{ number_format($entry->dose_morning, $decimals, ',', '') }}{{ $treatment->unit ? ' ' . $treatment->unit : '' }}</p>
+                                @php $hm = (float)$entry->dose_morning; $hmdec = $treatment->unit === 'ml' ? 1 : ($hm != (int)$hm ? 1 : 0); @endphp
+                                <p class="text-xs font-semibold">Matin · {{ number_format($hm, $hmdec, ',', '') }}{{ $treatment->unit ? ' ' . $treatment->unit : '' }}</p>
                                 @endif
                                 @if($entry->dose_noon !== null)
-                                <p class="text-xs font-semibold">Midi · {{ number_format($entry->dose_noon, $decimals, ',', '') }}{{ $treatment->unit ? ' ' . $treatment->unit : '' }}</p>
+                                @php $hn = (float)$entry->dose_noon; $hndec = $treatment->unit === 'ml' ? 1 : ($hn != (int)$hn ? 1 : 0); @endphp
+                                <p class="text-xs font-semibold">Midi · {{ number_format($hn, $hndec, ',', '') }}{{ $treatment->unit ? ' ' . $treatment->unit : '' }}</p>
                                 @endif
                                 @if($entry->dose_evening !== null)
-                                <p class="text-xs font-semibold">Soir · {{ number_format($entry->dose_evening, $decimals, ',', '') }}{{ $treatment->unit ? ' ' . $treatment->unit : '' }}</p>
+                                @php $hev = (float)$entry->dose_evening; $hevdec = $treatment->unit === 'ml' ? 1 : ($hev != (int)$hev ? 1 : 0); @endphp
+                                <p class="text-xs font-semibold">Soir · {{ number_format($hev, $hevdec, ',', '') }}{{ $treatment->unit ? ' ' . $treatment->unit : '' }}</p>
                                 @endif
                             </div>
                         @elseif($entry->times_per_day)
-                            @php $intervalH = $entry->times_per_day > 0 ? round(24 / $entry->times_per_day) : 0; @endphp
+                            @php $intervalH = $entry->times_per_day > 0 ? round(24 / $entry->times_per_day) : 0;
+                                 $hid = (float)($entry->dose ?? 0); $hiddec = $treatment->unit === 'ml' ? 1 : ($hid != (int)$hid ? 1 : 0); @endphp
                             <p class="text-sm font-bold {{ $index === 0 ? 'text-slate-800' : 'text-slate-500' }}">
-                                {{ number_format($entry->dose ?? 0, $treatment->unit === 'ml' ? 1 : 0, ',', '') }} {{ $treatment->unit }} / prise
+                                {{ number_format($hid, $hiddec, ',', '') }} {{ $treatment->unit }} / prise
                             </p>
                             <p class="text-xs {{ $index === 0 ? 'text-slate-500' : 'text-slate-400' }}">{{ $entry->times_per_day }}×/jour · toutes les {{ $intervalH }}h</p>
                         @else
+                        @php $hsd = (float)($entry->dose ?? 0); $hsddec = $treatment->unit === 'ml' ? 1 : ($hsd != (int)$hsd ? 1 : 0); @endphp
                         <p class="text-sm font-bold {{ $index === 0 ? 'text-slate-800' : 'text-slate-500' }}">
-                            {{ number_format($entry->dose ?? 0, $treatment->unit === 'ml' ? 1 : 0, ',', '') }} {{ $treatment->unit }} / {{ $treatment->type === 'daily' ? 'jour' : 'prise' }}
+                            {{ number_format($hsd, $hsddec, ',', '') }} {{ $treatment->unit }} / {{ $treatment->type === 'daily' ? 'jour' : 'prise' }}
                         </p>
                         @endif
                         <p class="text-xs text-slate-400">

@@ -60,7 +60,7 @@ class Treatment extends Model
 
     public function posologyHistory(): HasMany
     {
-        return $this->hasMany(PosologyHistory::class)->orderByDesc('started_at');
+        return $this->hasMany(PosologyHistory::class)->orderByDesc('started_at')->orderByDesc('id');
     }
 
     public function calendarEvents(): HasMany

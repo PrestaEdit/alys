@@ -225,9 +225,16 @@ class CalendarService
 
     private function formatAmount(float $amount, ?string $unit): string
     {
-        $formatted = $unit === 'ml'
-            ? number_format($amount, 1, ',', '')
-            : ($amount == (int) $amount ? (string)(int)$amount : number_format($amount, 2, ',', ''));
+        if ($unit === 'ml') {
+            $formatted = number_format($amount, 1, ',', '');
+        } elseif ($amount == (int) $amount) {
+            $formatted = (string)(int)$amount;
+        } else {
+            $rounded = round($amount * 2) / 2;
+            $formatted = $rounded == (int)$rounded
+                ? (string)(int)$rounded
+                : number_format($rounded, 1, ',', '');
+        }
         return $unit ? "{$formatted} {$unit}" : $formatted;
     }
 }
