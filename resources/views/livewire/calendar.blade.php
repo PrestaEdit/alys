@@ -137,7 +137,7 @@
                 <div class="flex-1 min-w-0">
                     <p class="text-xs font-semibold text-slate-800">{{ $event['display_name'] ?? $event['name'] }}</p>
                     @if($event['requires_fasting'])
-                        <p class="text-xs text-amber-600 font-bold">⚠️ Alys doit être à jeun</p>
+                        <p class="text-xs text-amber-600 font-bold">⚠️ {{ $profileName }} doit être à jeun</p>
                     @endif
                     @if(!empty($event['notes']))
                         <p class="text-xs text-slate-400">{{ $event['notes'] }}</p>

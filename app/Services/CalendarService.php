@@ -150,6 +150,7 @@ class CalendarService
         $events = CalendarEvent::with('treatment')
             ->whereBetween('scheduled_date', [$start->toDateString(), $end->toDateString()])
             ->where('is_cancelled', false)
+            ->whereHas('treatment', fn($q) => $q->whereNull('archived_at'))
             ->get()
             ->groupBy(fn($e) => $e->scheduled_date->toDateString());
 

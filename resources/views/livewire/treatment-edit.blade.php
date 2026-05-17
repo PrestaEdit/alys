@@ -1,24 +1,25 @@
-<div class="p-4 max-w-lg mx-auto">
+<div>
 
-    {{-- Header --}}
-    <div class="flex items-center gap-3 mb-5">
-        <a href="{{ route('treatments') }}"
-           class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors text-lg">
-            ‹
-        </a>
-        <div>
-            <h1 class="text-base font-extrabold text-slate-900">{{ $treatment->name }} · {{ $treatment->commercial_name }}</h1>
-            <p class="text-xs text-slate-400">
-                Traitement {{ $treatment->type === 'daily' ? 'quotidien' : ($treatment->type === 'weekly' ? 'hebdomadaire' : 'cyclique') }}{{ $treatment->is_medical_act ? ' · acte médical' : '' }}
-            </p>
+    {{-- Fond fixe qui couvre la safe-area au-dessus du sticky header --}}
+    <div class="fixed top-0 left-0 right-0 bg-slate-50" style="height: var(--safe-top); z-index: 49;"></div>
+
+    {{-- Header sticky --}}
+    <div class="sticky bg-slate-50 border-b border-slate-100 px-4 py-3" style="top: var(--safe-top); z-index: 50;">
+        <div class="max-w-lg mx-auto flex items-center gap-3">
+            <a href="{{ route('treatments') }}"
+               class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors text-lg flex-shrink-0">
+                ‹
+            </a>
+            <div class="min-w-0">
+                <h1 class="text-base font-extrabold text-slate-900 truncate">{{ $treatment->name }}{{ $treatment->commercial_name ? ' · ' . $treatment->commercial_name : '' }}</h1>
+                <p class="text-xs text-slate-400">
+                    Traitement {{ $treatment->type === 'daily' ? 'quotidien' : ($treatment->type === 'weekly' ? 'hebdomadaire' : 'cyclique') }}{{ $treatment->is_medical_act ? ' · acte médical' : '' }}
+                </p>
+            </div>
         </div>
     </div>
 
-    @if(session('success'))
-    <div class="bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2 mb-4">
-        <p class="text-xs font-semibold text-emerald-700">{{ session('success') }}</p>
-    </div>
-    @endif
+    <div class="p-4 max-w-lg mx-auto">
 
     {{-- Panel 1 : Informations --}}
     <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
@@ -477,4 +478,5 @@
     </div>
     @endif
 
+    </div>{{-- /p-4 max-w-lg --}}
 </div>
