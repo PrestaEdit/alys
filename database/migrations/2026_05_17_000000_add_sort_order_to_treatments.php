@@ -13,14 +13,22 @@ return new class extends Migration
             $table->integer('sort_order')->nullable()->after('archived_at');
         });
 
-        $ids = DB::table('treatments')
+        $profileIds = DB::table('treatments')
             ->whereNull('archived_at')
-            ->orderByRaw("CASE WHEN name = 'Hôpital' THEN 0 ELSE 1 END")
-            ->orderBy('id')
-            ->pluck('id');
+            ->distinct()
+            ->pluck('profile_id');
 
-        foreach ($ids as $index => $id) {
-            DB::table('treatments')->where('id', $id)->update(['sort_order' => $index]);
+        foreach ($profileIds as $profileId) {
+            $ids = DB::table('treatments')
+                ->whereNull('archived_at')
+                ->where('profile_id', $profileId)
+                ->orderByRaw("CASE WHEN name = 'Hôpital' THEN 0 ELSE 1 END")
+                ->orderBy('id')
+                ->pluck('id');
+
+            foreach ($ids as $index => $id) {
+                DB::table('treatments')->where('id', $id)->update(['sort_order' => $index]);
+            }
         }
     }
 
