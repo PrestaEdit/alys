@@ -112,6 +112,20 @@ class Treatment extends Model
         return (int) $h === $h ? (int) $h : null;
     }
 
+    public function dayOfWeekName(): string
+    {
+        return match ($this->day_of_week) {
+            0 => 'lundi',
+            1 => 'mardi',
+            2 => 'mercredi',
+            3 => 'jeudi',
+            4 => 'vendredi',
+            5 => 'samedi',
+            6 => 'dimanche',
+            default => '',
+        };
+    }
+
     public function displayName(): string
     {
         return $this->commercial_name ?: $this->name;

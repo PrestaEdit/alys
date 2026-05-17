@@ -185,40 +185,88 @@
         </button>
     </div>
 
-    {{-- Panel 3 : Récurrence (cyclic uniquement) --}}
-    @if($editType === 'cyclic')
+    {{-- Panel 3 : Planification (weekly) ou Récurrence (cyclic) --}}
+    @if($editType === 'weekly' || $editType === 'cyclic')
     <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
-        <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-4">Récurrence</p>
+        <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-4">
+            {{ $editType === 'weekly' ? 'Planification' : 'Récurrence' }}
+        </p>
 
-        <div class="mb-3">
-            <label class="block text-xs font-semibold text-slate-600 mb-1.5">Date de début</label>
-            <x-datepicker model="editRecurrenceStart" :value="$editRecurrenceStart" />
-        </div>
-
-        <div class="mb-5">
-            <label class="block text-xs font-semibold text-slate-600 mb-1.5">Fréquence (semaines)</label>
-            <div class="flex items-center gap-3">
-                <button wire:click="decrementFrequency"
-                        class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 text-xl font-light hover:bg-slate-200 transition-colors flex items-center justify-center">
-                    −
-                </button>
-                <div class="flex-1 text-center">
-                    <p class="text-lg font-extrabold text-slate-800">
-                        {{ $frequencyWeeks === 1 ? 'Toutes les semaines' : 'Toutes les ' . $frequencyWeeks . ' semaines' }}
-                    </p>
+        @if($editType === 'weekly')
+            {{-- Jour de la semaine --}}
+            <div class="mb-4">
+                <label class="block text-xs font-semibold text-slate-600 mb-2">Jour de la semaine</label>
+                @php $dayNames = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']; @endphp
+                <div class="grid grid-cols-7 gap-1">
+                    @foreach($dayNames as $i => $dayName)
+                    <button wire:click="$set('editDayOfWeek', {{ $i }})"
+                            class="py-2 rounded-xl text-xs font-bold transition-colors
+                                   {{ $editDayOfWeek === $i ? 'text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200' }}"
+                            style="{{ $editDayOfWeek === $i ? 'background: linear-gradient(135deg, #0ea5e9, #6366f1);' : '' }}">
+                        {{ $dayName }}
+                    </button>
+                    @endforeach
                 </div>
-                <button wire:click="incrementFrequency"
-                        class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 text-xl font-light hover:bg-slate-200 transition-colors flex items-center justify-center">
-                    +
-                </button>
             </div>
-            @error('frequencyWeeks') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
-        </div>
+
+            {{-- Fréquence --}}
+            <div class="mb-4">
+                <label class="block text-xs font-semibold text-slate-600 mb-1.5">Fréquence</label>
+                <div class="flex items-center gap-3">
+                    <button wire:click="decrementFrequency"
+                            class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 text-xl font-light hover:bg-slate-200 transition-colors flex items-center justify-center">
+                        −
+                    </button>
+                    <div class="flex-1 text-center">
+                        <p class="text-lg font-extrabold text-slate-800">
+                            {{ $frequencyWeeks === 1 ? 'Toutes les semaines' : 'Une semaine sur ' . $frequencyWeeks }}
+                        </p>
+                    </div>
+                    <button wire:click="incrementFrequency"
+                            class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 text-xl font-light hover:bg-slate-200 transition-colors flex items-center justify-center">
+                        +
+                    </button>
+                </div>
+                @error('frequencyWeeks') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+            </div>
+
+            {{-- Date de référence --}}
+            <div class="mb-5">
+                <label class="block text-xs font-semibold text-slate-600 mb-1.5">Date de la première prise (optionnel)</label>
+                <x-datepicker model="editRecurrenceStart" :value="$editRecurrenceStart" />
+            </div>
+        @else
+            {{-- Cyclique : date + fréquence --}}
+            <div class="mb-3">
+                <label class="block text-xs font-semibold text-slate-600 mb-1.5">Date de début</label>
+                <x-datepicker model="editRecurrenceStart" :value="$editRecurrenceStart" />
+            </div>
+
+            <div class="mb-5">
+                <label class="block text-xs font-semibold text-slate-600 mb-1.5">Fréquence (semaines)</label>
+                <div class="flex items-center gap-3">
+                    <button wire:click="decrementFrequency"
+                            class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 text-xl font-light hover:bg-slate-200 transition-colors flex items-center justify-center">
+                        −
+                    </button>
+                    <div class="flex-1 text-center">
+                        <p class="text-lg font-extrabold text-slate-800">
+                            {{ $frequencyWeeks === 1 ? 'Toutes les semaines' : 'Toutes les ' . $frequencyWeeks . ' semaines' }}
+                        </p>
+                    </div>
+                    <button wire:click="incrementFrequency"
+                            class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 text-xl font-light hover:bg-slate-200 transition-colors flex items-center justify-center">
+                        +
+                    </button>
+                </div>
+                @error('frequencyWeeks') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+            </div>
+        @endif
 
         <button wire:click="saveRecurrence"
                 class="w-full py-3 rounded-xl text-sm font-bold text-white transition-colors hover:opacity-90"
                 style="background: linear-gradient(135deg, #0ea5e9, #6366f1);">
-            Enregistrer la récurrence
+            Enregistrer la planification
         </button>
     </div>
     @endif
@@ -257,8 +305,9 @@
                         −
                     </button>
                     <div class="flex-1 text-center">
+                        @php $epv = (float)($part['value'] ?? 0); $epdec = $treatment->unit === 'ml' ? 1 : ($epv != (int)$epv ? 1 : 0); @endphp
                         <p class="text-3xl font-extrabold leading-none" style="color: {{ $treatment->color }};">
-                            {{ number_format($part['value'] ?? 0, $treatment->unit === 'ml' ? 1 : 0, ',', '') }}
+                            {{ number_format($epv, $epdec, ',', '') }}
                         </p>
                         @if($treatment->unit)
                         <p class="text-xs text-slate-400 font-medium mt-1">{{ $treatment->unit }}</p>
@@ -280,8 +329,9 @@
                     −
                 </button>
                 <div class="flex-1 text-center">
+                    @php $eid = (float)($newDose ?? 0); $eidec = $treatment->unit === 'ml' ? 1 : ($eid != (int)$eid ? 1 : 0); @endphp
                     <p class="text-4xl font-extrabold leading-none" style="color: {{ $treatment->color }};">
-                        {{ number_format($newDose ?? 0, $treatment->unit === 'ml' ? 1 : 0, ',', '') }}
+                        {{ number_format($eid, $eidec, ',', '') }}
                     </p>
                     @if($treatment->unit)
                     <p class="text-sm text-slate-400 font-medium mt-1">{{ $treatment->unit }} / prise</p>
@@ -317,10 +367,11 @@
                     −
                 </button>
                 <div class="flex-1 text-center">
+                    @php $esd = (float)($newDose ?? 0); $esdec = $treatment->unit === 'ml' ? 1 : ($esd != (int)$esd ? 1 : 0); @endphp
                     <p class="text-4xl font-extrabold leading-none" style="color: {{ $treatment->color }};">
-                        {{ number_format($newDose ?? 0, $treatment->unit === 'ml' ? 1 : 0, ',', '') }}
+                        {{ number_format($esd, $esdec, ',', '') }}
                     </p>
-                    <p class="text-sm text-slate-400 font-medium mt-1">{{ $treatment->unit }} / {{ $treatment->type === 'daily' ? 'jour' : ($treatment->type === 'weekly' ? 'mardi' : 'prise') }}</p>
+                    <p class="text-sm text-slate-400 font-medium mt-1">{{ $treatment->unit }} / {{ $treatment->type === 'daily' ? 'jour' : ($treatment->type === 'weekly' ? $treatment->dayOfWeekName() : 'prise') }}</p>
                 </div>
                 <button wire:click="increment"
                         class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 text-xl font-light hover:bg-slate-200 transition-colors flex items-center justify-center">

@@ -24,6 +24,9 @@ class TreatmentCreate extends Component
     public ?int $parentTreatmentId = null;
     public int $linkedDays = 1;
 
+    // Weekly scheduling
+    public int $dayOfWeek = 0; // 0=Lundi … 6=Dimanche
+
     // Widget
     public bool $showWidget = false;
     public string $widgetIcon = '💊';
@@ -55,7 +58,7 @@ class TreatmentCreate extends Component
     {
         $steps = [1, 2];
         if (!$this->isMedicalAct) $steps[] = 3;
-        if ($this->type === 'cyclic') $steps[] = 4;
+        if ($this->type === 'cyclic' || $this->type === 'weekly') $steps[] = 4;
         $steps[] = 5;
         return $steps;
     }
@@ -88,7 +91,7 @@ class TreatmentCreate extends Component
             1       => 'Informations de base',
             2       => 'Widget accueil',
             3       => 'Posologie',
-            4       => 'Récurrence',
+            4       => $this->type === 'weekly' ? 'Planification' : 'Récurrence',
             5       => 'Récapitulatif',
             default => '',
         };
@@ -109,14 +112,18 @@ class TreatmentCreate extends Component
                 'color.required'  => 'La couleur est obligatoire.',
             ]);
         } elseif ($this->step === 4) {
-            $this->validate([
-                'frequencyWeeks'  => 'required|integer|min:1',
-                'recurrenceStart' => 'nullable|date',
-            ], [
+            $rules = ['frequencyWeeks' => 'required|integer|min:1'];
+            $messages = [
                 'frequencyWeeks.required' => 'La fréquence est obligatoire.',
                 'frequencyWeeks.min'      => 'La fréquence doit être d\'au moins 1 semaine.',
-                'recurrenceStart.date'    => 'La date de début est invalide.',
-            ]);
+            ];
+            if ($this->type === 'weekly') {
+                $rules['dayOfWeek'] = 'required|integer|between:0,6';
+            } else {
+                $rules['recurrenceStart']    = 'nullable|date';
+                $messages['recurrenceStart.date'] = 'La date de début est invalide.';
+            }
+            $this->validate($rules, $messages);
         }
     }
 
@@ -149,13 +156,13 @@ class TreatmentCreate extends Component
 
     public function increment(): void
     {
-        $step = $this->unit === 'ml' ? 0.1 : 1;
+        $step = $this->unit === 'ml' ? 0.1 : 0.5;
         $this->currentDose = round($this->currentDose + $step, 2);
     }
 
     public function decrement(): void
     {
-        $step = $this->unit === 'ml' ? 0.1 : 1;
+        $step = $this->unit === 'ml' ? 0.1 : 0.5;
         $this->currentDose = max(0, round($this->currentDose - $step, 2));
     }
 
@@ -173,37 +180,37 @@ class TreatmentCreate extends Component
 
     public function incrementMorning(): void
     {
-        $step = $this->unit === 'ml' ? 0.1 : 1;
+        $step = $this->unit === 'ml' ? 0.1 : 0.5;
         $this->doseMorning = round(($this->doseMorning ?? 0) + $step, 2);
     }
 
     public function decrementMorning(): void
     {
-        $step = $this->unit === 'ml' ? 0.1 : 1;
+        $step = $this->unit === 'ml' ? 0.1 : 0.5;
         $this->doseMorning = max(0, round(($this->doseMorning ?? 0) - $step, 2));
     }
 
     public function incrementNoon(): void
     {
-        $step = $this->unit === 'ml' ? 0.1 : 1;
+        $step = $this->unit === 'ml' ? 0.1 : 0.5;
         $this->doseNoon = round(($this->doseNoon ?? 0) + $step, 2);
     }
 
     public function decrementNoon(): void
     {
-        $step = $this->unit === 'ml' ? 0.1 : 1;
+        $step = $this->unit === 'ml' ? 0.1 : 0.5;
         $this->doseNoon = max(0, round(($this->doseNoon ?? 0) - $step, 2));
     }
 
     public function incrementEvening(): void
     {
-        $step = $this->unit === 'ml' ? 0.1 : 1;
+        $step = $this->unit === 'ml' ? 0.1 : 0.5;
         $this->doseEvening = round(($this->doseEvening ?? 0) + $step, 2);
     }
 
     public function decrementEvening(): void
     {
-        $step = $this->unit === 'ml' ? 0.1 : 1;
+        $step = $this->unit === 'ml' ? 0.1 : 0.5;
         $this->doseEvening = max(0, round(($this->doseEvening ?? 0) - $step, 2));
     }
 
@@ -290,6 +297,14 @@ class TreatmentCreate extends Component
             }
         }
 
+        if ($this->type === 'weekly') {
+            $treatmentData['day_of_week']     = $this->dayOfWeek;
+            $treatmentData['frequency_weeks'] = $this->frequencyWeeks;
+            if ($this->recurrenceStart) {
+                $treatmentData['recurrence_start'] = $this->recurrenceStart;
+            }
+        }
+
         $treatment = Treatment::create($treatmentData);
 
         // Initial posology history entry
@@ -322,12 +337,40 @@ class TreatmentCreate extends Component
             $this->generateCyclicEvents($treatment);
         }
 
+        if ($this->type === 'weekly') {
+            $this->generateWeeklyEvents($treatment);
+        }
+
         if ($this->parentTreatmentId) {
             $this->generateLinkedEvents($treatment);
         }
 
         session()->flash('success', 'Traitement créé avec succès.');
         $this->redirect(route('treatments'), navigate: false);
+    }
+
+    private function generateWeeklyEvents(Treatment $treatment): void
+    {
+        $profile = app(\App\Services\ActiveProfile::class)->get();
+        if (!$profile) return;
+
+        $endDate = $profile->treatment_end;
+        $start   = $this->recurrenceStart ? Carbon::parse($this->recurrenceStart) : Carbon::today();
+
+        // Position on the correct day of week on or after $start
+        $current = $start->copy()->startOfWeek(Carbon::MONDAY)->addDays($this->dayOfWeek);
+        if ($current->lt($start)) {
+            $current->addWeeks($this->frequencyWeeks);
+        }
+
+        while ($current->lte($endDate)) {
+            CalendarEvent::create([
+                'treatment_id'   => $treatment->id,
+                'scheduled_date' => $current->toDateString(),
+                'is_cancelled'   => false,
+            ]);
+            $current->addWeeks($this->frequencyWeeks);
+        }
     }
 
     private function generateCyclicEvents(Treatment $treatment): void
