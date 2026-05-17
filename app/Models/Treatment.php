@@ -21,6 +21,7 @@ class Treatment extends Model
         'show_widget', 'widget_icon',
         'parent_treatment_id', 'linked_days',
         'archived_at',
+        'sort_order',
     ];
 
     protected $casts = [
@@ -36,6 +37,7 @@ class Treatment extends Model
         'linked_days'      => 'integer',
         'is_medical_act'   => 'boolean',
         'requires_fasting' => 'boolean',
+        'sort_order'       => 'integer',
     ];
 
     public function scopeActive(Builder $query): void
