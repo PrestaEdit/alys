@@ -64,8 +64,9 @@ class CalendarService
                 ->whereDate('scheduled_date', '>', $fromDate)
                 ->where('is_cancelled', false)
             ])
-            ->get()
-            ->sortBy(fn($t) => $t->name === 'Hôpital' ? 0 : 1);
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
 
         return $treatments->map(fn($t) => [
             'display_name' => $t->displayName(),
