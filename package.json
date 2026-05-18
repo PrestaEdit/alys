@@ -17,6 +17,7 @@
     },
     "dependencies": {
         "preline": "^4.1.3",
-        "qrcode": "^1.5.4"
+        "qrcode": "^1.5.4",
+        "sortablejs": "^1.15.7"
     }
 }

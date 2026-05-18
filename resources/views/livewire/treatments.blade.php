@@ -30,11 +30,28 @@
         </a>
     </div>
     @else
-    <div class="space-y-3">
+    <div
+        wire:ignore
+        x-data="{
+            init() {
+                new Sortable(this.$refs.sortable, {
+                    handle: '.drag-handle',
+                    animation: 150,
+                    onEnd: () => {
+                        const ids = [...this.$refs.sortable.children]
+                            .map(el => parseInt(el.dataset.id));
+                        $wire.call('setOrder', ids);
+                    },
+                });
+            }
+        }"
+    >
+    <div x-ref="sortable" class="space-y-3">
         @foreach($treatments as $treatment)
-        <div class="bg-white rounded-2xl p-4 shadow-sm">
+        <div class="bg-white rounded-2xl p-4 shadow-sm" data-id="{{ $treatment->id }}">
             <div class="flex items-center justify-between mb-2">
                 <div class="flex items-center gap-2">
+                    <span class="drag-handle text-slate-300 text-xl cursor-grab leading-none flex-shrink-0 select-none" aria-hidden="true">⠿</span>
                     <span class="w-3 h-3 rounded-full flex-shrink-0"
                           style="background-color: {{ $treatment->color }};"></span>
                     <div>
@@ -57,34 +74,38 @@
             <div class="flex items-center justify-between">
                 <div>
                     @if($treatment->hasDayPartDoses())
-                        @php $decimals = $treatment->unit === 'ml' ? 1 : 0; @endphp
                         <div class="space-y-0.5">
                             @if($treatment->dose_morning !== null)
+                            @php $dm = (float)$treatment->dose_morning; $dmdec = $treatment->unit === 'ml' ? 1 : ($dm != (int)$dm ? 1 : 0); @endphp
                             <p class="text-xs font-semibold" style="color: {{ $treatment->color }};">
-                                Matin · {{ number_format((float)$treatment->dose_morning, $decimals, ',', '') }}{{ $treatment->unit ? ' ' . $treatment->unit : '' }}
+                                Matin · {{ number_format($dm, $dmdec, ',', '') }}{{ $treatment->unit ? ' ' . $treatment->unit : '' }}
                             </p>
                             @endif
                             @if($treatment->dose_noon !== null)
+                            @php $dn = (float)$treatment->dose_noon; $dndec = $treatment->unit === 'ml' ? 1 : ($dn != (int)$dn ? 1 : 0); @endphp
                             <p class="text-xs font-semibold" style="color: {{ $treatment->color }};">
-                                Midi · {{ number_format((float)$treatment->dose_noon, $decimals, ',', '') }}{{ $treatment->unit ? ' ' . $treatment->unit : '' }}
+                                Midi · {{ number_format($dn, $dndec, ',', '') }}{{ $treatment->unit ? ' ' . $treatment->unit : '' }}
                             </p>
                             @endif
                             @if($treatment->dose_evening !== null)
+                            @php $dev = (float)$treatment->dose_evening; $devdec = $treatment->unit === 'ml' ? 1 : ($dev != (int)$dev ? 1 : 0); @endphp
                             <p class="text-xs font-semibold" style="color: {{ $treatment->color }};">
-                                Soir · {{ number_format((float)$treatment->dose_evening, $decimals, ',', '') }}{{ $treatment->unit ? ' ' . $treatment->unit : '' }}
+                                Soir · {{ number_format($dev, $devdec, ',', '') }}{{ $treatment->unit ? ' ' . $treatment->unit : '' }}
                             </p>
                             @endif
                         </div>
                     @elseif($treatment->hasIntervalDose())
-                        @php $intervalH = $treatment->times_per_day > 0 ? round(24 / $treatment->times_per_day) : 0; @endphp
+                        @php $intervalH = $treatment->times_per_day > 0 ? round(24 / $treatment->times_per_day) : 0;
+                             $icd = (float)$treatment->current_dose; $icddec = $treatment->unit === 'ml' ? 1 : ($icd != (int)$icd ? 1 : 0); @endphp
                         <p class="text-xl font-extrabold leading-none" style="color: {{ $treatment->color }};">
-                            {{ number_format((float)$treatment->current_dose, $treatment->unit === 'ml' ? 1 : 0, ',', '') }}
+                            {{ number_format($icd, $icddec, ',', '') }}
                             <span class="text-sm font-normal text-slate-400">{{ $treatment->unit }}</span>
                         </p>
                         <p class="text-xs text-slate-400 mt-0.5">{{ $treatment->times_per_day }}×/jour · toutes les {{ $intervalH }}h</p>
                     @elseif($treatment->current_dose !== null)
+                    @php $scd = (float)$treatment->current_dose; $scddec = $treatment->unit === 'ml' ? 1 : ($scd != (int)$scd ? 1 : 0); @endphp
                     <p class="text-xl font-extrabold leading-none" style="color: {{ $treatment->color }};">
-                        {{ number_format((float)$treatment->current_dose, $treatment->unit === 'ml' ? 1 : 0, ',', '') }}
+                        {{ number_format($scd, $scddec, ',', '') }}
                         <span class="text-sm font-normal text-slate-400">{{ $treatment->unit }}</span>
                     </p>
                     @endif
@@ -92,7 +113,12 @@
                 <span class="text-xs font-semibold px-2 py-1 rounded-full"
                       style="color: {{ $treatment->color }}; background-color: {{ $treatment->color }}18;">
                     @if($treatment->type === 'daily') Quotidien
-                    @elseif($treatment->type === 'weekly') Hebdo · mardi
+                    @elseif($treatment->type === 'weekly')
+                        @if($treatment->frequency_weeks && $treatment->frequency_weeks > 1)
+                            1 sem. / {{ $treatment->frequency_weeks }} · {{ $treatment->dayOfWeekName() }}
+                        @else
+                            Hebdo · {{ $treatment->dayOfWeekName() }}
+                        @endif
                     @elseif($treatment->is_medical_act) Acte médical
                     @elseif($treatment->frequency_weeks) / {{ $treatment->frequency_weeks }} sem.
                     @else Cyclique
@@ -111,7 +137,21 @@
             @endif
         </div>
         @endforeach
+    </div>{{-- data-sortable --}}
+    </div>{{-- wire:ignore wrapper --}}
+
+    @if($isDirty)
+    <div class="mt-3">
+        <button
+            wire:click="saveOrder"
+            class="w-full py-3 rounded-2xl font-bold text-white text-sm"
+            style="background: linear-gradient(135deg, #0ea5e9, #6366f1);"
+        >
+            Enregistrer l'ordre
+        </button>
     </div>
+    @endif
+
     @endif
 
     {{-- Modal confirmation archivage --}}

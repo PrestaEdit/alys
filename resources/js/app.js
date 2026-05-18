@@ -1,4 +1,6 @@
 import './bootstrap';
+import Sortable from 'sortablejs';
+window.Sortable = Sortable;
 import 'preline';
 import { Calendar } from 'vanilla-calendar-pro';
 import QRCode from 'qrcode';
@@ -21,6 +23,32 @@ function formatDateForDisplay(isoDate, format) {
     const [y, m, d] = isoDate.split('-');
     return format.replace('YYYY', y).replace('MM', m).replace('DD', d);
 }
+
+// Reposition the calendar popup above the input when it overflows the viewport.
+// vanilla-calendar-pro appends the popup to document.body; we reposition via a
+// delegated click listener with a short delay so the popup is visible/measured.
+// This covers both the first open (childList mutation) and subsequent opens
+// (popup already in DOM, toggled visible on click).
+(function setupCalendarRepositioner() {
+    function reposition(container) {
+        // The popup element has both data-vc="calendar" and data-vc-input
+        const popup = document.body.querySelector('[data-vc-input]');
+        if (!popup || window.getComputedStyle(popup).display === 'none') return;
+        const rect = popup.getBoundingClientRect();
+        // 100 px from the bottom: clears Android 3-button nav bar in all densities
+        if (rect.bottom <= window.innerHeight - 100) return;
+        const inputRect = container.getBoundingClientRect();
+        const newTop = window.scrollY + inputRect.top - popup.offsetHeight - 8;
+        popup.style.top = Math.max(window.scrollY + 8, newTop) + 'px';
+    }
+
+    document.addEventListener('click', (e) => {
+        const container = e.target.closest?.('.hs-datepicker');
+        if (!container) return;
+        // 60 ms is enough for vanilla-calendar-pro to show the popup
+        setTimeout(() => reposition(container), 60);
+    });
+})();
 
 // Direct vanilla-calendar-pro initialization, bypassing Preline's HSDatepicker
 // (which requires lodash globally — not available in the Vite/ESM build).

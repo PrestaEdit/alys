@@ -41,6 +41,9 @@ class TreatmentEdit extends Component
     public ?int $editParentTreatmentId = null;
     public int $editLinkedDays = 1;
 
+    // Weekly scheduling
+    public int $editDayOfWeek = 0;
+
     // Widget config
     public bool $showWidget = false;
     public string $widgetIcon = '💊';
@@ -86,6 +89,9 @@ class TreatmentEdit extends Component
         $this->editIsMedicalAct = (bool) $treatment->is_medical_act;
         $this->editRequiresFasting = (bool) $treatment->requires_fasting;
 
+        // Weekly scheduling
+        $this->editDayOfWeek = $treatment->day_of_week ?? 0;
+
         // Linked treatment
         $this->editParentTreatmentId = $treatment->parent_treatment_id;
         $this->editLinkedDays = $treatment->linked_days ?? 1;
@@ -112,13 +118,13 @@ class TreatmentEdit extends Component
 
     public function increment(): void
     {
-        $step = $this->treatment->unit === 'ml' ? 0.1 : 1;
+        $step = $this->treatment->unit === 'ml' ? 0.1 : 0.5;
         $this->newDose = round(($this->newDose ?? 0) + $step, 2);
     }
 
     public function decrement(): void
     {
-        $step = $this->treatment->unit === 'ml' ? 0.1 : 1;
+        $step = $this->treatment->unit === 'ml' ? 0.1 : 0.5;
         $this->newDose = max(0, round(($this->newDose ?? 0) - $step, 2));
     }
 
@@ -138,37 +144,37 @@ class TreatmentEdit extends Component
 
     public function incrementMorning(): void
     {
-        $step = $this->treatment->unit === 'ml' ? 0.1 : 1;
+        $step = $this->treatment->unit === 'ml' ? 0.1 : 0.5;
         $this->newDoseMorning = round(($this->newDoseMorning ?? 0) + $step, 2);
     }
 
     public function decrementMorning(): void
     {
-        $step = $this->treatment->unit === 'ml' ? 0.1 : 1;
+        $step = $this->treatment->unit === 'ml' ? 0.1 : 0.5;
         $this->newDoseMorning = max(0, round(($this->newDoseMorning ?? 0) - $step, 2));
     }
 
     public function incrementNoon(): void
     {
-        $step = $this->treatment->unit === 'ml' ? 0.1 : 1;
+        $step = $this->treatment->unit === 'ml' ? 0.1 : 0.5;
         $this->newDoseNoon = round(($this->newDoseNoon ?? 0) + $step, 2);
     }
 
     public function decrementNoon(): void
     {
-        $step = $this->treatment->unit === 'ml' ? 0.1 : 1;
+        $step = $this->treatment->unit === 'ml' ? 0.1 : 0.5;
         $this->newDoseNoon = max(0, round(($this->newDoseNoon ?? 0) - $step, 2));
     }
 
     public function incrementEvening(): void
     {
-        $step = $this->treatment->unit === 'ml' ? 0.1 : 1;
+        $step = $this->treatment->unit === 'ml' ? 0.1 : 0.5;
         $this->newDoseEvening = round(($this->newDoseEvening ?? 0) + $step, 2);
     }
 
     public function decrementEvening(): void
     {
-        $step = $this->treatment->unit === 'ml' ? 0.1 : 1;
+        $step = $this->treatment->unit === 'ml' ? 0.1 : 0.5;
         $this->newDoseEvening = max(0, round(($this->newDoseEvening ?? 0) - $step, 2));
     }
 
@@ -245,7 +251,7 @@ class TreatmentEdit extends Component
 
         $this->treatment->refresh();
         $this->note = '';
-        session()->flash('success', 'Posologie mise à jour.');
+        $this->dispatch('toast', message: 'Posologie mise à jour.');
     }
 
     // ── Save info ──────────────────────────────────────────────────────
@@ -289,7 +295,7 @@ class TreatmentEdit extends Component
         }
 
         $this->treatment->refresh();
-        session()->flash('success', 'Informations mises à jour.');
+        $this->dispatch('toast', message: 'Informations mises à jour.');
     }
 
     private function regenerateLinkedEvents(): void
@@ -332,7 +338,7 @@ class TreatmentEdit extends Component
             'widget_icon' => $this->showWidget ? $this->widgetIcon : null,
         ]);
         $this->treatment->refresh();
-        session()->flash('success', 'Widget mis à jour.');
+        $this->dispatch('toast', message: 'Widget mis à jour.');
     }
 
     // ── Save recurrence ────────────────────────────────────────────────
@@ -343,8 +349,9 @@ class TreatmentEdit extends Component
 
         $freqChanged  = $this->frequencyWeeks !== ($this->treatment->frequency_weeks ?? 1);
         $startChanged = $this->editRecurrenceStart !== ($this->treatment->recurrence_start?->toDateString() ?? '');
+        $dayChanged   = $this->treatment->type === 'weekly' && $this->editDayOfWeek !== ($this->treatment->day_of_week ?? 0);
 
-        if ($freqChanged || $startChanged) {
+        if ($freqChanged || $startChanged || $dayChanged) {
             $this->showRecalculateModal = true;
             return;
         }
@@ -365,17 +372,21 @@ class TreatmentEdit extends Component
 
     private function applyRecurrenceSave(bool $recalculate = false): void
     {
-        $this->treatment->update([
+        $data = [
             'frequency_weeks'  => $this->frequencyWeeks,
             'recurrence_start' => $this->editRecurrenceStart ?: null,
-        ]);
+        ];
+        if ($this->treatment->type === 'weekly') {
+            $data['day_of_week'] = $this->editDayOfWeek;
+        }
+        $this->treatment->update($data);
         $this->treatment->refresh();
 
         if ($recalculate) {
             $this->recalculateFutureEvents();
         }
 
-        session()->flash('success', 'Récurrence mise à jour.');
+        $this->dispatch('toast', message: 'Récurrence mise à jour.');
     }
 
     private function recalculateFutureEvents(): void
@@ -388,16 +399,25 @@ class TreatmentEdit extends Component
             ->delete();
 
         $profile = app(\App\Services\ActiveProfile::class)->get();
-        if (! $profile || ! $this->editRecurrenceStart) return;
+        if (! $profile) return;
 
         $endDate = $profile->treatment_end;
-        $start   = Carbon::parse($this->editRecurrenceStart);
 
-        $current = $start->copy();
-        if ($current->lte($today)) {
-            $diff = $today->diffInDays($current, false);
-            $weeksAhead = (int) ceil(abs($diff) / (7 * $this->frequencyWeeks));
-            $current->addWeeks($weeksAhead * $this->frequencyWeeks);
+        if ($this->treatment->type === 'weekly') {
+            $start   = $this->editRecurrenceStart ? Carbon::parse($this->editRecurrenceStart) : $today;
+            $current = $start->copy()->startOfWeek(Carbon::MONDAY)->addDays($this->editDayOfWeek);
+            if ($current->lte($today)) {
+                $current->addWeeks($this->frequencyWeeks);
+            }
+        } else {
+            if (! $this->editRecurrenceStart) return;
+            $start   = Carbon::parse($this->editRecurrenceStart);
+            $current = $start->copy();
+            if ($current->lte($today)) {
+                $diff       = $today->diffInDays($current, false);
+                $weeksAhead = (int) ceil(abs($diff) / (7 * $this->frequencyWeeks));
+                $current->addWeeks($weeksAhead * $this->frequencyWeeks);
+            }
         }
 
         while ($current->lte($endDate)) {

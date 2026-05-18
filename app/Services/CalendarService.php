@@ -64,8 +64,9 @@ class CalendarService
                 ->whereDate('scheduled_date', '>', $fromDate)
                 ->where('is_cancelled', false)
             ])
-            ->get()
-            ->sortBy(fn($t) => $t->name === 'Hôpital' ? 0 : 1);
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
 
         return $treatments->map(fn($t) => [
             'display_name' => $t->displayName(),
@@ -150,6 +151,7 @@ class CalendarService
         $events = CalendarEvent::with('treatment')
             ->whereBetween('scheduled_date', [$start->toDateString(), $end->toDateString()])
             ->where('is_cancelled', false)
+            ->whereHas('treatment', fn($q) => $q->whereNull('archived_at'))
             ->get()
             ->groupBy(fn($e) => $e->scheduled_date->toDateString());
 
@@ -224,9 +226,16 @@ class CalendarService
 
     private function formatAmount(float $amount, ?string $unit): string
     {
-        $formatted = $unit === 'ml'
-            ? number_format($amount, 1, ',', '')
-            : ($amount == (int) $amount ? (string)(int)$amount : number_format($amount, 2, ',', ''));
+        if ($unit === 'ml') {
+            $formatted = number_format($amount, 1, ',', '');
+        } elseif ($amount == (int) $amount) {
+            $formatted = (string)(int)$amount;
+        } else {
+            $rounded = round($amount * 2) / 2;
+            $formatted = $rounded == (int)$rounded
+                ? (string)(int)$rounded
+                : number_format($rounded, 1, ',', '');
+        }
         return $unit ? "{$formatted} {$unit}" : $formatted;
     }
 }

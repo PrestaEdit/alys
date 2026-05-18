@@ -21,6 +21,7 @@ class Treatment extends Model
         'show_widget', 'widget_icon',
         'parent_treatment_id', 'linked_days',
         'archived_at',
+        'sort_order',
     ];
 
     protected $casts = [
@@ -36,6 +37,7 @@ class Treatment extends Model
         'linked_days'      => 'integer',
         'is_medical_act'   => 'boolean',
         'requires_fasting' => 'boolean',
+        'sort_order'       => 'integer',
     ];
 
     public function scopeActive(Builder $query): void
@@ -60,7 +62,7 @@ class Treatment extends Model
 
     public function posologyHistory(): HasMany
     {
-        return $this->hasMany(PosologyHistory::class)->orderByDesc('started_at');
+        return $this->hasMany(PosologyHistory::class)->orderByDesc('started_at')->orderByDesc('id');
     }
 
     public function calendarEvents(): HasMany
@@ -110,6 +112,20 @@ class Treatment extends Model
         if (!$this->hasIntervalDose() || $this->times_per_day === 0) return null;
         $h = 24 / $this->times_per_day;
         return (int) $h === $h ? (int) $h : null;
+    }
+
+    public function dayOfWeekName(): string
+    {
+        return match ($this->day_of_week) {
+            0 => 'lundi',
+            1 => 'mardi',
+            2 => 'mercredi',
+            3 => 'jeudi',
+            4 => 'vendredi',
+            5 => 'samedi',
+            6 => 'dimanche',
+            default => '',
+        };
     }
 
     public function displayName(): string

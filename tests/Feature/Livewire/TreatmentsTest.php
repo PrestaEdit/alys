@@ -16,12 +16,12 @@ it('renders treatments list', function () {
     Livewire::test(Treatments::class)->assertStatus(200);
 });
 
-it('increments dose by 1 for tablet unit', function () {
+it('increments dose by 0.5 for tablet unit', function () {
     $sixMp = Treatment::where('name', '6-MP')->first();
     $component = Livewire::test(TreatmentEdit::class, ['treatment' => $sixMp]);
     $before = $component->get('newDose');
     $component->call('increment');
-    expect($component->get('newDose'))->toBe($before + 1.0);
+    expect($component->get('newDose'))->toBe($before + 0.5);
 });
 
 it('increments dose by 0.1 for ml unit', function () {
