@@ -34,25 +34,24 @@
         wire:ignore
         x-data="{
             init() {
-                new Sortable(this.$el.querySelector('[data-sortable]'), {
+                new Sortable(this.$refs.sortable, {
                     handle: '.drag-handle',
                     animation: 150,
                     onEnd: () => {
-                        const ids = [...this.$el.querySelector('[data-sortable]').children]
+                        const ids = [...this.$refs.sortable.children]
                             .map(el => parseInt(el.dataset.id));
-                        $wire.set('orderedIds', ids);
-                        $wire.set('isDirty', true);
+                        $wire.call('setOrder', ids);
                     },
                 });
             }
         }"
     >
-    <div data-sortable class="space-y-3">
+    <div x-ref="sortable" class="space-y-3">
         @foreach($treatments as $treatment)
         <div class="bg-white rounded-2xl p-4 shadow-sm" data-id="{{ $treatment->id }}">
             <div class="flex items-center justify-between mb-2">
                 <div class="flex items-center gap-2">
-                    <span class="drag-handle text-slate-300 text-xl cursor-grab leading-none flex-shrink-0 select-none">⠿</span>
+                    <span class="drag-handle text-slate-300 text-xl cursor-grab leading-none flex-shrink-0 select-none" aria-hidden="true">⠿</span>
                     <span class="w-3 h-3 rounded-full flex-shrink-0"
                           style="background-color: {{ $treatment->color }};"></span>
                     <div>

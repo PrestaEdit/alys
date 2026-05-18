@@ -39,6 +39,12 @@ class Treatments extends Component
         Treatment::findOrFail($id)->unarchive();
     }
 
+    public function setOrder(array $ids): void
+    {
+        $this->orderedIds = $ids;
+        $this->isDirty = true;
+    }
+
     public function saveOrder(): void
     {
         foreach ($this->orderedIds as $index => $id) {
