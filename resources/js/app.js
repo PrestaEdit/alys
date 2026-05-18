@@ -1,4 +1,6 @@
 import './bootstrap';
+import Sortable from 'sortablejs';
+window.Sortable = Sortable;
 import 'preline';
 import { Calendar } from 'vanilla-calendar-pro';
 import QRCode from 'qrcode';
