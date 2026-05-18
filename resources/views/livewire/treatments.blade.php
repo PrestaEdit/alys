@@ -30,11 +30,29 @@
         </a>
     </div>
     @else
-    <div class="space-y-3">
+    <div
+        wire:ignore
+        x-data="{
+            init() {
+                new Sortable(this.$el.querySelector('[data-sortable]'), {
+                    handle: '.drag-handle',
+                    animation: 150,
+                    onEnd: () => {
+                        const ids = [...this.$el.querySelector('[data-sortable]').children]
+                            .map(el => parseInt(el.dataset.id));
+                        $wire.set('orderedIds', ids);
+                        $wire.set('isDirty', true);
+                    },
+                });
+            }
+        }"
+    >
+    <div data-sortable class="space-y-3">
         @foreach($treatments as $treatment)
-        <div class="bg-white rounded-2xl p-4 shadow-sm">
+        <div class="bg-white rounded-2xl p-4 shadow-sm" data-id="{{ $treatment->id }}">
             <div class="flex items-center justify-between mb-2">
                 <div class="flex items-center gap-2">
+                    <span class="drag-handle text-slate-300 text-xl cursor-grab leading-none flex-shrink-0 select-none">⠿</span>
                     <span class="w-3 h-3 rounded-full flex-shrink-0"
                           style="background-color: {{ $treatment->color }};"></span>
                     <div>
@@ -120,7 +138,21 @@
             @endif
         </div>
         @endforeach
+    </div>{{-- data-sortable --}}
+    </div>{{-- wire:ignore wrapper --}}
+
+    @if($isDirty)
+    <div class="mt-3">
+        <button
+            wire:click="saveOrder"
+            class="w-full py-3 rounded-2xl font-bold text-white text-sm"
+            style="background: linear-gradient(135deg, #0ea5e9, #6366f1);"
+        >
+            Enregistrer l'ordre
+        </button>
     </div>
+    @endif
+
     @endif
 
     {{-- Modal confirmation archivage --}}
