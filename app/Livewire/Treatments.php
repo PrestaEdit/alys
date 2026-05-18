@@ -10,6 +10,9 @@ class Treatments extends Component
     public ?int $pendingArchiveId = null;
     public bool $showArchiveModal = false;
 
+    public array $orderedIds = [];
+    public bool $isDirty = false;
+
     public function archive(int $id): void
     {
         $this->pendingArchiveId = $id;
@@ -36,12 +39,20 @@ class Treatments extends Component
         Treatment::findOrFail($id)->unarchive();
     }
 
+    public function saveOrder(): void
+    {
+        foreach ($this->orderedIds as $index => $id) {
+            Treatment::where('id', (int) $id)->update(['sort_order' => $index]);
+        }
+        $this->isDirty = false;
+    }
+
     public function render(): \Illuminate\View\View
     {
         return view('livewire.treatments', [
             'treatments' => Treatment::active()
                 ->with('posologyHistory')
-                ->orderByRaw("CASE WHEN name = 'Hôpital' THEN 0 ELSE 1 END")
+                ->orderBy('sort_order')
                 ->orderBy('id')
                 ->get(),
             'archived' => Treatment::archived()
