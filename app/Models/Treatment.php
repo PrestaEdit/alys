@@ -22,6 +22,10 @@ class Treatment extends Model
         'parent_treatment_id', 'linked_days',
         'archived_at',
         'sort_order',
+        'notification_enabled',
+        'notification_time_morning',
+        'notification_time_noon',
+        'notification_time_evening',
     ];
 
     protected $casts = [
@@ -35,9 +39,10 @@ class Treatment extends Model
         'frequency_weeks'  => 'integer',
         'day_of_week'      => 'integer',
         'linked_days'      => 'integer',
-        'is_medical_act'   => 'boolean',
-        'requires_fasting' => 'boolean',
-        'sort_order'       => 'integer',
+        'is_medical_act'        => 'boolean',
+        'requires_fasting'      => 'boolean',
+        'sort_order'            => 'integer',
+        'notification_enabled'  => 'boolean',
     ];
 
     public function scopeActive(Builder $query): void

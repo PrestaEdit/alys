@@ -186,6 +186,82 @@
         </button>
     </div>
 
+    {{-- Panel : Notifications --}}
+    <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
+        <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-4">Notifications</p>
+
+        <div class="flex items-center justify-between mb-5">
+            <div>
+                <span class="text-sm font-semibold text-slate-700">Activer les rappels</span>
+                <p class="text-xs text-slate-400">Notification locale au moment de la prise</p>
+            </div>
+            <button type="button" wire:click="$toggle('notificationEnabled')"
+                    style="position:relative;display:inline-block;width:44px;height:24px;border-radius:9999px;background-color:{{ $notificationEnabled ? '#0ea5e9' : '#94a3b8' }};border:none;cursor:pointer;flex-shrink:0;transition:background-color .2s;">
+                <span style="position:absolute;top:4px;left:{{ $notificationEnabled ? '24px' : '4px' }};width:16px;height:16px;border-radius:9999px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:left .15s;"></span>
+            </button>
+        </div>
+
+        @if($notificationEnabled)
+        <div class="space-y-3 mb-5">
+            @if($treatment->is_medical_act || $dosageMode === 'single' || $dosageMode === 'interval')
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1.5">
+                    {{ $dosageMode === 'interval' ? 'Heure de la 1ère prise' : 'Heure du rappel' }}
+                </label>
+                <input type="time"
+                       wire:model="notificationTimeMorning"
+                       class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-400">
+                @error('notificationTimeMorning') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+            </div>
+            @if($dosageMode === 'interval' && $newTimesPerDay > 0)
+            <p class="text-xs text-slate-400">
+                Les {{ $newTimesPerDay }} rappels suivants se déclencheront automatiquement
+                toutes les {{ round(24 / $newTimesPerDay) }}h.
+            </p>
+            @endif
+
+            @elseif($dosageMode === 'dayparts')
+            @if(($newDoseMorning ?? 0) > 0)
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1.5">Matin</label>
+                <input type="time" wire:model="notificationTimeMorning"
+                       class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-400">
+            </div>
+            @endif
+            @if(($newDoseNoon ?? 0) > 0)
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1.5">Midi</label>
+                <input type="time" wire:model="notificationTimeNoon"
+                       class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-400">
+            </div>
+            @endif
+            @if(($newDoseEvening ?? 0) > 0)
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1.5">Soir</label>
+                <input type="time" wire:model="notificationTimeEvening"
+                       class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-400">
+            </div>
+            @endif
+            @error('notificationTimeMorning') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+            @endif
+
+            @if($treatment->type === 'weekly' || $treatment->type === 'cyclic')
+            <div class="px-3 py-2 bg-amber-50 rounded-xl">
+                <p class="text-xs text-amber-700">
+                    La notification se déclenchera uniquement les jours planifiés dans votre calendrier.
+                </p>
+            </div>
+            @endif
+        </div>
+        @endif
+
+        <button wire:click="saveNotification"
+                class="w-full py-2.5 rounded-xl text-sm font-semibold text-white transition-colors"
+                style="background: #0ea5e9;">
+            Enregistrer
+        </button>
+    </div>
+
     {{-- Panel 3 : Planification (weekly) ou Récurrence (cyclic) --}}
     @if($editType === 'weekly' || $editType === 'cyclic')
     <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">

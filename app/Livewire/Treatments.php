@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Treatment;
+use App\Services\NotificationScheduler;
 use Livewire\Component;
 
 class Treatments extends Component
@@ -22,7 +23,9 @@ class Treatments extends Component
     public function confirmArchive(): void
     {
         if ($this->pendingArchiveId !== null) {
-            Treatment::findOrFail($this->pendingArchiveId)->archive();
+            $treatment = Treatment::findOrFail($this->pendingArchiveId);
+            app(NotificationScheduler::class)->cancelForTreatment($treatment);
+            $treatment->archive();
         }
         $this->pendingArchiveId = null;
         $this->showArchiveModal = false;

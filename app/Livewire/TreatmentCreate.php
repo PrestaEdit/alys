@@ -45,6 +45,12 @@ class TreatmentCreate extends Component
 
     public int $step = 1;
 
+    // Notifications
+    public bool $notificationEnabled = false;
+    public string $notificationTimeMorning = '08:00';
+    public string $notificationTimeNoon = '12:30';
+    public string $notificationTimeEvening = '20:00';
+
     public const WIDGET_ICONS = ['🏥', '💉', '🔬', '💊', '🧪', '🩺', '🩹', '❤️', '🫀', '🧬'];
 
     public const COLORS = [
@@ -59,7 +65,8 @@ class TreatmentCreate extends Component
         $steps = [1, 2];
         if (!$this->isMedicalAct) $steps[] = 3;
         if ($this->type === 'cyclic' || $this->type === 'weekly') $steps[] = 4;
-        $steps[] = 5;
+        $steps[] = 6; // Notifications
+        $steps[] = 5; // Récapitulatif
         return $steps;
     }
 
@@ -92,6 +99,7 @@ class TreatmentCreate extends Component
             2       => 'Widget accueil',
             3       => 'Posologie',
             4       => $this->type === 'weekly' ? 'Planification' : 'Récurrence',
+            6       => 'Notifications',
             5       => 'Récapitulatif',
             default => '',
         };
@@ -111,6 +119,23 @@ class TreatmentCreate extends Component
                 'type.in'         => 'Le type sélectionné est invalide.',
                 'color.required'  => 'La couleur est obligatoire.',
             ]);
+        } elseif ($this->step === 6) {
+            if ($this->notificationEnabled) {
+                if (!$this->isMedicalAct && $this->dosageMode === 'dayparts') {
+                    if (!$this->notificationTimeMorning && !$this->notificationTimeNoon && !$this->notificationTimeEvening) {
+                        $this->addError('notificationTimeMorning', 'Au moins une heure de notification est requise.');
+                        throw new \Livewire\Exceptions\ValidationException(
+                            app(\Illuminate\Contracts\Validation\Factory::class)->make([], [])
+                        );
+                    }
+                } else {
+                    $this->validate(
+                        ['notificationTimeMorning' => 'required|date_format:H:i'],
+                        ['notificationTimeMorning.required'    => "L'heure de notification est obligatoire.",
+                         'notificationTimeMorning.date_format' => "Format d'heure invalide (HH:MM)."]
+                    );
+                }
+            }
         } elseif ($this->step === 4) {
             $rules = ['frequencyWeeks' => 'required|integer|min:1'];
             $messages = [
@@ -271,8 +296,12 @@ class TreatmentCreate extends Component
             'color'               => $this->color,
             'parent_treatment_id' => $this->parentTreatmentId,
             'linked_days'         => $this->parentTreatmentId ? $this->linkedDays : null,
-            'show_widget'         => $this->showWidget,
-            'widget_icon'         => $this->showWidget ? $this->widgetIcon : null,
+            'show_widget'               => $this->showWidget,
+            'widget_icon'               => $this->showWidget ? $this->widgetIcon : null,
+            'notification_enabled'      => $this->notificationEnabled,
+            'notification_time_morning' => $this->notificationEnabled ? ($this->notificationTimeMorning ?: null) : null,
+            'notification_time_noon'    => $this->notificationEnabled ? ($this->notificationTimeNoon ?: null) : null,
+            'notification_time_evening' => $this->notificationEnabled ? ($this->notificationTimeEvening ?: null) : null,
         ];
 
         if (!$this->isMedicalAct) {
@@ -344,6 +373,8 @@ class TreatmentCreate extends Component
         if ($this->parentTreatmentId) {
             $this->generateLinkedEvents($treatment);
         }
+
+        app(\App\Services\NotificationScheduler::class)->scheduleForTreatment($treatment);
 
         session()->flash('success', 'Traitement créé avec succès.');
         $this->redirect(route('treatments'), navigate: false);

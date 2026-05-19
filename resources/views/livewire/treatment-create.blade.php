@@ -15,7 +15,7 @@
         @endif
         <div>
             <h1 class="text-base font-extrabold text-slate-900">Nouveau traitement</h1>
-            <p class="text-xs text-slate-400">Étape {{ $step }} sur 5</p>
+            <p class="text-xs text-slate-400">Étape {{ array_search($step, $applicableSteps) + 1 }} sur {{ count($applicableSteps) }}</p>
         </div>
     </div>
 
@@ -24,23 +24,21 @@
         $currentIdx = array_search($step, $applicableSteps);
     @endphp
     <div class="flex gap-1.5 justify-center mb-6">
-        @for ($i = 1; $i <= 5; $i++)
+        @foreach($applicableSteps as $dotStep)
         @php
-            $isActive  = $i === $step;
-            $stepIdx   = array_search($i, $applicableSteps);
-            $isDone    = $stepIdx !== false && $stepIdx < $currentIdx;
-            $isNA      = $stepIdx === false;
-            $bgColor   = $isActive ? '#0ea5e9' : ($isDone ? '#10b981' : '#e2e8f0');
+            $isActive = $dotStep === $step;
+            $dotIdx   = array_search($dotStep, $applicableSteps);
+            $isDone   = $dotIdx !== false && $dotIdx < $currentIdx;
+            $bgColor  = $isActive ? '#0ea5e9' : ($isDone ? '#10b981' : '#e2e8f0');
         @endphp
         <div style="
             width: {{ $isActive ? '24px' : '7px' }};
             height: 7px;
             border-radius: 9999px;
             background: {{ $bgColor }};
-            opacity: {{ $isNA ? '0.35' : '1' }};
             transition: width 0.2s;
         "></div>
-        @endfor
+        @endforeach
     </div>
 
     @if(session('success'))
@@ -429,6 +427,91 @@
     </div>
     @endif
 
+    {{-- ── Étape 6 : Notifications ─────────────────────────────────────── --}}
+    @if($step === 6)
+    <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
+        <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-4">{{ $stepLabel }}</p>
+
+        {{-- Toggle --}}
+        <div class="flex items-center justify-between mb-5">
+            <div>
+                <span class="text-sm font-semibold text-slate-700">Activer les rappels</span>
+                <p class="text-xs text-slate-400">Notification locale au moment de la prise</p>
+            </div>
+            <button type="button" wire:click="$toggle('notificationEnabled')"
+                    style="position:relative;display:inline-block;width:44px;height:24px;border-radius:9999px;background-color:{{ $notificationEnabled ? '#0ea5e9' : '#94a3b8' }};border:none;cursor:pointer;flex-shrink:0;transition:background-color .2s;">
+                <span style="position:absolute;top:4px;left:{{ $notificationEnabled ? '24px' : '4px' }};width:16px;height:16px;border-radius:9999px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:left .15s;"></span>
+            </button>
+        </div>
+
+        @if($notificationEnabled)
+        <div class="space-y-3">
+            @if($isMedicalAct || $dosageMode === 'single' || $dosageMode === 'interval')
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1.5">
+                    {{ $dosageMode === 'interval' ? 'Heure de la 1ère prise' : 'Heure du rappel' }}
+                </label>
+                <input type="time"
+                       wire:model="notificationTimeMorning"
+                       class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-400">
+                @error('notificationTimeMorning') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+            </div>
+            @if($dosageMode === 'interval' && $timesPerDay > 0)
+            <p class="text-xs text-slate-400">
+                Les {{ $timesPerDay }} rappels suivants se déclencheront automatiquement
+                toutes les {{ round(24 / $timesPerDay) }}h.
+            </p>
+            @endif
+
+            @elseif($dosageMode === 'dayparts')
+            @if(($doseMorning ?? 0) > 0)
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1.5">Matin</label>
+                <input type="time" wire:model="notificationTimeMorning"
+                       class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-400">
+            </div>
+            @endif
+            @if(($doseNoon ?? 0) > 0)
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1.5">Midi</label>
+                <input type="time" wire:model="notificationTimeNoon"
+                       class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-400">
+            </div>
+            @endif
+            @if(($doseEvening ?? 0) > 0)
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1.5">Soir</label>
+                <input type="time" wire:model="notificationTimeEvening"
+                       class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-400">
+            </div>
+            @endif
+            @error('notificationTimeMorning') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+            @endif
+
+            @if($type === 'weekly' || $type === 'cyclic')
+            <div class="px-3 py-2 bg-amber-50 rounded-xl">
+                <p class="text-xs text-amber-700">
+                    La notification se déclenchera uniquement les jours planifiés dans votre calendrier.
+                </p>
+            </div>
+            @endif
+        </div>
+        @endif
+    </div>
+
+    <div class="flex gap-3">
+        <button wire:click="prevStep"
+                class="flex-1 py-3 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">
+            ← Retour
+        </button>
+        <button wire:click="nextStep"
+                class="flex-1 py-3 rounded-xl text-sm font-semibold text-white transition-colors"
+                style="background: #0ea5e9;">
+            Suivant →
+        </button>
+    </div>
+    @endif
+
     {{-- ── Étape 5 : Récapitulatif ─────────────────────────────────────── --}}
     @if($step === 5)
     <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
@@ -488,6 +571,22 @@
         <div class="flex justify-between items-center py-3 border-b border-slate-100">
             <span class="text-xs text-slate-400 font-medium">Widget</span>
             <span class="text-lg">{{ $widgetIcon }}</span>
+        </div>
+        @endif
+
+        {{-- Notifications --}}
+        @if($notificationEnabled)
+        <div class="flex justify-between items-start py-3 border-b border-slate-100">
+            <span class="text-xs text-slate-400 font-medium">Rappels</span>
+            <div class="text-right">
+                @if(!$isMedicalAct && $dosageMode === 'dayparts')
+                    @if($notificationTimeMorning && ($doseMorning ?? 0) > 0)<p class="text-xs text-slate-600">Matin : <strong>{{ $notificationTimeMorning }}</strong></p>@endif
+                    @if($notificationTimeNoon && ($doseNoon ?? 0) > 0)<p class="text-xs text-slate-600">Midi : <strong>{{ $notificationTimeNoon }}</strong></p>@endif
+                    @if($notificationTimeEvening && ($doseEvening ?? 0) > 0)<p class="text-xs text-slate-600">Soir : <strong>{{ $notificationTimeEvening }}</strong></p>@endif
+                @else
+                    <span class="text-sm font-bold text-slate-800">{{ $notificationTimeMorning }}</span>
+                @endif
+            </div>
         </div>
         @endif
 

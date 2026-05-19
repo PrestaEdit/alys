@@ -51,6 +51,12 @@ class TreatmentEdit extends Component
     // Modal state
     public bool $showRecalculateModal = false;
 
+    // Notifications
+    public bool $notificationEnabled = false;
+    public string $notificationTimeMorning = '08:00';
+    public string $notificationTimeNoon = '12:30';
+    public string $notificationTimeEvening = '20:00';
+
     public const WIDGET_ICONS = ['🏥', '💉', '🔬', '💊', '🧪', '🩺', '🩹', '❤️', '🫀', '🧬'];
 
     public const COLORS = [
@@ -99,6 +105,12 @@ class TreatmentEdit extends Component
         // Widget
         $this->showWidget = (bool) $treatment->show_widget;
         $this->widgetIcon = $treatment->widget_icon ?? '💊';
+
+        // Notifications
+        $this->notificationEnabled     = (bool) $treatment->notification_enabled;
+        $this->notificationTimeMorning = $treatment->notification_time_morning ?? '08:00';
+        $this->notificationTimeNoon    = $treatment->notification_time_noon    ?? '12:30';
+        $this->notificationTimeEvening = $treatment->notification_time_evening ?? '20:00';
     }
 
     // ── Dosage mode switch ─────────────────────────────────────────────
@@ -327,6 +339,39 @@ class TreatmentEdit extends Component
                 ]);
             }
         }
+    }
+
+    // ── Save notifications ─────────────────────────────────────────────
+
+    public function saveNotification(): void
+    {
+        if ($this->notificationEnabled) {
+            $isDayparts = !$this->treatment->is_medical_act && $this->dosageMode === 'dayparts';
+
+            if ($isDayparts) {
+                if (!$this->notificationTimeMorning && !$this->notificationTimeNoon && !$this->notificationTimeEvening) {
+                    $this->addError('notificationTimeMorning', 'Au moins une heure est requise.');
+                    return;
+                }
+            } else {
+                $this->validate(
+                    ['notificationTimeMorning' => 'required|date_format:H:i'],
+                    ['notificationTimeMorning.required'    => "L'heure de notification est obligatoire.",
+                     'notificationTimeMorning.date_format' => "Format invalide (HH:MM)."]
+                );
+            }
+        }
+
+        $this->treatment->update([
+            'notification_enabled'      => $this->notificationEnabled,
+            'notification_time_morning' => $this->notificationEnabled ? ($this->notificationTimeMorning ?: null) : null,
+            'notification_time_noon'    => $this->notificationEnabled ? ($this->notificationTimeNoon ?: null) : null,
+            'notification_time_evening' => $this->notificationEnabled ? ($this->notificationTimeEvening ?: null) : null,
+        ]);
+
+        $this->treatment->refresh();
+        app(\App\Services\NotificationScheduler::class)->scheduleForTreatment($this->treatment);
+        $this->dispatch('toast', message: 'Notifications mises à jour.');
     }
 
     // ── Save widget ────────────────────────────────────────────────────

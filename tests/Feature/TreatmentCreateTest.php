@@ -45,7 +45,7 @@ it('applicableSteps inclut toutes les étapes si cyclique non-médical', functio
         ->set('type', 'cyclic')
         ->set('isMedicalAct', false);
 
-    expect($component->instance()->applicableSteps())->toBe([1, 2, 3, 4, 5]);
+    expect($component->instance()->applicableSteps())->toBe([1, 2, 3, 4, 6, 5]);
 });
 
 it('nextStep saute l\'étape 3 si acte médical', function () {
@@ -56,8 +56,8 @@ it('nextStep saute l\'étape 3 si acte médical', function () {
         ->set('isMedicalAct', true)
         ->call('nextStep') // 1 → 2
         ->assertSet('step', 2)
-        ->call('nextStep') // 2 → 5 (3 et 4 skippés)
-        ->assertSet('step', 5);
+        ->call('nextStep') // 2 → 6 (3 et 4 skippés, 6 = notifications)
+        ->assertSet('step', 6);
 });
 
 it('prevStep revient en arrière', function () {
