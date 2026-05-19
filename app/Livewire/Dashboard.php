@@ -41,6 +41,22 @@ class Dashboard extends Component
         $this->treatmentEndLabel   = $end?->locale('fr')->isoFormat('D MMM YYYY') ?? '';
     }
 
+    public function requestNotificationPermission(): void
+    {
+        \Ikromjon\LocalNotifications\Facades\LocalNotifications::requestPermission();
+    }
+
+    public function testNotification(): void
+    {
+        \Ikromjon\LocalNotifications\Facades\LocalNotifications::schedule([
+            'id'    => 'test-' . time(),
+            'title' => 'Test Alys',
+            'body'  => 'Les notifications fonctionnent !',
+            'at'    => now()->addSeconds(30)->timestamp,
+        ]);
+        $this->dispatch('toast', message: 'Notification test dans 30 secondes.');
+    }
+
     public function render(): \Illuminate\View\View
     {
         return view('livewire.dashboard')
