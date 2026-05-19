@@ -146,7 +146,9 @@
                 ]));
             @endphp
             <div class="mt-2 pt-2 border-t border-slate-100 flex items-center gap-1.5">
-                <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                <svg class="w-3 h-3 text-amber-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 2a6 6 0 0 0-6 6v3.586l-.707.707A1 1 0 0 0 4 14h12a1 1 0 0 0 .707-1.707L16 11.586V8a6 6 0 0 0-6-6zM10 18a3 3 0 0 1-2.83-2h5.66A3 3 0 0 1 10 18z"/>
+                </svg>
                 <p class="text-xs text-slate-400">Rappels · {{ implode(' · ', $notifTimes) }}</p>
             </div>
             @endif

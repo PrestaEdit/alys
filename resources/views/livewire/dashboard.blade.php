@@ -92,9 +92,13 @@
 
 @script
 <script>
-    // Called after the WebView and JS bridge are ready
-    if (typeof LocalNotifications !== 'undefined') {
-        LocalNotifications.RequestPermission();
-    }
+    fetch('/_native/api/call', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+        },
+        body: JSON.stringify({ method: 'LocalNotifications.RequestPermission', params: {} }),
+    }).catch(() => {});
 </script>
 @endscript

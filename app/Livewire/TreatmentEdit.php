@@ -362,11 +362,13 @@ class TreatmentEdit extends Component
             }
         }
 
+        $isDayparts = ! $this->treatment->is_medical_act && $this->dosageMode === 'dayparts';
+
         $this->treatment->update([
             'notification_enabled'      => $this->notificationEnabled,
             'notification_time_morning' => $this->notificationEnabled ? ($this->notificationTimeMorning ?: null) : null,
-            'notification_time_noon'    => $this->notificationEnabled ? ($this->notificationTimeNoon ?: null) : null,
-            'notification_time_evening' => $this->notificationEnabled ? ($this->notificationTimeEvening ?: null) : null,
+            'notification_time_noon'    => ($this->notificationEnabled && $isDayparts) ? ($this->notificationTimeNoon ?: null) : null,
+            'notification_time_evening' => ($this->notificationEnabled && $isDayparts) ? ($this->notificationTimeEvening ?: null) : null,
         ]);
 
         $this->treatment->refresh();

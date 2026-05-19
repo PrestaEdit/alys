@@ -86,7 +86,7 @@ class NotificationScheduler
                 'repeat' => RepeatInterval::Daily,
             ]);
         }
-        if ($treatment->notification_time_noon) {
+        if ($treatment->notification_time_noon && $treatment->dose_noon !== null) {
             LocalNotifications::schedule([
                 'id'     => $prefix . '-noon',
                 'title'  => $title,
@@ -95,7 +95,7 @@ class NotificationScheduler
                 'repeat' => RepeatInterval::Daily,
             ]);
         }
-        if ($treatment->notification_time_evening) {
+        if ($treatment->notification_time_evening && $treatment->dose_evening !== null) {
             LocalNotifications::schedule([
                 'id'     => $prefix . '-evening',
                 'title'  => $title,

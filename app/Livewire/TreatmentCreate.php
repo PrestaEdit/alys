@@ -300,8 +300,8 @@ class TreatmentCreate extends Component
             'widget_icon'               => $this->showWidget ? $this->widgetIcon : null,
             'notification_enabled'      => $this->notificationEnabled,
             'notification_time_morning' => $this->notificationEnabled ? ($this->notificationTimeMorning ?: null) : null,
-            'notification_time_noon'    => $this->notificationEnabled ? ($this->notificationTimeNoon ?: null) : null,
-            'notification_time_evening' => $this->notificationEnabled ? ($this->notificationTimeEvening ?: null) : null,
+            'notification_time_noon'    => ($this->notificationEnabled && $this->dosageMode === 'dayparts') ? ($this->notificationTimeNoon ?: null) : null,
+            'notification_time_evening' => ($this->notificationEnabled && $this->dosageMode === 'dayparts') ? ($this->notificationTimeEvening ?: null) : null,
         ];
 
         if (!$this->isMedicalAct) {

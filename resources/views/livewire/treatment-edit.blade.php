@@ -241,7 +241,7 @@
 
         <button wire:click="saveNotification"
                 class="w-full py-2.5 rounded-xl text-sm font-semibold text-white transition-colors"
-                style="background: #0ea5e9;">
+                style="background: linear-gradient(135deg, #0ea5e9, #6366f1);">
             Enregistrer
         </button>
     </div>
