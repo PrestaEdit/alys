@@ -447,17 +447,13 @@
         @if($notificationEnabled)
         <div class="space-y-3">
             @if($isMedicalAct || $dosageMode === 'single' || $dosageMode === 'interval')
-            <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1.5">
-                    {{ $dosageMode === 'interval' ? 'Heure de la 1ère prise' : 'Heure du rappel' }}
-                </label>
-                <input type="time"
-                       wire:model="notificationTimeMorning"
-                       class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-400">
-                @error('notificationTimeMorning') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
-            </div>
+            <x-time-picker
+                :label="$dosageMode === 'interval' ? 'Heure de la 1ère prise' : 'Heure du rappel'"
+                property="notificationTimeMorning"
+                :value="$notificationTimeMorning" />
+            @error('notificationTimeMorning') <p class="text-xs text-red-500 mt-2">{{ $message }}</p> @enderror
             @if($dosageMode === 'interval' && $timesPerDay > 0)
-            <p class="text-xs text-slate-400">
+            <p class="text-xs text-slate-400 text-center mt-2">
                 Les {{ $timesPerDay }} rappels suivants se déclencheront automatiquement
                 toutes les {{ round(24 / $timesPerDay) }}h.
             </p>
@@ -465,27 +461,15 @@
 
             @elseif($dosageMode === 'dayparts')
             @if(($doseMorning ?? 0) > 0)
-            <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1.5">Matin</label>
-                <input type="time" wire:model="notificationTimeMorning"
-                       class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-400">
-            </div>
+            <x-time-picker label="Matin" property="notificationTimeMorning" :value="$notificationTimeMorning" />
             @endif
             @if(($doseNoon ?? 0) > 0)
-            <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1.5">Midi</label>
-                <input type="time" wire:model="notificationTimeNoon"
-                       class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-400">
-            </div>
+            <x-time-picker label="Midi" property="notificationTimeNoon" :value="$notificationTimeNoon" />
             @endif
             @if(($doseEvening ?? 0) > 0)
-            <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1.5">Soir</label>
-                <input type="time" wire:model="notificationTimeEvening"
-                       class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-400">
-            </div>
+            <x-time-picker label="Soir" property="notificationTimeEvening" :value="$notificationTimeEvening" />
             @endif
-            @error('notificationTimeMorning') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+            @error('notificationTimeMorning') <p class="text-xs text-red-500 mt-2">{{ $message }}</p> @enderror
             @endif
 
             @if($type === 'weekly' || $type === 'cyclic')
