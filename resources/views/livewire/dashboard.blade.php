@@ -89,3 +89,12 @@
     </div>
 
 </div>
+
+@script
+<script>
+    // Called after the WebView and JS bridge are ready
+    if (typeof LocalNotifications !== 'undefined') {
+        LocalNotifications.RequestPermission();
+    }
+</script>
+@endscript
