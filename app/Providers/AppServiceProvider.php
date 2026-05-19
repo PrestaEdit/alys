@@ -30,7 +30,6 @@ class AppServiceProvider extends ServiceProvider
             Artisan::call('migrate', ['--force' => true]);
             $this->bootstrapOnboardingFlag();
             $this->bootstrapDeviceKeys();
-            $this->requestNotificationPermission();
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::error('[boot] ' . $e->getMessage());
         }
@@ -47,15 +46,6 @@ class AppServiceProvider extends ServiceProvider
 
         if ($hasProfile && ! $alreadyFlagged) {
             Setting::set('onboarding_completed', '1');
-        }
-    }
-
-    private function requestNotificationPermission(): void
-    {
-        try {
-            \Ikromjon\LocalNotifications\Facades\LocalNotifications::requestPermission();
-        } catch (\Throwable) {
-            // Non bloquant — l'utilisateur peut refuser
         }
     }
 

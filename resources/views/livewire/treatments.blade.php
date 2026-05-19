@@ -110,20 +110,29 @@
                     </p>
                     @endif
                 </div>
-                <span class="text-xs font-semibold px-2 py-1 rounded-full"
-                      style="color: {{ $treatment->color }}; background-color: {{ $treatment->color }}18;">
-                    @if($treatment->type === 'daily') Quotidien
-                    @elseif($treatment->type === 'weekly')
-                        @if($treatment->frequency_weeks && $treatment->frequency_weeks > 1)
-                            1 sem. / {{ $treatment->frequency_weeks }} · {{ $treatment->dayOfWeekName() }}
-                        @else
-                            Hebdo · {{ $treatment->dayOfWeekName() }}
-                        @endif
-                    @elseif($treatment->is_medical_act) Acte médical
-                    @elseif($treatment->frequency_weeks) / {{ $treatment->frequency_weeks }} sem.
-                    @else Cyclique
+                <div class="flex items-center gap-1.5">
+                    @if($treatment->notification_enabled)
+                    <span class="w-6 h-6 rounded-full bg-amber-50 flex items-center justify-center" title="Notifications activées">
+                        <svg class="w-3.5 h-3.5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10 2a6 6 0 0 0-6 6v3.586l-.707.707A1 1 0 0 0 4 14h12a1 1 0 0 0 .707-1.707L16 11.586V8a6 6 0 0 0-6-6zM10 18a3 3 0 0 1-2.83-2h5.66A3 3 0 0 1 10 18z"/>
+                        </svg>
+                    </span>
                     @endif
-                </span>
+                    <span class="text-xs font-semibold px-2 py-1 rounded-full"
+                          style="color: {{ $treatment->color }}; background-color: {{ $treatment->color }}18;">
+                        @if($treatment->type === 'daily') Quotidien
+                        @elseif($treatment->type === 'weekly')
+                            @if($treatment->frequency_weeks && $treatment->frequency_weeks > 1)
+                                1 sem. / {{ $treatment->frequency_weeks }} · {{ $treatment->dayOfWeekName() }}
+                            @else
+                                Hebdo · {{ $treatment->dayOfWeekName() }}
+                            @endif
+                        @elseif($treatment->is_medical_act) Acte médical
+                        @elseif($treatment->frequency_weeks) / {{ $treatment->frequency_weeks }} sem.
+                        @else Cyclique
+                        @endif
+                    </span>
+                </div>
             </div>
 
             {{-- Dernier changement de posologie --}}

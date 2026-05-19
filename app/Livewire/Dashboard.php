@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Services\ActiveProfile;
 use App\Services\CalendarService;
 use Carbon\Carbon;
+use Ikromjon\LocalNotifications\Facades\LocalNotifications;
 use Livewire\Component;
 
 class Dashboard extends Component
@@ -39,6 +40,8 @@ class Dashboard extends Component
         $end   = $profile?->treatment_end;
         $this->treatmentStartLabel = $start?->locale('fr')->isoFormat('D MMM YYYY') ?? '';
         $this->treatmentEndLabel   = $end?->locale('fr')->isoFormat('D MMM YYYY') ?? '';
+
+        LocalNotifications::requestPermission();
     }
 
     public function render(): \Illuminate\View\View
