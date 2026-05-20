@@ -30,3 +30,4 @@ yarn-error.log
 
 # Standalone plugin repos (installed via Composer VCS)
 /packages/nativephp-android-widgets/
+.DS_Store
