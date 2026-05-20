@@ -125,10 +125,20 @@
     <script>
         document.body.style.overscrollBehavior = 'none';
 
+        // Bfcache restore (Android WebView) : la page est restaurée depuis le cache
+        // avec des snapshots Livewire périmés → forcer un rechargement propre.
+        window.addEventListener('pageshow', (event) => {
+            if (event.persisted) {
+                window.location.reload();
+            }
+        });
+
+        // Filet de sécurité : si Livewire obtient quand même une erreur de session,
+        // recharger plutôt qu'afficher le popup.
         document.addEventListener('livewire:init', () => {
             Livewire.hook('request', ({ fail }) => {
                 fail(({ status, preventDefault }) => {
-                    if (status === 419) {
+                    if (status === 419 || status === 403) {
                         preventDefault();
                         window.location.reload();
                     }
