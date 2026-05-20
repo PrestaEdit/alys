@@ -3288,12 +3288,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/prestaedit/nativephp-android-widgets.git",
-                "reference": "f4d67f7af34b990b0ec85d9a0a53f59775d8ab82"
+                "reference": "9e1d6d82654fdfe978bf33158e2d7c923cbff1d1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PrestaEdit/nativephp-android-widgets/zipball/f4d67f7af34b990b0ec85d9a0a53f59775d8ab82",
-                "reference": "f4d67f7af34b990b0ec85d9a0a53f59775d8ab82",
+                "url": "https://api.github.com/repos/PrestaEdit/nativephp-android-widgets/zipball/9e1d6d82654fdfe978bf33158e2d7c923cbff1d1",
+                "reference": "9e1d6d82654fdfe978bf33158e2d7c923cbff1d1",
                 "shasum": ""
             },
             "require": {
