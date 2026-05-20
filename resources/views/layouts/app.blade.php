@@ -125,20 +125,22 @@
     <script>
         document.body.style.overscrollBehavior = 'none';
 
-        // Bfcache restore (Android WebView) : la page est restaurée depuis le cache
-        // avec des snapshots Livewire périmés → forcer un rechargement propre.
+        // Bfcache restore : attendre que FrankenPHP soit prêt avant de recharger.
         window.addEventListener('pageshow', (event) => {
-            if (event.persisted) {
-                window.location.reload();
-            }
+            if (!event.persisted) return;
+            const tryReload = () => {
+                fetch('/', { method: 'HEAD', cache: 'no-store' })
+                    .then(() => window.location.reload())
+                    .catch(() => setTimeout(tryReload, 300));
+            };
+            setTimeout(tryReload, 200);
         });
 
-        // Filet de sécurité : si Livewire obtient quand même une erreur de session,
-        // recharger plutôt qu'afficher le popup.
+        // Filet de sécurité Livewire : toute erreur de session → rechargement.
         document.addEventListener('livewire:init', () => {
             Livewire.hook('request', ({ fail }) => {
                 fail(({ status, preventDefault }) => {
-                    if (status === 419 || status === 403) {
+                    if (status === 419 || status === 403 || status === 404) {
                         preventDefault();
                         window.location.reload();
                     }
