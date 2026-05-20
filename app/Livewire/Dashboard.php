@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Services\ActiveProfile;
 use App\Services\CalendarService;
+use App\Services\WidgetService;
 use Carbon\Carbon;
 use Livewire\Component;
 
@@ -19,7 +20,7 @@ class Dashboard extends Component
     public string $treatmentStartLabel = '';
     public string $treatmentEndLabel = '';
 
-    public function mount(CalendarService $service, ActiveProfile $activeProfile): void
+    public function mount(CalendarService $service, ActiveProfile $activeProfile, WidgetService $widgetService): void
     {
         $profile = $activeProfile->get();
         $this->patientName = $profile?->name ?? 'Alys';
@@ -39,6 +40,8 @@ class Dashboard extends Component
         $end   = $profile?->treatment_end;
         $this->treatmentStartLabel = $start?->locale('fr')->isoFormat('D MMM YYYY') ?? '';
         $this->treatmentEndLabel   = $end?->locale('fr')->isoFormat('D MMM YYYY') ?? '';
+
+        $widgetService->refresh();
     }
 
     public function requestNotificationPermission(): void
