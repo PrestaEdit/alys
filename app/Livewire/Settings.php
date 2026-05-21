@@ -26,9 +26,26 @@ class Settings extends Component
             $scheduler->rescheduleAll();
             $this->dispatch('toast', message: 'Autorisation accordée — rappels activés.');
         } else {
-            // Permanent denial or unsupported: direct the user to system settings
             $this->dispatch('toast', message: "Statut : {$status}. Autorisez les notifications dans les Paramètres Android.");
         }
+    }
+
+    public function diagNotifications(): void
+    {
+        $hasCall = function_exists('nativephp_call') ? 'oui' : 'non';
+        $hasCan  = function_exists('nativephp_can')  ? 'oui' : 'non';
+
+        $canSchedule = function_exists('nativephp_can')
+            ? (nativephp_can('LocalNotifications.Schedule') ? 'oui' : 'non')
+            : 'n/a';
+
+        $raw = function_exists('nativephp_call')
+            ? nativephp_call('LocalNotifications.CheckPermission', '{}')
+            : '(non disponible)';
+
+        $this->dispatch('toast', message:
+            "nativephp_call={$hasCall} | nativephp_can={$hasCan} | can.Schedule={$canSchedule} | raw=" . ($raw ?: 'vide')
+        );
     }
 
     public function render(): \Illuminate\View\View

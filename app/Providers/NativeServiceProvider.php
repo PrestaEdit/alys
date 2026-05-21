@@ -40,6 +40,8 @@ class NativeServiceProvider extends ServiceProvider
             \Native\Mobile\Providers\ShareServiceProvider::class,
             \Prestaedit\AlysNative\AlysNativeServiceProvider::class,
             \NativePhp\AndroidWidgets\AndroidWidgetsServiceProvider::class,
+            \Ikromjon\LocalNotifications\LocalNotificationsServiceProvider::class,
+        
         ];
     }
 }

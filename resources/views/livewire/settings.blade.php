@@ -36,6 +36,13 @@
         <p class="text-sm text-slate-700">Activer les autorisations et replanifier tous les rappels de traitements.</p>
     </button>
 
+    @if(config('app.debug'))
+    <button wire:click="diagNotifications"
+            class="w-full bg-white rounded-2xl p-4 shadow-sm mb-4 text-left hover:bg-slate-50 transition-colors border border-dashed border-slate-300">
+        <p class="text-xs font-bold text-slate-400 uppercase tracking-wide">Diagnostic notifications</p>
+    </button>
+    @endif
+
     <p class="text-center text-xs text-slate-300 mt-2">v{{ config('nativephp.version') }}</p>
 
 </div>

@@ -80,14 +80,14 @@
     "minimum-stability": "stable",
     "prefer-stable": true,
     "repositories": [{
+        "name": "nativephp-plugins",
+        "type": "composer",
+        "url": "https://plugins.nativephp.com"
+    },{
         "type": "path",
         "url": "packages/alys-native"
     },{
         "type": "vcs",
         "url": "https://github.com/prestaedit/nativephp-android-widgets.git"
-    },{
-        "name": "nativephp-plugins",
-        "type": "composer",
-        "url": "https://plugins.nativephp.com"
     }]
 }
