@@ -160,33 +160,6 @@
     @livewireScripts
     <script>
         document.body.style.overscrollBehavior = 'none';
-
-        @unless(\Native\Mobile\Facades\System::isMobile())
-        // Bfcache restore : attendre que FrankenPHP soit prêt avant de recharger.
-        // Désactivé sur mobile (NativePHP gère le cycle de vie — ce listener
-        // provoquerait des rechargements intempestifs à chaque retour en arrière).
-        window.addEventListener('pageshow', (event) => {
-            if (!event.persisted) return;
-            const tryReload = () => {
-                fetch('/', { method: 'HEAD', cache: 'no-store' })
-                    .then(() => window.location.reload())
-                    .catch(() => setTimeout(tryReload, 300));
-            };
-            setTimeout(tryReload, 200);
-        });
-        @endunless
-
-        // Filet de sécurité Livewire : toute erreur de session → rechargement.
-        document.addEventListener('livewire:init', () => {
-            Livewire.hook('request', ({ fail }) => {
-                fail(({ status, preventDefault }) => {
-                    if (status === 419 || status === 403 || status === 404) {
-                        preventDefault();
-                        window.location.reload();
-                    }
-                });
-            });
-        });
     </script>
 </body>
 </html>

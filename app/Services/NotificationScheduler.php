@@ -10,6 +10,14 @@ use Ikromjon\LocalNotifications\Facades\LocalNotifications;
 
 class NotificationScheduler
 {
+    public function rescheduleAll(): void
+    {
+        Treatment::active()
+            ->where('notification_enabled', true)
+            ->get()
+            ->each(fn (Treatment $t) => $this->scheduleForTreatment($t));
+    }
+
     public function scheduleForTreatment(Treatment $treatment): void
     {
         if (! $treatment->notification_enabled) {

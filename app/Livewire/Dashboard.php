@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Services\ActiveProfile;
 use App\Services\CalendarService;
+use App\Services\NotificationScheduler;
 use App\Services\WidgetService;
 use Carbon\Carbon;
 use Livewire\Component;
@@ -20,8 +21,9 @@ class Dashboard extends Component
     public string $treatmentStartLabel = '';
     public string $treatmentEndLabel = '';
 
-    public function mount(CalendarService $service, ActiveProfile $activeProfile, WidgetService $widgetService): void
+    public function mount(CalendarService $service, ActiveProfile $activeProfile, WidgetService $widgetService, NotificationScheduler $notificationScheduler): void
     {
+        $notificationScheduler->rescheduleAll();
         $profile = $activeProfile->get();
         $this->patientName = $profile?->name ?? 'Alys';
 
