@@ -90,7 +90,7 @@
             </native:bottom-nav>
         @else
             <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-50"
-                 style="padding-bottom: var(--safe-bottom);">
+                 style="padding-bottom: env(safe-area-inset-bottom, 0px);">
                 <div class="flex justify-around items-center h-16 max-w-lg mx-auto px-4">
 
                     <a href="{{ route('home') }}"
@@ -161,7 +161,10 @@
     <script>
         document.body.style.overscrollBehavior = 'none';
 
+        @unless(\Native\Mobile\Facades\System::isMobile())
         // Bfcache restore : attendre que FrankenPHP soit prêt avant de recharger.
+        // Désactivé sur mobile (NativePHP gère le cycle de vie — ce listener
+        // provoquerait des rechargements intempestifs à chaque retour en arrière).
         window.addEventListener('pageshow', (event) => {
             if (!event.persisted) return;
             const tryReload = () => {
@@ -171,6 +174,7 @@
             };
             setTimeout(tryReload, 200);
         });
+        @endunless
 
         // Filet de sécurité Livewire : toute erreur de session → rechargement.
         document.addEventListener('livewire:init', () => {
