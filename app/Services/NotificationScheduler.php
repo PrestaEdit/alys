@@ -55,17 +55,15 @@ class NotificationScheduler
     private function scheduleDaily(Treatment $treatment): void
     {
         $prefix = 'treatment-' . $treatment->id;
-        $title  = $treatment->displayName();
 
         if ($treatment->is_medical_act || (! $treatment->hasDayPartDoses() && ! $treatment->hasIntervalDose())) {
             if ($treatment->notification_time_morning) {
-                LocalNotifications::schedule([
+                $this->push([
                     'id'     => $prefix . '-morning',
-                    'title'  => $title,
                     'body'   => $this->buildBody($treatment, 'morning'),
                     'at'     => $this->todayAt($treatment->notification_time_morning),
                     'repeat' => RepeatInterval::Daily,
-                ]);
+                ], $treatment);
             }
             return;
         }
@@ -73,44 +71,40 @@ class NotificationScheduler
         if ($treatment->hasIntervalDose()) {
             if ($treatment->notification_time_morning && $treatment->times_per_day > 0) {
                 $intervalSeconds = (int) (86400 / $treatment->times_per_day);
-                LocalNotifications::schedule([
+                $this->push([
                     'id'                    => $prefix . '-interval',
-                    'title'                 => $title,
                     'body'                  => $this->buildBody($treatment, 'interval'),
                     'at'                    => $this->todayAt($treatment->notification_time_morning),
                     'repeatIntervalSeconds' => $intervalSeconds,
-                ]);
+                ], $treatment);
             }
             return;
         }
 
         // Dayparts mode
         if ($treatment->notification_time_morning) {
-            LocalNotifications::schedule([
+            $this->push([
                 'id'     => $prefix . '-morning',
-                'title'  => $title,
                 'body'   => $this->buildBody($treatment, 'morning'),
                 'at'     => $this->todayAt($treatment->notification_time_morning),
                 'repeat' => RepeatInterval::Daily,
-            ]);
+            ], $treatment);
         }
         if ($treatment->notification_time_noon && $treatment->dose_noon !== null) {
-            LocalNotifications::schedule([
+            $this->push([
                 'id'     => $prefix . '-noon',
-                'title'  => $title,
                 'body'   => $this->buildBody($treatment, 'noon'),
                 'at'     => $this->todayAt($treatment->notification_time_noon),
                 'repeat' => RepeatInterval::Daily,
-            ]);
+            ], $treatment);
         }
         if ($treatment->notification_time_evening && $treatment->dose_evening !== null) {
-            LocalNotifications::schedule([
+            $this->push([
                 'id'     => $prefix . '-evening',
-                'title'  => $title,
                 'body'   => $this->buildBody($treatment, 'evening'),
                 'at'     => $this->todayAt($treatment->notification_time_evening),
                 'repeat' => RepeatInterval::Daily,
-            ]);
+            ], $treatment);
         }
     }
 
@@ -121,19 +115,17 @@ class NotificationScheduler
         }
 
         $prefix = 'treatment-' . $treatment->id;
-        $title  = $treatment->displayName();
 
         if ($treatment->frequency_weeks === 1) {
             // day_of_week: 0=lundi…6=dimanche → repeatDays: 1=lun…7=dim
             $repeatDay = ($treatment->day_of_week ?? 0) + 1;
 
-            LocalNotifications::schedule([
+            $this->push([
                 'id'         => $prefix . '-morning',
-                'title'      => $title,
                 'body'       => $this->buildBody($treatment, 'morning'),
                 'at'         => $this->todayAt($treatment->notification_time_morning),
                 'repeatDays' => [$repeatDay],
-            ]);
+            ], $treatment);
             return;
         }
 
@@ -152,7 +144,6 @@ class NotificationScheduler
     private function scheduleOneShots(Treatment $treatment): void
     {
         $prefix = 'treatment-' . $treatment->id;
-        $title  = $treatment->displayName();
         $cutoff = today()->addYear()->toDateString();
 
         $events = CalendarEvent::where('treatment_id', $treatment->id)
@@ -166,13 +157,29 @@ class NotificationScheduler
         foreach ($events as $event) {
             $at = Carbon::parse($event->scheduled_date)->setTime((int) $h, (int) $m)->timestamp;
 
-            LocalNotifications::schedule([
-                'id'    => $prefix . '-event-' . $event->id,
-                'title' => $title,
-                'body'  => $this->buildBody($treatment, 'morning'),
-                'at'    => $at,
-            ]);
+            $this->push([
+                'id'   => $prefix . '-event-' . $event->id,
+                'body' => $this->buildBody($treatment, 'morning'),
+                'at'   => $at,
+            ], $treatment);
         }
+    }
+
+    /**
+     * Schedule a notification with the standard Alys branding and snooze actions.
+     */
+    private function push(array $params, Treatment $treatment): void
+    {
+        LocalNotifications::schedule(array_merge([
+            'title'    => 'Alys',
+            'subtitle' => $treatment->displayName(),
+            'image'    => 'https://prestaedit.app/alys/icon.svg',
+            'actions'  => [
+                ['id' => 'snooze5',  'title' => '+ 5 min',  'snooze' => 300],
+                ['id' => 'snooze15', 'title' => '+ 15 min', 'snooze' => 900],
+                ['id' => 'dismiss',  'title' => 'OK'],
+            ],
+        ], $params));
     }
 
     private function todayAt(string $time): int
