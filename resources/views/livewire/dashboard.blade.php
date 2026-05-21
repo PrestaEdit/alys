@@ -90,17 +90,4 @@
 
 </div>
 
-@if(config('app.debug'))
-<div class="mt-6 pt-4 border-t border-slate-100">
-    <button wire:click="testNotification"
-            class="w-full py-2.5 rounded-xl text-xs font-semibold text-slate-400 border border-slate-200 hover:bg-slate-50 transition-colors">
-        🔔 Tester les notifications (dans 30s)
-    </button>
-</div>
-@endif
 
-@script
-<script>
-    $wire.requestNotificationPermission();
-</script>
-@endscript

@@ -30,6 +30,12 @@
         <p class="text-sm text-slate-700">Transférer les clés vers un nouvel appareil via QR code.</p>
     </a>
 
+    <button wire:click="enableNotifications"
+            class="w-full bg-white rounded-2xl p-5 shadow-sm mb-4 text-left hover:bg-slate-50 transition-colors">
+        <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Notifications</p>
+        <p class="text-sm text-slate-700">Activer les autorisations et replanifier tous les rappels de traitements.</p>
+    </button>
+
     <p class="text-center text-xs text-slate-300 mt-2">v{{ config('nativephp.version') }}</p>
 
 </div>

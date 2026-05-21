@@ -4,7 +4,6 @@ namespace App\Livewire;
 
 use App\Services\ActiveProfile;
 use App\Services\CalendarService;
-use App\Services\NotificationScheduler;
 use App\Services\WidgetService;
 use Carbon\Carbon;
 use Livewire\Component;
@@ -21,9 +20,8 @@ class Dashboard extends Component
     public string $treatmentStartLabel = '';
     public string $treatmentEndLabel = '';
 
-    public function mount(CalendarService $service, ActiveProfile $activeProfile, WidgetService $widgetService, NotificationScheduler $notificationScheduler): void
+    public function mount(CalendarService $service, ActiveProfile $activeProfile, WidgetService $widgetService): void
     {
-        $notificationScheduler->rescheduleAll();
         $profile = $activeProfile->get();
         $this->patientName = $profile?->name ?? 'Alys';
 
@@ -46,23 +44,7 @@ class Dashboard extends Component
         $widgetService->refresh();
     }
 
-    public function requestNotificationPermission(): void
-    {
-        \Ikromjon\LocalNotifications\Facades\LocalNotifications::requestPermission();
-    }
-
-    public function testNotification(): void
-    {
-        \Ikromjon\LocalNotifications\Facades\LocalNotifications::schedule([
-            'id'    => 'test-' . time(),
-            'title' => 'Test Alys',
-            'body'  => 'Les notifications fonctionnent !',
-            'at'    => now()->addSeconds(30)->timestamp,
-        ]);
-        $this->dispatch('toast', message: 'Notification test dans 30 secondes.');
-    }
-
-    public function render(): \Illuminate\View\View
+public function render(): \Illuminate\View\View
     {
         return view('livewire.dashboard')
             ->layout('layouts.app', ['title' => 'Accueil']);
