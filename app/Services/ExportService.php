@@ -16,18 +16,15 @@ class ExportService
 
         $settings = Setting::all()->pluck('value', 'key')->toArray();
 
-        $treatmentsQuery = Treatment::withoutGlobalScopes();
+        $treatmentsQuery = Treatment::withoutGlobalScopes()->whereNull('archived_at');
         if ($filtering) {
             $treatmentsQuery->whereIn('id', $selectedTreatmentIds);
         }
         $treatmentModels = $treatmentsQuery->get();
 
-        $profileIds = $filtering
-            ? $treatmentModels->pluck('profile_id')->unique()->values()->all()
-            : [];
+        $profileIds = $treatmentModels->pluck('profile_id')->unique()->values()->all();
 
-        // Profile has no global scope; Profile::query() already spans all profiles.
-        $profilesQuery = Profile::query();
+        $profilesQuery = Profile::query()->whereNull('archived_at');
         if ($filtering) {
             $profilesQuery->whereIn('id', $profileIds);
         }
@@ -63,12 +60,12 @@ class ExportService
             'archived_at'      => $t->archived_at?->toIso8601String(),
         ])->toArray();
 
+        $activeTreatmentIds = $treatmentModels->pluck('id')->all();
+
         $historyQuery = PosologyHistory::withoutGlobalScopes()
             ->with(['treatment' => fn($q) => $q->withoutGlobalScopes()])
+            ->whereIn('treatment_id', $activeTreatmentIds)
             ->orderBy('started_at');
-        if ($filtering) {
-            $historyQuery->whereIn('treatment_id', $selectedTreatmentIds);
-        }
         $history = $historyQuery->get()->map(fn($h) => [
             'profile_id'     => $h->profile_id,
             'treatment_name' => $h->treatment->name,
@@ -82,10 +79,8 @@ class ExportService
 
         $eventsQuery = CalendarEvent::withoutGlobalScopes()
             ->with(['treatment' => fn($q) => $q->withoutGlobalScopes()])
+            ->whereIn('treatment_id', $activeTreatmentIds)
             ->orderBy('scheduled_date');
-        if ($filtering) {
-            $eventsQuery->whereIn('treatment_id', $selectedTreatmentIds);
-        }
         $events = $eventsQuery->get()->map(fn($e) => [
             'profile_id'     => $e->profile_id,
             'treatment_name' => $e->treatment->name,

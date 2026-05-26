@@ -10,8 +10,13 @@ use Ikromjon\LocalNotifications\Facades\LocalNotifications;
 
 class NotificationScheduler
 {
+    /** null = not yet checked, false/true = result of Battery.CheckStatus */
+    private ?bool $batteryUnrestricted = null;
+
     public function rescheduleAll(): void
     {
+        $this->batteryUnrestricted = $this->checkBatteryUnrestricted();
+
         Treatment::active()
             ->where('notification_enabled', true)
             ->get()
@@ -22,6 +27,11 @@ class NotificationScheduler
     {
         if (! $treatment->notification_enabled) {
             return;
+        }
+
+        // Initialize battery flag if called directly (not via rescheduleAll).
+        if ($this->batteryUnrestricted === null) {
+            $this->batteryUnrestricted = $this->checkBatteryUnrestricted();
         }
 
         $this->cancelForTreatment($treatment);
@@ -166,20 +176,39 @@ class NotificationScheduler
     }
 
     /**
-     * Schedule a notification with the standard Alys branding and snooze actions.
+     * Schedule a notification with the standard Alys branding.
+     * Snooze actions are only added when battery optimization is unrestricted,
+     * since they rely on setExactAndAllowWhileIdle() and would silently fail otherwise.
      */
     private function push(array $params, Treatment $treatment): void
     {
+        $actions = ($this->batteryUnrestricted === true)
+            ? [
+                ['id' => 'snooze5',  'title' => '+ 5 min',  'snooze' => 300],
+                ['id' => 'snooze15', 'title' => '+ 15 min', 'snooze' => 900],
+                ['id' => 'dismiss',  'title' => 'OK'],
+            ]
+            : [
+                ['id' => 'dismiss', 'title' => 'OK'],
+            ];
+
         LocalNotifications::schedule(array_merge([
             'title'    => 'Alys',
             'subtitle' => $treatment->displayName(),
             'image'    => 'https://prestaedit.app/alys/icon.svg',
-            'actions'  => [
-                ['id' => 'snooze5',  'title' => '+ 5 min',  'snooze' => 300],
-                ['id' => 'snooze15', 'title' => '+ 15 min', 'snooze' => 900],
-                ['id' => 'dismiss',  'title' => 'OK'],
-            ],
+            'actions'  => $actions,
         ], $params));
+    }
+
+    private function checkBatteryUnrestricted(): bool
+    {
+        if (! function_exists('nativephp_call')) {
+            return false;
+        }
+
+        $result = nativephp_call('Battery.CheckStatus', '{}');
+
+        return ($result['unrestricted'] ?? false) === true;
     }
 
     private function todayAt(string $time): int

@@ -15,6 +15,7 @@ class Settings extends Component
 
         if ($status === 'granted') {
             $scheduler->rescheduleAll();
+            $this->requestBatteryUnrestricted();
             $this->dispatch('toast', message: 'Autorisation déjà accordée — rappels replanifiés.');
             return;
         }
@@ -24,10 +25,25 @@ class Settings extends Component
 
         if ($granted) {
             $scheduler->rescheduleAll();
+            $this->requestBatteryUnrestricted();
             $this->dispatch('toast', message: 'Autorisation accordée — rappels activés.');
         } else {
             $this->dispatch('toast', message: "Statut : {$status}. Autorisez les notifications dans les Paramètres Android.");
         }
+    }
+
+    private function requestBatteryUnrestricted(): void
+    {
+        if (! function_exists('nativephp_call')) {
+            return;
+        }
+
+        $result = nativephp_call('Battery.CheckStatus', '{}');
+        if (($result['unrestricted'] ?? false) === true) {
+            return; // déjà exempt
+        }
+
+        nativephp_call('Battery.RequestUnrestricted', '{}');
     }
 
     public function diagNotifications(): void

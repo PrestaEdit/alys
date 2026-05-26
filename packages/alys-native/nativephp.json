@@ -12,11 +12,23 @@
             "android": "app.prestaedit.alys.filesaver.FileSaverFunctions.Save",
             "ios": "FileSaverFunctions.Save",
             "description": "Save a file to device storage using the native document picker"
+        },
+        {
+            "name": "Battery.RequestUnrestricted",
+            "android": "app.prestaedit.alys.battery.BatteryFunctions.RequestUnrestricted",
+            "description": "Request battery optimization exemption for reliable background alarms"
+        },
+        {
+            "name": "Battery.CheckStatus",
+            "android": "app.prestaedit.alys.battery.BatteryFunctions.CheckStatus",
+            "description": "Check if the app is exempt from battery optimization"
         }
     ],
     "android": {
         "min_version": 26,
-        "permissions": [],
+        "permissions": [
+            "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"
+        ],
         "dependencies": {
             "implementation": []
         }

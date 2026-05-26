@@ -25,7 +25,7 @@ class Export extends Component
     public function mount(): void
     {
         $profiles = Profile::active()
-            ->with(['treatments' => fn($q) => $q->withoutGlobalScopes()])
+            ->with(['treatments' => fn($q) => $q->withoutGlobalScopes()->active()])
             ->get();
 
         foreach ($profiles as $profile) {
@@ -39,7 +39,7 @@ class Export extends Component
     public function toggleProfile(int $profileId): void
     {
         $profile = Profile::active()
-            ->with(['treatments' => fn($q) => $q->withoutGlobalScopes()])
+            ->with(['treatments' => fn($q) => $q->withoutGlobalScopes()->active()])
             ->find($profileId);
 
         if (! $profile) {
@@ -81,7 +81,7 @@ class Export extends Component
         $profileId = (int) $profileId;
 
         $profile = Profile::active()
-            ->with(['treatments' => fn($q) => $q->withoutGlobalScopes()])
+            ->with(['treatments' => fn($q) => $q->withoutGlobalScopes()->active()])
             ->find($profileId);
 
         if (! $profile) {
@@ -193,7 +193,7 @@ class Export extends Component
     public function render(): \Illuminate\View\View
     {
         $profiles = Profile::active()
-            ->with(['treatments' => fn($q) => $q->withoutGlobalScopes()])
+            ->with(['treatments' => fn($q) => $q->withoutGlobalScopes()->active()])
             ->get();
 
         return view('livewire.export', ['profiles' => $profiles])
