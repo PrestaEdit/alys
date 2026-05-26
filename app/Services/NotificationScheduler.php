@@ -25,6 +25,8 @@ class NotificationScheduler
 
     public function scheduleForTreatment(Treatment $treatment): void
     {
+        $this->cancelForTreatment($treatment);
+
         if (! $treatment->notification_enabled) {
             return;
         }
@@ -33,8 +35,6 @@ class NotificationScheduler
         if ($this->batteryUnrestricted === null) {
             $this->batteryUnrestricted = $this->checkBatteryUnrestricted();
         }
-
-        $this->cancelForTreatment($treatment);
 
         match ($treatment->type) {
             'daily'  => $this->scheduleDaily($treatment),
