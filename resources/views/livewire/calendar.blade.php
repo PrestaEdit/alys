@@ -169,9 +169,9 @@
         <div class="bg-white rounded-2xl p-5 w-full max-w-sm shadow-xl">
             <h3 class="text-sm font-bold text-slate-800 mb-1">Déplacer l'événement</h3>
             <p class="text-xs text-slate-400 mb-4">Choisir la nouvelle date :</p>
-            <input type="date"
-                   wire:model="moveToDate"
-                   class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-400 mb-4">
+            <div class="mb-4">
+                <x-datepicker model="moveToDate" :value="$moveToDate" />
+            </div>
             @error('moveToDate')
             <p class="text-xs text-red-500 mb-3">{{ $message }}</p>
             @enderror
