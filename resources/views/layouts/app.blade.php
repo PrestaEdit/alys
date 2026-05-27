@@ -6,8 +6,9 @@
     <title>{{ $title ?? 'Alys' }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
+    <meta name="color-scheme" content="light">
     <style>
-        :root { --safe-top: 0px; --safe-bottom: 0px; }
+        :root { --safe-top: 0px; --safe-bottom: 0px; color-scheme: light; }
     </style>
     <script>
         (function () {

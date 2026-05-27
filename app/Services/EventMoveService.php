@@ -23,9 +23,7 @@ class EventMoveService
             $this->applyMtxCoherenceRule($previousDate, $newDate);
         }
 
-        if ($event->treatment->name === 'VCR') {
-            $this->shiftChildEvents($event, $previousDate, $newDate);
-        }
+        $this->shiftChildEvents($event, $previousDate, $newDate);
     }
 
     private function shiftChildEvents(CalendarEvent $parent, string $previousDate, string $newDate): void
