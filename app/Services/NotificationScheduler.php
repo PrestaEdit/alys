@@ -15,6 +15,8 @@ class NotificationScheduler
 
     public function rescheduleAll(): void
     {
+        LocalNotifications::cancelAll();
+
         $this->batteryUnrestricted = $this->checkBatteryUnrestricted();
 
         Treatment::active()
