@@ -99,7 +99,8 @@ it('export calls Share and sets success state', function () {
     \Native\Mobile\Facades\Share::shouldReceive('file')->once();
 
     $component = Livewire::test(Export::class);
-    $component->call('export');
+    $component->call('generate');
+    $component->call('share');
 
     $component->assertSet('success', true);
 });
@@ -110,7 +111,7 @@ it('export sets error when key is missing', function () {
         ->andReturn(null);
 
     $component = Livewire::test(Export::class);
-    $component->call('export');
+    $component->call('generate');
 
     $component->assertSet('exportError', fn($v) => $v !== '');
 });
