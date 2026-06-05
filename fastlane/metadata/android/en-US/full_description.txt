@@ -1,0 +1,48 @@
+Alys — Medical treatment tracker
+
+Alys is an Android app designed to support the parents and loved ones of a child undergoing long-term medical treatment. Each day, it brings together what you need to know: the medications to give, upcoming appointments, current dosages — all with no internet connection, no account, no cloud.
+
+Key features
+
+📅 Interactive calendar
+Monthly view with color coding per treatment. Tap a day to see the details of the care planned. Appointments can be moved when needed.
+
+💊 Dosage & history
+Record every dose change with a note and a date. The full history of changes can be viewed treatment by treatment.
+
+🔄 Cyclic recurrences
+Daily, weekly, every 2, 4 or 12 weeks — future events are generated automatically until the end of the treatment.
+
+🏥 Next hospital appointment
+Shown as a banner on the home screen, the next hospital appointment is always visible at a glance.
+
+⚠️ Fasting alerts
+Some medical procedures require fasting. The app shows this clearly in the calendar and on the home screen.
+
+📊 Customizable widgets
+Choose which treatments to show as a widget on the home screen, with the icon of your choice and a countdown of the remaining sessions.
+
+🔗 Linked care
+Some treatments automatically trigger other care on the following days. Moving the parent event repositions all the associated care.
+
+📤 JSON export
+Export the entire calendar as JSON from the home screen to archive it or share it with the medical team.
+
+⚙️ Flexible settings
+Patient's first name, treatment start and end dates — everything can be changed at any time.
+
+Privacy
+
+A child's medical data is no one's business but their family's and care team's. That's why Alys works entirely offline:
+
+• No remote server — everything stays on your phone
+• No user account required
+• No trackers, no ads, no telemetry
+• Stored in a local SQLite database, never synced
+• The JSON export is encrypted and can only be decrypted by the destination phone
+
+The source code is fully open source and auditable on GitHub.
+
+About
+
+Alys was created for Alexis, a child being treated for leukemia. It is released for free, without ads, in the hope of helping other families going through the same ordeal.

@@ -1,0 +1,48 @@
+Alys — Suivi de traitement médical
+
+Alys est une application Android pensée pour accompagner les parents et proches d'un enfant en cours de traitement médical long. Chaque jour, elle centralise ce qu'il faut savoir : les médicaments à donner, les rendez-vous à venir, les posologies en cours — le tout sans connexion internet, sans compte, sans nuage.
+
+Fonctionnalités principales
+
+📅 Calendrier interactif
+Vue mensuelle avec code couleur par traitement. Appuyez sur un jour pour voir le détail des soins prévus. Les rendez-vous peuvent être déplacés si nécessaire.
+
+💊 Posologie & historique
+Enregistrez chaque changement de dose avec une note et une date. L'historique complet des modifications est consultable traitement par traitement.
+
+🔄 Récurrences cycliques
+Traitements quotidiens, hebdomadaires, toutes les 2, 4 ou 12 semaines — les événements futurs sont générés automatiquement jusqu'à la fin du traitement.
+
+🏥 Prochain rendez-vous hospitalier
+Affiché en bannière sur l'accueil, le prochain RDV hôpital est toujours visible d'un coup d'œil.
+
+⚠️ Alertes à jeun
+Certains actes médicaux nécessitent d'être à jeun. L'application l'indique clairement dans le calendrier et sur l'écran d'accueil.
+
+📊 Widgets personnalisables
+Choisissez quels traitements afficher en widget sur l'accueil, avec l'icône de votre choix et le décompte des séances restantes.
+
+🔗 Soins liés
+Certains traitements déclenchent automatiquement d'autres soins sur les jours suivants. Déplacer l'événement parent repositionne l'ensemble des soins associés.
+
+📤 Export JSON
+Exportez l'intégralité du calendrier en JSON depuis l'accueil pour archiver ou partager avec l'équipe médicale.
+
+⚙️ Réglages flexibles
+Prénom du patient, dates de début et de fin de traitement — tout est modifiable à tout moment.
+
+Confidentialité
+
+Les données médicales d'un enfant ne regardent personne d'autre que sa famille et son équipe soignante. C'est pourquoi Alys fonctionne entièrement hors ligne :
+
+• Aucun serveur distant — tout reste sur votre téléphone
+• Aucun compte utilisateur requis
+• Aucun tracker, aucune publicité, aucune télémétrie
+• Stockage dans une base SQLite locale, jamais synchronisée
+• L'export JSON est chiffré et uniquement déchiffrable par le téléphone de destination
+
+Le code source est entièrement open source et auditable sur GitHub.
+
+À propos
+
+Alys a été développée pour Alexis, un enfant en traitement contre une leucémie. Elle est publiée gratuitement, sans publicité, dans l'espoir d'être utile à d'autres familles qui traversent la même épreuve.
