@@ -263,7 +263,7 @@ class TreatmentEdit extends Component
 
         $this->treatment->refresh();
         $this->note = '';
-        $this->dispatch('toast', message: 'Posologie mise à jour.');
+        $this->dispatch('toast', message: __('treatments.posology_updated'));
     }
 
     // ── Save info ──────────────────────────────────────────────────────
@@ -307,7 +307,7 @@ class TreatmentEdit extends Component
         }
 
         $this->treatment->refresh();
-        $this->dispatch('toast', message: 'Informations mises à jour.');
+        $this->dispatch('toast', message: __('treatments.info_updated'));
     }
 
     private function regenerateLinkedEvents(): void
@@ -350,14 +350,14 @@ class TreatmentEdit extends Component
 
             if ($isDayparts) {
                 if (!$this->notificationTimeMorning && !$this->notificationTimeNoon && !$this->notificationTimeEvening) {
-                    $this->addError('notificationTimeMorning', 'Au moins une heure est requise.');
+                    $this->addError('notificationTimeMorning', __('treatments.validation_notif_at_least_one_short'));
                     return;
                 }
             } else {
                 $this->validate(
                     ['notificationTimeMorning' => 'required|date_format:H:i'],
-                    ['notificationTimeMorning.required'    => "L'heure de notification est obligatoire.",
-                     'notificationTimeMorning.date_format' => "Format invalide (HH:MM)."]
+                    ['notificationTimeMorning.required'    => __('treatments.validation_notif_time_required'),
+                     'notificationTimeMorning.date_format' => __('treatments.validation_notif_time_format_short')]
                 );
             }
         }
@@ -373,7 +373,7 @@ class TreatmentEdit extends Component
 
         $this->treatment->refresh();
         app(\App\Services\NotificationScheduler::class)->scheduleForTreatment($this->treatment);
-        $this->dispatch('toast', message: 'Notifications mises à jour.');
+        $this->dispatch('toast', message: __('treatments.notifications_updated'));
     }
 
     // ── Save widget ────────────────────────────────────────────────────
@@ -385,7 +385,7 @@ class TreatmentEdit extends Component
             'widget_icon' => $this->showWidget ? $this->widgetIcon : null,
         ]);
         $this->treatment->refresh();
-        $this->dispatch('toast', message: 'Widget mis à jour.');
+        $this->dispatch('toast', message: __('treatments.widget_updated'));
     }
 
     // ── Save recurrence ────────────────────────────────────────────────
@@ -433,7 +433,7 @@ class TreatmentEdit extends Component
             $this->recalculateFutureEvents();
         }
 
-        $this->dispatch('toast', message: 'Récurrence mise à jour.');
+        $this->dispatch('toast', message: __('treatments.recurrence_updated'));
     }
 
     private function recalculateFutureEvents(): void

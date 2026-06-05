@@ -5,18 +5,18 @@
            class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors text-lg">
             ‹
         </a>
-        <h1 class="text-xl font-extrabold text-slate-900">Nouveau profil</h1>
+        <h1 class="text-xl font-extrabold text-slate-900">{{ __('profiles.title_create') }}</h1>
     </div>
 
     <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
-        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Prénom</label>
-        <input type="text" wire:model="name" placeholder="Prénom"
+        <label class="block text-xs font-semibold text-slate-600 mb-1.5">{{ __('profiles.first_name') }}</label>
+        <input type="text" wire:model="name" placeholder="{{ __('profiles.first_name_placeholder') }}"
                class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400">
         @error('name')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
     </div>
 
     <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
-        <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-3">Couleur</p>
+        <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-3">{{ __('profiles.color') }}</p>
         <div class="flex flex-wrap gap-3">
             @foreach($colors as $hex)
             <button type="button" wire:click="$set('color', '{{ $hex }}')"
@@ -42,6 +42,6 @@
     <button wire:click="save"
             class="w-full py-3 rounded-xl text-sm font-bold text-white transition-colors hover:opacity-90"
             style="background: linear-gradient(135deg, #0ea5e9, #6366f1);">
-        Créer le profil
+        {{ __('profiles.create_profile') }}
     </button>
 </div>

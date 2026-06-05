@@ -2,7 +2,7 @@
 
     {{-- Header avec switcher --}}
     <div class="flex items-center justify-between mb-4">
-        <h1 class="text-xl font-extrabold text-slate-900">Calendrier</h1>
+        <h1 class="text-xl font-extrabold text-slate-900">{{ __('calendar.title') }}</h1>
         <livewire:profile-switcher />
     </div>
 
@@ -17,7 +17,7 @@
             <button @click="legend = !legend"
                     :class="legend ? 'bg-sky-100 text-sky-600' : 'bg-slate-100 text-slate-500'"
                     class="w-8 h-8 rounded-xl flex items-center justify-center transition-colors hover:bg-sky-100 hover:text-sky-600"
-                    title="Légende">
+                    title="{{ __('calendar.legend_tooltip') }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/>
                 </svg>
@@ -34,7 +34,7 @@
 
         {{-- En-têtes jours --}}
         <div class="grid grid-cols-7 mb-1">
-            @foreach(['L','M','M','J','V','S','D'] as $header)
+            @foreach($weekdayHeaders as $header)
             <div class="text-center text-xs font-semibold text-slate-400 py-1">{{ $header }}</div>
             @endforeach
         </div>
@@ -86,7 +86,7 @@
          class="bg-white rounded-2xl shadow-sm mb-4 overflow-hidden">
 
         <div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
-            <p class="text-xs font-bold text-slate-500 uppercase tracking-wide">Légende</p>
+            <p class="text-xs font-bold text-slate-500 uppercase tracking-wide">{{ __('calendar.legend') }}</p>
             <button @click="legend = false" class="text-slate-400 hover:text-slate-600 transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
@@ -107,11 +107,11 @@
                 </div>
                 <span class="text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0"
                       style="color: {{ $item['color'] }}; background-color: {{ $item['color'] }}18;">
-                    @if($item['type'] === 'daily') Quotidien
-                    @elseif($item['type'] === 'weekly') Hebdo
-                    @elseif($item['is_medical_act']) Acte médical
-                    @elseif($item['frequency_weeks']) / {{ $item['frequency_weeks'] }} sem.
-                    @else Cyclique
+                    @if($item['type'] === 'daily') {{ __('calendar.type_daily') }}
+                    @elseif($item['type'] === 'weekly') {{ __('calendar.type_weekly') }}
+                    @elseif($item['is_medical_act']) {{ __('calendar.type_medical_act') }}
+                    @elseif($item['frequency_weeks']) {{ __('calendar.type_every_weeks', ['weeks' => $item['frequency_weeks']]) }}
+                    @else {{ __('calendar.type_cyclic') }}
                     @endif
                 </span>
             </div>
@@ -123,11 +123,11 @@
     @if($selectedDate)
     <div class="bg-white rounded-2xl p-4 shadow-sm mb-4">
         <p class="text-xs font-bold text-slate-800 uppercase tracking-wide mb-3">
-            {{ \Carbon\Carbon::parse($selectedDate)->locale('fr')->isoFormat('dddd D MMMM YYYY') }}
+            {{ \Carbon\Carbon::parse($selectedDate)->isoFormat('dddd D MMMM YYYY') }}
         </p>
 
         @if(empty($selectedDayEvents))
-        <p class="text-xs text-slate-400 text-center py-2">Aucun événement ce jour.</p>
+        <p class="text-xs text-slate-400 text-center py-2">{{ __('calendar.empty_day') }}</p>
         @else
         <div class="space-y-2">
             @foreach($selectedDayEvents as $event)
@@ -137,7 +137,7 @@
                 <div class="flex-1 min-w-0">
                     <p class="text-xs font-semibold text-slate-800">{{ $event['display_name'] ?? $event['name'] }}</p>
                     @if($event['requires_fasting'])
-                        <p class="text-xs text-amber-600 font-bold">⚠️ {{ $profileName }} doit être à jeun</p>
+                        <p class="text-xs text-amber-600 font-bold">⚠️ {{ __('calendar.fasting_warning', ['name' => $profileName]) }}</p>
                     @endif
                     @if(!empty($event['notes']))
                         <p class="text-xs text-slate-400">{{ $event['notes'] }}</p>
@@ -147,13 +147,13 @@
                         @endforeach
                     @endif
                     @if(!empty($event['moved']) && $event['moved'])
-                        <p class="text-xs text-orange-500 italic">Déplacé (était le {{ \Carbon\Carbon::parse($event['original_date'])->locale('fr')->isoFormat('D MMM') }})</p>
+                        <p class="text-xs text-orange-500 italic">{{ __('calendar.moved_from', ['date' => \Carbon\Carbon::parse($event['original_date'])->isoFormat('D MMM')]) }}</p>
                     @endif
                 </div>
                 @if(!empty($event['can_move']) && $event['can_move'])
                 <button wire:click="openMoveModal({{ $event['id'] }})"
                         class="text-xs text-sky-500 font-semibold border border-sky-200 rounded-lg px-2 py-1 bg-sky-50 hover:bg-sky-100 transition-colors flex-shrink-0">
-                    Déplacer
+                    {{ __('calendar.move') }}
                 </button>
                 @endif
             </div>
@@ -167,8 +167,8 @@
     @if($showMoveModal)
     <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl p-5 w-full max-w-sm shadow-xl">
-            <h3 class="text-sm font-bold text-slate-800 mb-1">Déplacer l'événement</h3>
-            <p class="text-xs text-slate-400 mb-4">Choisir la nouvelle date :</p>
+            <h3 class="text-sm font-bold text-slate-800 mb-1">{{ __('calendar.move_event') }}</h3>
+            <p class="text-xs text-slate-400 mb-4">{{ __('calendar.move_choose_date') }}</p>
             <div class="mb-4">
                 <x-datepicker model="moveToDate" :value="$moveToDate" />
             </div>
@@ -178,11 +178,11 @@
             <div class="flex gap-3">
                 <button wire:click="cancelMove"
                         class="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors">
-                    Annuler
+                    {{ __('common.cancel') }}
                 </button>
                 <button wire:click="confirmMove"
                         class="flex-1 py-2.5 rounded-xl bg-sky-500 text-sm font-semibold text-white hover:bg-sky-600 transition-colors">
-                    Confirmer
+                    {{ __('common.confirm') }}
                 </button>
             </div>
         </div>

@@ -16,7 +16,7 @@
     <button type="button"
             wire:click="$set('open', false)"
             class="fixed inset-0 z-40 cursor-default"
-            aria-label="Fermer"></button>
+            aria-label="{{ __('profiles.close') }}"></button>
 
     <div class="absolute right-0 top-11 w-60 bg-white rounded-2xl z-50"
          style="box-shadow: 0 8px 30px rgba(0,0,0,.12), 0 1px 4px rgba(0,0,0,.06);">
@@ -41,12 +41,12 @@
             <a href="{{ route('profiles.create') }}"
                class="flex items-center gap-2 px-2 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors mt-1">
                 <span class="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 text-base font-bold">+</span>
-                Ajouter un profil
+                {{ __('profiles.add_profile') }}
             </a>
             <a href="{{ route('profiles') }}"
                class="flex items-center gap-2 px-2 py-2 rounded-xl text-sm text-slate-400 hover:bg-slate-50 transition-colors">
                 <span class="w-7 h-7 flex items-center justify-center text-slate-300 text-base">⚙</span>
-                Gérer les profils
+                {{ __('profiles.manage_profiles') }}
             </a>
         </div>
     </div>

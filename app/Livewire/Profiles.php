@@ -42,14 +42,14 @@ class Profiles extends Component
                 'editEnd'   => 'nullable|date|after:editStart',
             ],
             [
-                'editName.required' => 'Le prénom est requis.',
-                'editName.max'      => 'Le prénom ne peut pas dépasser 100 caractères.',
-                'editName.unique'   => 'Un profil avec ce prénom existe déjà.',
-                'editColor.required'=> 'Veuillez choisir une couleur.',
-                'editColor.in'      => 'Cette couleur n\'est pas autorisée.',
-                'editStart.date'    => 'La date de début doit être une date valide.',
-                'editEnd.date'      => 'La date de fin doit être une date valide.',
-                'editEnd.after'     => 'La date de fin doit être postérieure à la date de début.',
+                'editName.required' => __('profiles.validation_name_required'),
+                'editName.max'      => __('profiles.validation_name_max'),
+                'editName.unique'   => __('profiles.validation_name_unique'),
+                'editColor.required'=> __('profiles.validation_color_required'),
+                'editColor.in'      => __('profiles.validation_color_in'),
+                'editStart.date'    => __('profiles.validation_start_date'),
+                'editEnd.date'      => __('profiles.validation_end_date'),
+                'editEnd.after'     => __('profiles.validation_end_after'),
             ]
         );
 
@@ -93,6 +93,6 @@ class Profiles extends Component
             'archived' => Profile::archived()->orderBy('name')->get(),
             'activeId' => app(ActiveProfile::class)->id(),
             'colors'   => Profile::COLORS,
-        ])->layout('layouts.app', ['title' => 'Profils']);
+        ])->layout('layouts.app', ['title' => __('profiles.title')]);
     }
 }

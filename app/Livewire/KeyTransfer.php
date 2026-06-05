@@ -29,7 +29,7 @@ class KeyTransfer extends Component
                 $key = app(CryptoService::class)->generateKey();
                 SecureStorage::set('device_key', $key);
             } catch (\Throwable) {
-                $this->error = 'Impossible de générer les clés. Veuillez relancer l\'application.';
+                $this->error = __('data.key_err_generate');
                 return;
             }
         }
@@ -40,7 +40,7 @@ class KeyTransfer extends Component
     public function startScan(): void
     {
         Scanner::scan()
-            ->prompt('Scannez le QR code de votre ancien appareil')
+            ->prompt(__('data.key_scan_prompt'))
             ->formats(['qr'])
             ->id(self::SCAN_ID);
     }
@@ -84,7 +84,7 @@ class KeyTransfer extends Component
     {
         $decoded = base64_decode($keyBase64, true);
         if ($decoded === false || strlen($decoded) !== 32) {
-            $this->error = 'Clé invalide — le QR code ne contient pas une clé valide.';
+            $this->error = __('data.key_err_invalid');
             return;
         }
 
@@ -95,6 +95,6 @@ class KeyTransfer extends Component
     public function render(): \Illuminate\View\View
     {
         return view('livewire.key-transfer')
-            ->layout('layouts.app', ['title' => 'Transfert de clés']);
+            ->layout('layouts.app', ['title' => __('data.key_title')]);
     }
 }

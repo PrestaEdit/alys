@@ -117,7 +117,7 @@ class Export extends Component
             $key = SecureStorage::get('device_key');
 
             if ($key === null) {
-                $this->exportError = 'Clés non initialisées. Allez dans Réglages > Transfert de clés.';
+                $this->exportError = __('data.export_err_keys');
                 return;
             }
 
@@ -133,7 +133,7 @@ class Export extends Component
             $path     = rtrim($tempDir, '/') . '/' . $filename;
 
             if (file_put_contents($path, $envelope) === false) {
-                $this->exportError = 'Impossible d\'écrire le fichier temporaire.';
+                $this->exportError = __('data.export_err_write');
                 return;
             }
 
@@ -141,7 +141,7 @@ class Export extends Component
             $this->generatedFilename = $filename;
         } catch (\Throwable $e) {
             report($e);
-            $this->exportError = 'Une erreur est survenue lors de l\'export.';
+            $this->exportError = __('data.export_err_generic');
         }
     }
 
@@ -154,7 +154,7 @@ class Export extends Component
             return;
         }
 
-        Share::file('Alys Traitement', 'Export chiffré du calendrier de traitement', $this->generatedPath);
+        Share::file(__('data.export_share_title'), __('data.export_share_text'), $this->generatedPath);
         $this->success = true;
     }
 
@@ -185,7 +185,7 @@ class Export extends Component
             $this->generatedFilename = '';
         } else {
             if ($error !== 'cancelled') {
-                $this->exportError = 'Impossible d\'enregistrer le fichier.';
+                $this->exportError = __('data.export_err_save');
             }
         }
     }
@@ -197,6 +197,6 @@ class Export extends Component
             ->get();
 
         return view('livewire.export', ['profiles' => $profiles])
-            ->layout('layouts.app', ['title' => 'Exporter']);
+            ->layout('layouts.app', ['title' => __('data.export_title')]);
     }
 }

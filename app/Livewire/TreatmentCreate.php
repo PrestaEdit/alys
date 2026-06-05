@@ -95,12 +95,12 @@ class TreatmentCreate extends Component
     public function stepLabel(): string
     {
         return match ($this->step) {
-            1       => 'Informations de base',
-            2       => 'Widget accueil',
-            3       => 'Posologie',
-            4       => $this->type === 'weekly' ? 'Planification' : 'Récurrence',
-            6       => 'Notifications',
-            5       => 'Récapitulatif',
+            1       => __('treatments.step_basic_info'),
+            2       => __('treatments.step_widget'),
+            3       => __('treatments.step_posology'),
+            4       => $this->type === 'weekly' ? __('treatments.step_scheduling') : __('treatments.step_recurrence'),
+            6       => __('treatments.step_notifications'),
+            5       => __('treatments.step_summary'),
             default => '',
         };
     }
@@ -113,17 +113,17 @@ class TreatmentCreate extends Component
                 'type'  => 'required|in:daily,weekly,cyclic',
                 'color' => 'required|string',
             ], [
-                'name.required'   => 'Le nom est obligatoire.',
-                'name.max'        => 'Le nom ne peut pas dépasser 255 caractères.',
-                'type.required'   => 'Le type est obligatoire.',
-                'type.in'         => 'Le type sélectionné est invalide.',
-                'color.required'  => 'La couleur est obligatoire.',
+                'name.required'   => __('treatments.validation_name_required'),
+                'name.max'        => __('treatments.validation_name_max'),
+                'type.required'   => __('treatments.validation_type_required'),
+                'type.in'         => __('treatments.validation_type_in'),
+                'color.required'  => __('treatments.validation_color_required'),
             ]);
         } elseif ($this->step === 6) {
             if ($this->notificationEnabled) {
                 if (!$this->isMedicalAct && $this->dosageMode === 'dayparts') {
                     if (!$this->notificationTimeMorning && !$this->notificationTimeNoon && !$this->notificationTimeEvening) {
-                        $this->addError('notificationTimeMorning', 'Au moins une heure de notification est requise.');
+                        $this->addError('notificationTimeMorning', __('treatments.validation_notif_at_least_one'));
                         throw new \Livewire\Exceptions\ValidationException(
                             app(\Illuminate\Contracts\Validation\Factory::class)->make([], [])
                         );
@@ -131,22 +131,22 @@ class TreatmentCreate extends Component
                 } else {
                     $this->validate(
                         ['notificationTimeMorning' => 'required|date_format:H:i'],
-                        ['notificationTimeMorning.required'    => "L'heure de notification est obligatoire.",
-                         'notificationTimeMorning.date_format' => "Format d'heure invalide (HH:MM)."]
+                        ['notificationTimeMorning.required'    => __('treatments.validation_notif_time_required'),
+                         'notificationTimeMorning.date_format' => __('treatments.validation_notif_time_format')]
                     );
                 }
             }
         } elseif ($this->step === 4) {
             $rules = ['frequencyWeeks' => 'required|integer|min:1'];
             $messages = [
-                'frequencyWeeks.required' => 'La fréquence est obligatoire.',
-                'frequencyWeeks.min'      => 'La fréquence doit être d\'au moins 1 semaine.',
+                'frequencyWeeks.required' => __('treatments.validation_frequency_required'),
+                'frequencyWeeks.min'      => __('treatments.validation_frequency_min'),
             ];
             if ($this->type === 'weekly') {
                 $rules['dayOfWeek'] = 'required|integer|between:0,6';
             } else {
                 $rules['recurrenceStart']    = 'nullable|date';
-                $messages['recurrenceStart.date'] = 'La date de début est invalide.';
+                $messages['recurrenceStart.date'] = __('treatments.validation_start_date');
             }
             $this->validate($rules, $messages);
         }
@@ -274,17 +274,17 @@ class TreatmentCreate extends Component
         }
 
         $this->validate($rules, [
-            'name.required'              => 'Le nom est obligatoire.',
-            'name.max'                   => 'Le nom ne peut pas dépasser 255 caractères.',
-            'type.required'              => 'Le type est obligatoire.',
-            'type.in'                    => 'Le type sélectionné est invalide.',
-            'color.required'             => 'La couleur est obligatoire.',
-            'linkedDays.required'        => 'La durée liée est obligatoire.',
-            'linkedDays.min'             => 'La durée liée doit être d\'au moins 1 jour.',
-            'frequencyWeeks.required'    => 'La fréquence est obligatoire.',
-            'frequencyWeeks.min'         => 'La fréquence doit être d\'au moins 1 semaine.',
-            'recurrenceStart.date'       => 'La date de début est invalide.',
-            'parentTreatmentId.exists'   => 'Le traitement lié n\'existe pas.',
+            'name.required'              => __('treatments.validation_name_required'),
+            'name.max'                   => __('treatments.validation_name_max'),
+            'type.required'              => __('treatments.validation_type_required'),
+            'type.in'                    => __('treatments.validation_type_in'),
+            'color.required'             => __('treatments.validation_color_required'),
+            'linkedDays.required'        => __('treatments.validation_linked_days_required'),
+            'linkedDays.min'             => __('treatments.validation_linked_days_min'),
+            'frequencyWeeks.required'    => __('treatments.validation_frequency_required'),
+            'frequencyWeeks.min'         => __('treatments.validation_frequency_min'),
+            'recurrenceStart.date'       => __('treatments.validation_start_date'),
+            'parentTreatmentId.exists'   => __('treatments.validation_parent_exists'),
         ]);
 
         $treatmentData = [
@@ -376,7 +376,7 @@ class TreatmentCreate extends Component
 
         app(\App\Services\NotificationScheduler::class)->scheduleForTreatment($treatment);
 
-        session()->flash('success', 'Traitement créé avec succès.');
+        session()->flash('success', __('treatments.created'));
         $this->redirect(route('treatments'), navigate: false);
     }
 
@@ -461,6 +461,6 @@ class TreatmentCreate extends Component
             'otherTreatments' => $otherTreatments,
             'applicableSteps' => $this->applicableSteps(),
             'stepLabel'       => $this->stepLabel(),
-        ])->layout('layouts.app', ['title' => 'Nouveau traitement']);
+        ])->layout('layouts.app', ['title' => __('treatments.title_create')]);
     }
 }

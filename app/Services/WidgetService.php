@@ -28,7 +28,7 @@ class WidgetService
         $eventNames = array_values(array_map(fn($e) => $e['display_name'], $events));
 
         nativephp_call('Widget.UpdateCalendar', json_encode([
-            'date' => $today->locale('fr')->isoFormat('dddd D MMMM'),
+            'date' => $today->locale(app()->getLocale())->isoFormat('dddd D MMMM'),
             'events' => $eventNames,
         ]));
     }

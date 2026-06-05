@@ -118,14 +118,21 @@ class Calendar extends Component
         $profile = app(ActiveProfile::class)->get();
         $profileName = $profile?->name ?? 'Alys';
 
+        // Localized weekday initials, starting Monday, following the active locale.
+        $weekStart = Carbon::now()->startOfWeek(Carbon::MONDAY);
+        $weekdayHeaders = collect(range(0, 6))
+            ->map(fn($i) => mb_strtoupper(mb_substr($weekStart->copy()->addDays($i)->isoFormat('dd'), 0, 1)))
+            ->all();
+
         return view('livewire.calendar', [
             'firstDay' => $firstDay,
             'daysInMonth' => $daysInMonth,
             'startOffset' => $startOffset,
-            'monthName' => $firstDay->locale('fr')->isoFormat('MMMM YYYY'),
+            'monthName' => $firstDay->isoFormat('MMMM YYYY'),
+            'weekdayHeaders' => $weekdayHeaders,
             'today' => now()->toDateString(),
             'legend' => $legend,
             'profileName' => $profileName,
-        ])->layout('layouts.app', ['title' => 'Calendrier']);
+        ])->layout('layouts.app', ['title' => __('nav.calendar')]);
     }
 }

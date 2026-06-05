@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\BelongsToActiveProfile;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -121,16 +122,15 @@ class Treatment extends Model
 
     public function dayOfWeekName(): string
     {
-        return match ($this->day_of_week) {
-            0 => 'lundi',
-            1 => 'mardi',
-            2 => 'mercredi',
-            3 => 'jeudi',
-            4 => 'vendredi',
-            5 => 'samedi',
-            6 => 'dimanche',
-            default => '',
-        };
+        if ($this->day_of_week === null || $this->day_of_week < 0 || $this->day_of_week > 6) {
+            return '';
+        }
+
+        // 0 = lundi … 6 = dimanche. Le 2024-01-01 est un lundi : on s'appuie
+        // sur Carbon pour obtenir le nom du jour dans la locale active.
+        return Carbon::createFromDate(2024, 1, 1)
+            ->addDays($this->day_of_week)
+            ->isoFormat('dddd');
     }
 
     public function displayName(): string

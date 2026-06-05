@@ -15,6 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'livewire/*',
             '_native/*',
         ]);
+        $middleware->web(prepend: [
+            \App\Http\Middleware\SetLocale::class,
+        ]);
         $middleware->web(append: [
             \App\Http\Middleware\EnsureOnboardingCompleted::class,
             \App\Http\Middleware\PreventBfcache::class,

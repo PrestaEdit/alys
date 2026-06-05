@@ -22,8 +22,8 @@ class Onboarding extends Component
             $this->validate(
                 ['patientName' => 'required|string|max:100'],
                 [
-                    'patientName.required' => 'Le prénom est requis.',
-                    'patientName.max'      => 'Le prénom ne peut pas dépasser 100 caractères.',
+                    'patientName.required' => __('profiles.validation_name_required'),
+                    'patientName.max'      => __('profiles.validation_name_max'),
                 ]
             );
             $this->step = 2;
@@ -34,8 +34,8 @@ class Onboarding extends Component
             $this->validate(
                 ['color' => ['required', Rule::in(Profile::COLORS)]],
                 [
-                    'color.required' => 'Veuillez choisir une couleur.',
-                    'color.in'       => 'Cette couleur n\'est pas autorisée.',
+                    'color.required' => __('profiles.validation_color_required'),
+                    'color.in'       => __('profiles.validation_color_in'),
                 ]
             );
             $this->step = 3;
@@ -49,9 +49,9 @@ class Onboarding extends Component
                     'treatmentEnd'   => 'nullable|date|after:treatmentStart',
                 ],
                 [
-                    'treatmentStart.date' => 'La date de début doit être une date valide.',
-                    'treatmentEnd.date'   => 'La date de fin doit être une date valide.',
-                    'treatmentEnd.after'  => 'La date de fin doit être postérieure à la date de début.',
+                    'treatmentStart.date' => __('profiles.validation_start_date'),
+                    'treatmentEnd.date'   => __('profiles.validation_end_date'),
+                    'treatmentEnd.after'  => __('profiles.validation_end_after'),
                 ]
             );
             $this->step = 4;
@@ -94,6 +94,6 @@ class Onboarding extends Component
     public function render(): \Illuminate\View\View
     {
         return view('livewire.onboarding', ['colors' => Profile::COLORS])
-            ->layout('layouts.app', ['title' => 'Bienvenue']);
+            ->layout('layouts.app', ['title' => __('onboarding.welcome')]);
     }
 }

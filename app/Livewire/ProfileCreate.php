@@ -26,14 +26,14 @@ class ProfileCreate extends Component
                 'treatmentEnd'   => 'nullable|date|after:treatmentStart',
             ],
             [
-                'name.required'       => 'Le prénom est requis.',
-                'name.max'            => 'Le prénom ne peut pas dépasser 100 caractères.',
-                'name.unique'         => 'Un profil avec ce prénom existe déjà.',
-                'color.required'      => 'Veuillez choisir une couleur.',
-                'color.in'            => 'Cette couleur n\'est pas autorisée.',
-                'treatmentStart.date' => 'La date de début doit être une date valide.',
-                'treatmentEnd.date'   => 'La date de fin doit être une date valide.',
-                'treatmentEnd.after'  => 'La date de fin doit être postérieure à la date de début.',
+                'name.required'       => __('profiles.validation_name_required'),
+                'name.max'            => __('profiles.validation_name_max'),
+                'name.unique'         => __('profiles.validation_name_unique'),
+                'color.required'      => __('profiles.validation_color_required'),
+                'color.in'            => __('profiles.validation_color_in'),
+                'treatmentStart.date' => __('profiles.validation_start_date'),
+                'treatmentEnd.date'   => __('profiles.validation_end_date'),
+                'treatmentEnd.after'  => __('profiles.validation_end_after'),
             ]
         );
 
@@ -52,6 +52,6 @@ class ProfileCreate extends Component
     public function render(): \Illuminate\View\View
     {
         return view('livewire.profile-create', ['colors' => Profile::COLORS])
-            ->layout('layouts.app', ['title' => 'Nouveau profil']);
+            ->layout('layouts.app', ['title' => __('profiles.title_create')]);
     }
 }

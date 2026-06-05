@@ -1,0 +1,173 @@
+<?php
+
+return [
+    // List screen
+    'title'                 => 'Treatments',
+    'empty'                 => 'No treatment',
+    'empty_description'     => "This profile has no treatment yet. Add one to start tracking.",
+    'add_treatment'         => 'Add a treatment',
+    'unarchive'             => 'Unarchive',
+    'archived_section'      => 'Archived treatments',
+    'save_order'            => 'Save order',
+    'modified_on'           => 'Modified on :date',
+    'reminders'             => 'Reminders',
+
+    // Dose period labels
+    'morning'               => 'Morning',
+    'noon'                  => 'Noon',
+    'evening'               => 'Evening',
+
+    // Type badges
+    'type_daily'            => 'Daily',
+    'type_weekly'           => 'Weekly',
+    'type_cyclic'           => 'Cyclic',
+    'weekly_short'          => 'Weekly',
+    'medical_act'           => 'Medical act',
+    'every_n_weeks_short'   => '/ :weeks wk',
+    'one_week_per_n'        => '1 wk / :weeks',
+    'times_per_day_interval'=> ':count×/day · every :hours h',
+
+    // Archive modal
+    'archive_title'         => 'Archive the treatment',
+    'archive_subtitle'      => 'This treatment will be hidden from the active list.',
+    'archive_description'   => 'You can unarchive it at any time from the archived treatments section.',
+
+    // Create wizard
+    'title_create'          => 'New treatment',
+    'step_of'              => 'Step :current of :total',
+    'create_treatment'      => 'Create the treatment',
+    'next'                  => 'Next',
+    'previous'              => 'Previous',
+
+    // Step labels
+    'step_basic_info'       => 'Basic information',
+    'step_widget'           => 'Home widget',
+    'step_posology'         => 'Posology',
+    'step_scheduling'       => 'Scheduling',
+    'step_recurrence'       => 'Recurrence',
+    'step_notifications'    => 'Notifications',
+    'step_summary'          => 'Summary',
+
+    // Fields
+    'common_name'           => 'Common name',
+    'common_name_placeholder' => 'e.g. Methotrexate',
+    'commercial_name'       => 'Brand name',
+    'commercial_name_placeholder' => 'e.g. Novatrex',
+    'type'                  => 'Type',
+    'medical_act_label'     => 'Medical act',
+    'medical_act_help'      => 'No dosage or unit',
+    'fasting'               => 'Fasting',
+    'fasting_help'          => 'Shown as a warning in the calendar',
+    'color'                 => 'Color',
+    'linked_to'             => 'Linked to a treatment',
+    'none'                  => '— None —',
+    'linked_duration'       => 'Linked treatment duration (days)',
+    'day'                   => 'day',
+    'days'                  => 'days',
+
+    // Widget step
+    'show_on_home'          => 'Show on home page',
+    'widget_icon'           => 'Widget icon',
+
+    // Posology step
+    'unit'                  => 'Unit',
+    'unit_placeholder'      => 'e.g. mg, ml, tablet',
+    'unit_placeholder_short'=> 'e.g. mg, ml, tab',
+    'dose_single'           => 'Single dose',
+    'dose_dayparts'         => 'Morning / Noon / Evening',
+    'dose_interval'         => 'Regular interval',
+    'dose_per_intake'       => 'Dose per intake',
+    'intakes_per_day'       => 'Number of intakes per day',
+    'per_intake_suffix'     => ':unit / intake',
+    'times_per_day_suffix'  => '× / day · every :hours h',
+    'per_unit'              => ':unit / :period',
+    'period_day'            => 'day',
+    'period_week'           => 'week',
+    'period_intake'         => 'intake',
+
+    // Scheduling step
+    'day_of_week'           => 'Day of the week',
+    'frequency'             => 'Frequency',
+    'frequency_weeks'       => 'Frequency (weeks)',
+    'first_intake_date'     => 'Date of first intake (optional)',
+    'start_date'            => 'Start date',
+    'every_week'            => 'Every week',
+    'one_week_per'          => 'One week out of :weeks',
+    'every_n_weeks'         => 'Every :weeks weeks',
+    'every_week_short'      => 'Every week',
+    'every_n_weeks_summary' => 'Every :weeks wk',
+    'day_mon'               => 'Mon',
+    'day_tue'               => 'Tue',
+    'day_wed'               => 'Wed',
+    'day_thu'               => 'Thu',
+    'day_fri'               => 'Fri',
+    'day_sat'               => 'Sat',
+    'day_sun'               => 'Sun',
+
+    // Notifications step
+    'enable_reminders'      => 'Enable reminders',
+    'reminder_help'         => 'Local notification at intake time',
+    'reminder_time'         => 'Reminder time',
+    'first_intake_time'     => 'Time of first intake',
+    'interval_reminders_note' => 'The next :count reminders will trigger automatically every :hours h.',
+    'scheduled_days_note'   => 'The notification will only trigger on the days scheduled in your calendar.',
+
+    // Summary
+    'summary_name'          => 'Name',
+    'summary_color'         => 'Color',
+    'summary_linked_to'     => 'Linked to',
+    'summary_widget'        => 'Widget',
+    'summary_posology'      => 'Posology',
+    'summary_recurrence'    => 'Recurrence',
+    'summary_start'         => 'Start',
+
+    // Edit screen
+    'title_edit'            => 'Edit treatment',
+    'subtitle_type'         => ':type treatment',
+    'subtitle_daily'        => 'Daily',
+    'subtitle_weekly'       => 'Weekly',
+    'subtitle_cyclic'       => 'Cyclic',
+    'subtitle_medical_act'  => 'medical act',
+    'panel_info'            => 'Information',
+    'panel_widget'          => 'Home widget',
+    'panel_notifications'   => 'Notifications',
+    'panel_scheduling'      => 'Scheduling',
+    'panel_recurrence'      => 'Recurrence',
+    'panel_current_posology'=> 'Current posology',
+    'panel_history'         => 'History',
+    'save_info'             => 'Save information',
+    'save_widget'           => 'Save widget',
+    'save_scheduling'       => 'Save scheduling',
+    'save_posology'         => 'Save posology',
+    'note_placeholder'      => 'Optional note...',
+    'history_since'         => 'Since :date',
+    'history_current'       => 'Current',
+    'recalculate_title'     => 'Recalculate events?',
+    'recalculate_description' => 'Future events will be deleted and recalculated with the new frequency and start date. This action is irreversible.',
+
+    // Validation messages
+    'validation_name_required'   => 'The name is required.',
+    'validation_name_max'        => 'The name cannot exceed 255 characters.',
+    'validation_type_required'   => 'The type is required.',
+    'validation_type_in'         => 'The selected type is invalid.',
+    'validation_color_required'  => 'The color is required.',
+    'validation_linked_days_required' => 'The linked duration is required.',
+    'validation_linked_days_min' => 'The linked duration must be at least 1 day.',
+    'validation_frequency_required' => 'The frequency is required.',
+    'validation_frequency_min'   => 'The frequency must be at least 1 week.',
+    'validation_start_date'      => 'The start date is invalid.',
+    'validation_parent_exists'   => 'The linked treatment does not exist.',
+    'validation_notif_time_required'  => 'The notification time is required.',
+    'validation_notif_time_format'    => 'Invalid time format (HH:MM).',
+    'validation_notif_time_format_short' => 'Invalid format (HH:MM).',
+    'validation_notif_at_least_one'   => 'At least one notification time is required.',
+    'validation_notif_at_least_one_short' => 'At least one time is required.',
+
+    // Toast / flash messages
+    'created'               => 'Treatment created successfully.',
+    'posology_updated'      => 'Posology updated.',
+    'info_updated'          => 'Information updated.',
+    'notifications_updated' => 'Notifications updated.',
+    'widget_updated'        => 'Widget updated.',
+    'recurrence_updated'    => 'Recurrence updated.',
+];

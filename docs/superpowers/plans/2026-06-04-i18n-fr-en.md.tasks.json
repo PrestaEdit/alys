@@ -1,0 +1,89 @@
+{
+  "planPath": "docs/superpowers/plans/2026-06-04-i18n-fr-en.md",
+  "tasks": [
+    {
+      "id": 0,
+      "subject": "Task 0: Infrastructure i18n (config + middleware + Carbon)",
+      "status": "completed",
+      "description": "**Goal:** Résolution de locale côté serveur : Setting('locale') → Accept-Language → fallback fr ; applique app()->setLocale + Carbon::setLocale.\n\n```json:metadata\n{\"files\":[\"app/Http/Middleware/SetLocale.php\",\"bootstrap/app.php\",\"config/app.php\",\".env.example\",\"tests/Feature/SetLocaleTest.php\"],\"verifyCommand\":\"php artisan test --filter=SetLocaleTest\",\"acceptanceCriteria\":[\"Accept-Language en/fr/absent résolu correctement\",\"Setting override l'auto-détection\",\"Setting invalide ignoré\",\"Carbon locale suit\"]}\n```"
+    },
+    {
+      "id": 1,
+      "subject": "Task 1: Domaine nav — navigation, layout, titres de page",
+      "status": "completed",
+      "blockedBy": [0],
+      "description": "**Goal:** Extraire les 4 labels de nav (natif + web), html lang dynamique, titres de page des render() Livewire.\n\n```json:metadata\n{\"files\":[\"lang/fr/nav.php\",\"lang/en/nav.php\",\"resources/views/layouts/app.blade.php\"],\"verifyCommand\":\"php artisan test\",\"acceptanceCriteria\":[\"html lang dynamique\",\"labels nav natif+web via __()\",\"titres de page via __('nav.*')\"]}\n```"
+    },
+    {
+      "id": 2,
+      "subject": "Task 2: Domaine common — boutons partagés",
+      "status": "completed",
+      "blockedBy": [0],
+      "description": "**Goal:** Centraliser les libellés réutilisés (save/cancel/edit/delete/archive/back/confirm/add).\n\n```json:metadata\n{\"files\":[\"lang/fr/common.php\",\"lang/en/common.php\"],\"verifyCommand\":\"php -r \\\"var_dump(require 'lang/fr/common.php');\\\"\",\"acceptanceCriteria\":[\"fichiers common à clés identiques FR/EN\"]}\n```"
+    },
+    {
+      "id": 3,
+      "subject": "Task 3: Domaine dashboard (+ dates Carbon dynamiques)",
+      "status": "completed",
+      "blockedBy": [1, 2],
+      "description": "**Goal:** Extraire les chaînes du dashboard et retirer .locale('fr') de Dashboard.php.\n\n```json:metadata\n{\"files\":[\"lang/fr/dashboard.php\",\"lang/en/dashboard.php\",\"app/Livewire/Dashboard.php\",\"resources/views/livewire/dashboard.blade.php\"],\"verifyCommand\":\"php artisan test --filter=Dashboard\",\"acceptanceCriteria\":[\"pas de .locale('fr')\",\"pas de littéral FR dans la vue\"]}\n```"
+    },
+    {
+      "id": 4,
+      "subject": "Task 4: Domaine treatments (liste + création + édition)",
+      "status": "completed",
+      "blockedBy": [1, 2],
+      "description": "**Goal:** Extraire les chaînes des 3 écrans de traitements + toasts/titres ; retirer .locale('fr').\n\n```json:metadata\n{\"files\":[\"lang/fr/treatments.php\",\"lang/en/treatments.php\",\"resources/views/livewire/treatments.blade.php\",\"resources/views/livewire/treatment-create.blade.php\",\"resources/views/livewire/treatment-edit.blade.php\"],\"verifyCommand\":\"php artisan test --filter=Treatment\",\"acceptanceCriteria\":[\"pas de littéral FR dans les 3 vues/composants\",\"dates locale-aware\"]}\n```"
+    },
+    {
+      "id": 5,
+      "subject": "Task 5: Domaine calendar (+ dates Carbon dynamiques)",
+      "status": "completed",
+      "blockedBy": [1, 2],
+      "description": "**Goal:** Extraire les chaînes du calendrier et rendre mois/jours dépendants de la locale.\n\n```json:metadata\n{\"files\":[\"lang/fr/calendar.php\",\"lang/en/calendar.php\",\"app/Livewire/Calendar.php\",\"resources/views/livewire/calendar.blade.php\"],\"verifyCommand\":\"php artisan test --filter=Calendar\",\"acceptanceCriteria\":[\"pas de .locale('fr')\",\"picker locale = app()->getLocale()\",\"pas de littéral FR\"]}\n```"
+    },
+    {
+      "id": 6,
+      "subject": "Task 6: Domaine profiles (liste + création + switcher)",
+      "status": "completed",
+      "blockedBy": [1, 2],
+      "description": "**Goal:** Extraire les chaînes des écrans de profils + toasts/titres.\n\n```json:metadata\n{\"files\":[\"lang/fr/profiles.php\",\"lang/en/profiles.php\",\"resources/views/livewire/profiles.blade.php\",\"resources/views/livewire/profile-create.blade.php\",\"resources/views/livewire/profile-switcher.blade.php\"],\"verifyCommand\":\"php artisan test --filter=Profile\",\"acceptanceCriteria\":[\"pas de littéral FR dans les 3 vues/composants\"]}\n```"
+    },
+    {
+      "id": 7,
+      "subject": "Task 7: Domaine onboarding",
+      "status": "completed",
+      "blockedBy": [1, 2],
+      "description": "**Goal:** Extraire les chaînes de l'onboarding.\n\n```json:metadata\n{\"files\":[\"lang/fr/onboarding.php\",\"lang/en/onboarding.php\",\"resources/views/livewire/onboarding.blade.php\",\"app/Livewire/Onboarding.php\"],\"verifyCommand\":\"php artisan test --filter=Onboarding\",\"acceptanceCriteria\":[\"pas de littéral FR dans la vue/composant\"]}\n```"
+    },
+    {
+      "id": 8,
+      "subject": "Task 8: Domaine settings + sélecteur de langue (UI)",
+      "status": "completed",
+      "blockedBy": [1, 2],
+      "description": "**Goal:** Extraire les chaînes des Réglages + ajouter le contrôle segmenté FR/EN (setLocale persiste Setting, redirect relance le middleware).\n\n```json:metadata\n{\"files\":[\"lang/fr/settings.php\",\"lang/en/settings.php\",\"resources/views/livewire/settings.blade.php\",\"app/Livewire/Settings.php\",\"tests/Feature/Livewire/SettingsLocaleTest.php\"],\"verifyCommand\":\"php artisan test --filter=SettingsLocale\",\"acceptanceCriteria\":[\"setLocale persiste et rejette non supporté\",\"sélecteur visible, option active = locale\",\"pas de littéral FR\"]}\n```"
+    },
+    {
+      "id": 9,
+      "subject": "Task 9: Domaine data — export / import / key-transfer",
+      "status": "completed",
+      "blockedBy": [1, 2],
+      "description": "**Goal:** Extraire les chaînes des écrans de données + titres ; retirer .locale('fr') dans export.\n\n```json:metadata\n{\"files\":[\"lang/fr/data.php\",\"lang/en/data.php\",\"resources/views/livewire/export.blade.php\",\"resources/views/livewire/import.blade.php\",\"resources/views/livewire/key-transfer.blade.php\"],\"verifyCommand\":\"php artisan test --filter=Export\",\"acceptanceCriteria\":[\"pas de littéral FR dans les 3 vues/composants\",\"pas de .locale('fr') dans export\"]}\n```"
+    },
+    {
+      "id": 10,
+      "subject": "Task 10: Composants partagés + messages de validation",
+      "status": "completed",
+      "blockedBy": [3, 4, 5, 6, 7, 8, 9],
+      "description": "**Goal:** Messages de validation FR/EN + extraire datepicker/time-picker (locale du widget = app()->getLocale()).\n\n```json:metadata\n{\"files\":[\"lang/fr/validation.php\",\"lang/en/validation.php\",\"resources/views/components/datepicker.blade.php\",\"resources/views/components/time-picker.blade.php\"],\"verifyCommand\":\"php artisan test\",\"acceptanceCriteria\":[\"messages de validation localisés\",\"pas de littéral FR dans les composants\",\"picker locale dynamique\"]}\n```"
+    },
+    {
+      "id": 11,
+      "subject": "Task 11: Test de parité des clés + vérification finale",
+      "status": "completed",
+      "blockedBy": [10],
+      "description": "**Goal:** Garantir parité des clés FR/EN (récursif) et balayage final des vues.\n\n```json:metadata\n{\"files\":[\"tests/Feature/TranslationParityTest.php\"],\"verifyCommand\":\"php artisan test\",\"acceptanceCriteria\":[\"clés FR/EN identiques par fichier (récursif)\",\"aucune chaîne FR oubliée dans les vues\",\"suite complète verte\"]}\n```"
+    }
+  ],
+  "lastUpdated": "2026-06-04"
+}

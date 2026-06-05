@@ -3,7 +3,7 @@
     {{-- En-tête --}}
     <div class="flex items-center justify-between mb-5">
         <div>
-            <p class="text-xs text-slate-400 font-medium">{{ now()->locale('fr')->isoFormat('dddd D MMMM YYYY') }}</p>
+            <p class="text-xs text-slate-400 font-medium">{{ now()->isoFormat('dddd D MMMM YYYY') }}</p>
             <h1 class="text-xl font-extrabold text-slate-900">{{ $patientName }} 💙</h1>
         </div>
         <div class="flex items-center gap-2">
@@ -22,7 +22,7 @@
     <div class="rounded-2xl p-4 mb-4 text-white overflow-hidden relative"
          style="background: linear-gradient(135deg, #0ea5e9, #6366f1);">
         <div class="absolute top-0 right-0 w-24 h-24 rounded-full bg-white/10 -translate-y-8 translate-x-8"></div>
-        <p class="text-xs opacity-80 uppercase tracking-wide font-semibold mb-1">Prochain RDV hôpital</p>
+        <p class="text-xs opacity-80 uppercase tracking-wide font-semibold mb-1">{{ __('dashboard.next_hospital_visit') }}</p>
         <p class="text-lg font-extrabold capitalize">{{ $nextHospitalDate }}</p>
     </div>
     @endif
@@ -31,8 +31,8 @@
     @if($progressPercent !== null)
     <div class="bg-white rounded-2xl p-4 mb-4 shadow-sm">
         <div class="flex justify-between items-center mb-2">
-            <p class="text-xs font-semibold text-slate-700">Fin du traitement</p>
-            <p class="text-xs font-bold text-sky-500">{{ $daysRemaining }} jours restants</p>
+            <p class="text-xs font-semibold text-slate-700">{{ __('dashboard.treatment_end') }}</p>
+            <p class="text-xs font-bold text-sky-500">{{ $daysRemaining }} {{ __('dashboard.days_remaining') }}</p>
         </div>
         <div class="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
             <div class="h-full rounded-full transition-all duration-500"
@@ -64,7 +64,7 @@
 
     {{-- Traitements du jour --}}
     <div class="bg-white rounded-2xl p-4 shadow-sm">
-        <p class="text-xs font-bold text-slate-600 uppercase tracking-wide mb-3">Aujourd'hui</p>
+        <p class="text-xs font-bold text-slate-600 uppercase tracking-wide mb-3">{{ __('dashboard.today') }}</p>
         <div class="space-y-2">
             @forelse($todayEvents as $event)
             <div class="flex items-start gap-3 px-3 py-2 rounded-xl
@@ -74,7 +74,7 @@
                 <div class="flex-1 min-w-0">
                     <p class="text-xs font-medium text-slate-700">{{ $event['display_name'] ?? $event['name'] }}</p>
                     @if($event['requires_fasting'])
-                        <p class="text-xs text-amber-600 font-bold">À jeun !</p>
+                        <p class="text-xs text-amber-600 font-bold">{{ __('dashboard.fasting') }}</p>
                     @elseif(isset($event['dose']) && $event['dose'])
                         @foreach(explode(' · ', $event['dose']) as $dosePart)
                         <p class="text-xs text-slate-400">{{ $dosePart }}</p>
@@ -83,7 +83,7 @@
                 </div>
             </div>
             @empty
-            <p class="text-xs text-slate-400 text-center py-2">Aucun événement particulier aujourd'hui.</p>
+            <p class="text-xs text-slate-400 text-center py-2">{{ __('dashboard.no_events_today') }}</p>
             @endforelse
         </div>
     </div>

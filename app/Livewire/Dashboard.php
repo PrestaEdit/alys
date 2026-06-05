@@ -32,14 +32,14 @@ class Dashboard extends Component
         $this->daysRemaining = $service->getDaysRemaining($today);
 
         $nextVisit = $service->getNextHospitalVisit($today);
-        $this->nextHospitalDate = $nextVisit?->locale('fr')->isoFormat('dddd D MMMM YYYY');
+        $this->nextHospitalDate = $nextVisit?->isoFormat('dddd D MMMM YYYY');
 
         $this->progressPercent = $service->getProgressPercent($today);
 
         $start = $profile?->treatment_start;
         $end   = $profile?->treatment_end;
-        $this->treatmentStartLabel = $start?->locale('fr')->isoFormat('D MMM YYYY') ?? '';
-        $this->treatmentEndLabel   = $end?->locale('fr')->isoFormat('D MMM YYYY') ?? '';
+        $this->treatmentStartLabel = $start?->isoFormat('D MMM YYYY') ?? '';
+        $this->treatmentEndLabel   = $end?->isoFormat('D MMM YYYY') ?? '';
 
         $widgetService->refresh();
     }
@@ -47,6 +47,6 @@ class Dashboard extends Component
 public function render(): \Illuminate\View\View
     {
         return view('livewire.dashboard')
-            ->layout('layouts.app', ['title' => 'Accueil']);
+            ->layout('layouts.app', ['title' => __('nav.home')]);
     }
 }

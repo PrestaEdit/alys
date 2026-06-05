@@ -6,16 +6,16 @@
            class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors text-lg">
             ‹
         </a>
-        <h1 class="text-xl font-extrabold text-slate-900">Exporter</h1>
+        <h1 class="text-xl font-extrabold text-slate-900">{{ __('data.export_title') }}</h1>
     </div>
 
     @if($success)
         <div class="bg-green-50 border border-green-200 rounded-2xl p-5 shadow-sm text-center">
             <p class="text-2xl mb-2">✓</p>
-            <p class="text-sm font-semibold text-green-800">Export réussi !</p>
+            <p class="text-sm font-semibold text-green-800">{{ __('data.export_success') }}</p>
             <a href="{{ route('home') }}" wire:navigate
                class="mt-4 inline-block bg-green-600 text-white font-semibold py-2 px-6 rounded-2xl text-sm">
-                Retour à l'accueil
+                {{ __('data.export_back_home') }}
             </a>
         </div>
     @else
@@ -35,9 +35,9 @@
     <div class="bg-violet-50 border border-violet-100 rounded-2xl p-3 mb-4 flex items-center gap-2 text-violet-700 text-sm">
         <span>📦</span>
         <span>
-            <strong>{{ $profileCount }}</strong> profil{{ $profileCount !== 1 ? 's' : '' }} ·
-            <strong>{{ $totalSelected }}</strong> traitement{{ $totalSelected !== 1 ? 's' : '' }} ·
-            {{ now()->locale('fr')->isoFormat('D MMM YYYY') }}
+            <strong>{{ $profileCount }}</strong> {{ trans_choice('data.export_summary_profiles', $profileCount) }} ·
+            <strong>{{ $totalSelected }}</strong> {{ trans_choice('data.export_summary_treatments', $totalSelected) }} ·
+            {{ now()->isoFormat('D MMM YYYY') }}
         </span>
     </div>
 
@@ -86,21 +86,21 @@
     @if($generatedPath)
         {{-- File ready — show share / save options --}}
         <div class="bg-indigo-50 border border-indigo-100 rounded-2xl p-4 mb-3 text-center">
-            <p class="text-xs text-indigo-600 font-medium mb-3">Fichier prêt · {{ $generatedFilename }}</p>
+            <p class="text-xs text-indigo-600 font-medium mb-3">{{ __('data.export_file_ready', ['filename' => $generatedFilename]) }}</p>
             <div class="flex gap-3">
                 <button wire:click="share"
                         wire:loading.attr="disabled"
                         wire:target="share"
                         class="flex-1 bg-indigo-600 text-white font-semibold py-3 rounded-2xl text-sm disabled:opacity-50">
-                    <span wire:loading.remove wire:target="share">Partager</span>
-                    <span wire:loading wire:target="share">…</span>
+                    <span wire:loading.remove wire:target="share">{{ __('data.export_share') }}</span>
+                    <span wire:loading wire:target="share">{{ __('data.export_loading') }}</span>
                 </button>
                 <button wire:click="saveToDevice"
                         wire:loading.attr="disabled"
                         wire:target="saveToDevice"
                         class="flex-1 bg-white border border-indigo-300 text-indigo-700 font-semibold py-3 rounded-2xl text-sm disabled:opacity-50">
-                    <span wire:loading.remove wire:target="saveToDevice">Enregistrer</span>
-                    <span wire:loading wire:target="saveToDevice">…</span>
+                    <span wire:loading.remove wire:target="saveToDevice">{{ __('data.export_save') }}</span>
+                    <span wire:loading wire:target="saveToDevice">{{ __('data.export_loading') }}</span>
                 </button>
             </div>
         </div>
@@ -112,9 +112,9 @@
                 @disabled(count($selectedTreatments) === 0)
                 class="w-full bg-indigo-600 text-white font-semibold py-3 rounded-2xl text-sm disabled:opacity-50">
             <span wire:loading.remove wire:target="generate">
-                Exporter ({{ $totalSelected }} traitement{{ $totalSelected !== 1 ? 's' : '' }})
+                {{ trans_choice('data.export_button', $totalSelected, ['count' => $totalSelected]) }}
             </span>
-            <span wire:loading wire:target="generate">Génération en cours…</span>
+            <span wire:loading wire:target="generate">{{ __('data.export_generating') }}</span>
         </button>
     @endif
 

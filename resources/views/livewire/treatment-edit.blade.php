@@ -13,7 +13,7 @@
             <div class="min-w-0">
                 <h1 class="text-base font-extrabold text-slate-900 truncate">{{ $treatment->name }}{{ $treatment->commercial_name ? ' · ' . $treatment->commercial_name : '' }}</h1>
                 <p class="text-xs text-slate-400">
-                    Traitement {{ $treatment->type === 'daily' ? 'quotidien' : ($treatment->type === 'weekly' ? 'hebdomadaire' : 'cyclique') }}{{ $treatment->is_medical_act ? ' · acte médical' : '' }}
+                    {{ __('treatments.subtitle_type', ['type' => $treatment->type === 'daily' ? __('treatments.subtitle_daily') : ($treatment->type === 'weekly' ? __('treatments.subtitle_weekly') : __('treatments.subtitle_cyclic'))]) }}{{ $treatment->is_medical_act ? ' · ' . __('treatments.subtitle_medical_act') : '' }}
                 </p>
             </div>
         </div>
@@ -23,11 +23,11 @@
 
     {{-- Panel 1 : Informations --}}
     <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
-        <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-4">Informations</p>
+        <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-4">{{ __('treatments.panel_info') }}</p>
 
         {{-- Nom usuel --}}
         <div class="mb-3">
-            <label class="block text-xs font-semibold text-slate-600 mb-1.5">Nom usuel *</label>
+            <label class="block text-xs font-semibold text-slate-600 mb-1.5">{{ __('treatments.common_name') }} *</label>
             <input type="text"
                    wire:model="editName"
                    class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-400">
@@ -36,7 +36,7 @@
 
         {{-- Nom commercial --}}
         <div class="mb-3">
-            <label class="block text-xs font-semibold text-slate-600 mb-1.5">Nom commercial</label>
+            <label class="block text-xs font-semibold text-slate-600 mb-1.5">{{ __('treatments.commercial_name') }}</label>
             <input type="text"
                    wire:model="editCommercialName"
                    class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-400">
@@ -44,12 +44,12 @@
 
         {{-- Type --}}
         <div class="mb-4">
-            <label class="block text-xs font-semibold text-slate-600 mb-2">Type *</label>
+            <label class="block text-xs font-semibold text-slate-600 mb-2">{{ __('treatments.type') }} *</label>
             <div class="grid grid-cols-2 gap-2">
                 @foreach([
-                    ['daily', 'Quotidien'],
-                    ['weekly', 'Hebdomadaire'],
-                    ['cyclic', 'Cyclique'],
+                    ['daily', __('treatments.type_daily')],
+                    ['weekly', __('treatments.type_weekly')],
+                    ['cyclic', __('treatments.type_cyclic')],
                 ] as [$val, $label])
                 <label class="flex items-center gap-2 px-3 py-2.5 rounded-xl border cursor-pointer transition-colors
                               {{ $editType === $val ? 'border-sky-400 bg-sky-50 text-sky-700' : 'border-slate-200 text-slate-600 hover:border-slate-300' }}">
@@ -64,8 +64,8 @@
         {{-- Acte médical --}}
         <div class="flex items-center justify-between mb-3">
             <div>
-                <span class="text-sm font-semibold text-slate-700">Acte médical</span>
-                <p class="text-xs text-slate-400">Pas de posologie ni d'unité</p>
+                <span class="text-sm font-semibold text-slate-700">{{ __('treatments.medical_act_label') }}</span>
+                <p class="text-xs text-slate-400">{{ __('treatments.medical_act_help') }}</p>
             </div>
             <button type="button" wire:click="$toggle('editIsMedicalAct')"
                     style="position:relative;display:inline-block;width:44px;height:24px;border-radius:9999px;background-color:{{ $editIsMedicalAct ? '#0ea5e9' : '#94a3b8' }};border:none;cursor:pointer;flex-shrink:0;transition:background-color .2s;">
@@ -76,8 +76,8 @@
         {{-- À jeun --}}
         <div class="flex items-center justify-between mb-4">
             <div>
-                <span class="text-sm font-semibold text-slate-700">À jeun</span>
-                <p class="text-xs text-slate-400">Affiché en avertissement dans le calendrier</p>
+                <span class="text-sm font-semibold text-slate-700">{{ __('treatments.fasting') }}</span>
+                <p class="text-xs text-slate-400">{{ __('treatments.fasting_help') }}</p>
             </div>
             <button type="button" wire:click="$toggle('editRequiresFasting')"
                     style="position:relative;display:inline-block;width:44px;height:24px;border-radius:9999px;background-color:{{ $editRequiresFasting ? '#f59e0b' : '#94a3b8' }};border:none;cursor:pointer;flex-shrink:0;transition:background-color .2s;">
@@ -87,10 +87,10 @@
 
         {{-- Lié à un traitement --}}
         <div class="mb-4">
-            <label class="block text-xs font-semibold text-slate-600 mb-1.5">Lié à un traitement</label>
+            <label class="block text-xs font-semibold text-slate-600 mb-1.5">{{ __('treatments.linked_to') }}</label>
             <select wire:model.live="editParentTreatmentId"
                     class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-400 bg-white">
-                <option value="">— Aucun —</option>
+                <option value="">{{ __('treatments.none') }}</option>
                 @foreach($otherTreatments as $t)
                 <option value="{{ $t->id }}">{{ $t->name }}{{ $t->commercial_name ? ' · ' . $t->commercial_name : '' }}</option>
                 @endforeach
@@ -100,7 +100,7 @@
 
         @if($editParentTreatmentId)
         <div class="mb-4">
-            <label class="block text-xs font-semibold text-slate-600 mb-1.5">Durée du traitement lié (jours)</label>
+            <label class="block text-xs font-semibold text-slate-600 mb-1.5">{{ __('treatments.linked_duration') }}</label>
             <div class="flex items-center gap-3">
                 <button wire:click="decrementLinkedDays"
                         class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 text-xl font-light hover:bg-slate-200 transition-colors flex items-center justify-center">
@@ -108,7 +108,7 @@
                 </button>
                 <div class="flex-1 text-center">
                     <p class="text-lg font-extrabold text-slate-800">
-                        {{ $editLinkedDays }} {{ $editLinkedDays === 1 ? 'jour' : 'jours' }}
+                        {{ $editLinkedDays }} {{ $editLinkedDays === 1 ? __('treatments.day') : __('treatments.days') }}
                     </p>
                 </div>
                 <button wire:click="incrementLinkedDays"
@@ -122,10 +122,10 @@
         {{-- Unité --}}
         @if(!$editIsMedicalAct)
         <div class="mb-3">
-            <label class="block text-xs font-semibold text-slate-600 mb-1.5">Unité</label>
+            <label class="block text-xs font-semibold text-slate-600 mb-1.5">{{ __('treatments.unit') }}</label>
             <input type="text"
                    wire:model="editUnit"
-                   placeholder="ex : mg, ml, cp"
+                   placeholder="{{ __('treatments.unit_placeholder_short') }}"
                    class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-400">
             @error('editUnit') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
         </div>
@@ -133,7 +133,7 @@
 
         {{-- Couleur --}}
         <div class="mb-5">
-            <label class="block text-xs font-semibold text-slate-600 mb-2">Couleur</label>
+            <label class="block text-xs font-semibold text-slate-600 mb-2">{{ __('treatments.color') }}</label>
             <div class="flex gap-2 flex-wrap">
                 @foreach($colors as $c)
                 <button type="button"
@@ -147,16 +147,16 @@
         <button wire:click="saveInfo"
                 class="w-full py-3 rounded-xl text-sm font-bold text-white transition-colors hover:opacity-90"
                 style="background: linear-gradient(135deg, #0ea5e9, #6366f1);">
-            Enregistrer les informations
+            {{ __('treatments.save_info') }}
         </button>
     </div>
 
     {{-- Panel 2 : Widget --}}
     <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
-        <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-4">Widget accueil</p>
+        <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-4">{{ __('treatments.panel_widget') }}</p>
 
         <div class="flex items-center justify-between mb-4">
-            <span class="text-sm font-semibold text-slate-700">Afficher en page d'accueil</span>
+            <span class="text-sm font-semibold text-slate-700">{{ __('treatments.show_on_home') }}</span>
             <button type="button"
                     wire:click="$toggle('showWidget')"
                     style="position:relative;display:inline-block;width:44px;height:24px;border-radius:9999px;background-color:{{ $showWidget ? '#0ea5e9' : '#94a3b8' }};border:none;cursor:pointer;flex-shrink:0;transition:background-color .2s;">
@@ -166,7 +166,7 @@
 
         <div class="mb-5" style="display: {{ $showWidget ? 'block' : 'none' }};"
              wire:key="widget-icon-picker-{{ $showWidget ? '1' : '0' }}">
-            <label class="block text-xs font-semibold text-slate-600 mb-2">Icône du widget</label>
+            <label class="block text-xs font-semibold text-slate-600 mb-2">{{ __('treatments.widget_icon') }}</label>
             <div class="flex gap-2 flex-wrap">
                 @foreach($widgetIcons as $icon)
                 <button type="button"
@@ -182,18 +182,18 @@
         <button wire:click="saveWidget"
                 class="w-full py-3 rounded-xl text-sm font-bold text-white transition-colors hover:opacity-90"
                 style="background: linear-gradient(135deg, #0ea5e9, #6366f1);">
-            Enregistrer le widget
+            {{ __('treatments.save_widget') }}
         </button>
     </div>
 
     {{-- Panel : Notifications --}}
     <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
-        <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-4">Notifications</p>
+        <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-4">{{ __('treatments.panel_notifications') }}</p>
 
         <div class="flex items-center justify-between mb-5">
             <div>
-                <span class="text-sm font-semibold text-slate-700">Activer les rappels</span>
-                <p class="text-xs text-slate-400">Notification locale au moment de la prise</p>
+                <span class="text-sm font-semibold text-slate-700">{{ __('treatments.enable_reminders') }}</span>
+                <p class="text-xs text-slate-400">{{ __('treatments.reminder_help') }}</p>
             </div>
             <button type="button" wire:click="$toggle('notificationEnabled')"
                     style="position:relative;display:inline-block;width:44px;height:24px;border-radius:9999px;background-color:{{ $notificationEnabled ? '#0ea5e9' : '#94a3b8' }};border:none;cursor:pointer;flex-shrink:0;transition:background-color .2s;">
@@ -205,26 +205,25 @@
         <div class="space-y-3 mb-5">
             @if($treatment->is_medical_act || $dosageMode === 'single' || $dosageMode === 'interval')
             <x-time-picker
-                :label="$dosageMode === 'interval' ? 'Heure de la 1ère prise' : 'Heure du rappel'"
+                :label="$dosageMode === 'interval' ? __('treatments.first_intake_time') : __('treatments.reminder_time')"
                 property="notificationTimeMorning"
                 :value="$notificationTimeMorning" />
             @error('notificationTimeMorning') <p class="text-xs text-red-500 mt-2">{{ $message }}</p> @enderror
             @if($dosageMode === 'interval' && $newTimesPerDay > 0)
             <p class="text-xs text-slate-400 text-center mt-2">
-                Les {{ $newTimesPerDay }} rappels suivants se déclencheront automatiquement
-                toutes les {{ round(24 / $newTimesPerDay) }}h.
+                {{ __('treatments.interval_reminders_note', ['count' => $newTimesPerDay, 'hours' => round(24 / $newTimesPerDay)]) }}
             </p>
             @endif
 
             @elseif($dosageMode === 'dayparts')
             @if(($newDoseMorning ?? 0) > 0)
-            <x-time-picker label="Matin" property="notificationTimeMorning" :value="$notificationTimeMorning" />
+            <x-time-picker :label="__('treatments.morning')" property="notificationTimeMorning" :value="$notificationTimeMorning" />
             @endif
             @if(($newDoseNoon ?? 0) > 0)
-            <x-time-picker label="Midi" property="notificationTimeNoon" :value="$notificationTimeNoon" />
+            <x-time-picker :label="__('treatments.noon')" property="notificationTimeNoon" :value="$notificationTimeNoon" />
             @endif
             @if(($newDoseEvening ?? 0) > 0)
-            <x-time-picker label="Soir" property="notificationTimeEvening" :value="$notificationTimeEvening" />
+            <x-time-picker :label="__('treatments.evening')" property="notificationTimeEvening" :value="$notificationTimeEvening" />
             @endif
             @error('notificationTimeMorning') <p class="text-xs text-red-500 mt-2">{{ $message }}</p> @enderror
             @endif
@@ -232,7 +231,7 @@
             @if($treatment->type === 'weekly' || $treatment->type === 'cyclic')
             <div class="px-3 py-2 bg-amber-50 rounded-xl">
                 <p class="text-xs text-amber-700">
-                    La notification se déclenchera uniquement les jours planifiés dans votre calendrier.
+                    {{ __('treatments.scheduled_days_note') }}
                 </p>
             </div>
             @endif
@@ -242,7 +241,7 @@
         <button wire:click="saveNotification"
                 class="w-full py-2.5 rounded-xl text-sm font-semibold text-white transition-colors"
                 style="background: linear-gradient(135deg, #0ea5e9, #6366f1);">
-            Enregistrer
+            {{ __('common.save') }}
         </button>
     </div>
 
@@ -250,14 +249,14 @@
     @if($editType === 'weekly' || $editType === 'cyclic')
     <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
         <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-4">
-            {{ $editType === 'weekly' ? 'Planification' : 'Récurrence' }}
+            {{ $editType === 'weekly' ? __('treatments.panel_scheduling') : __('treatments.panel_recurrence') }}
         </p>
 
         @if($editType === 'weekly')
             {{-- Jour de la semaine --}}
             <div class="mb-4">
-                <label class="block text-xs font-semibold text-slate-600 mb-2">Jour de la semaine</label>
-                @php $dayNames = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']; @endphp
+                <label class="block text-xs font-semibold text-slate-600 mb-2">{{ __('treatments.day_of_week') }}</label>
+                @php $dayNames = [__('treatments.day_mon'), __('treatments.day_tue'), __('treatments.day_wed'), __('treatments.day_thu'), __('treatments.day_fri'), __('treatments.day_sat'), __('treatments.day_sun')]; @endphp
                 <div class="grid grid-cols-7 gap-1">
                     @foreach($dayNames as $i => $dayName)
                     <button wire:click="$set('editDayOfWeek', {{ $i }})"
@@ -272,7 +271,7 @@
 
             {{-- Fréquence --}}
             <div class="mb-4">
-                <label class="block text-xs font-semibold text-slate-600 mb-1.5">Fréquence</label>
+                <label class="block text-xs font-semibold text-slate-600 mb-1.5">{{ __('treatments.frequency') }}</label>
                 <div class="flex items-center gap-3">
                     <button wire:click="decrementFrequency"
                             class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 text-xl font-light hover:bg-slate-200 transition-colors flex items-center justify-center">
@@ -280,7 +279,7 @@
                     </button>
                     <div class="flex-1 text-center">
                         <p class="text-lg font-extrabold text-slate-800">
-                            {{ $frequencyWeeks === 1 ? 'Toutes les semaines' : 'Une semaine sur ' . $frequencyWeeks }}
+                            {{ $frequencyWeeks === 1 ? __('treatments.every_week') : __('treatments.one_week_per', ['weeks' => $frequencyWeeks]) }}
                         </p>
                     </div>
                     <button wire:click="incrementFrequency"
@@ -293,18 +292,18 @@
 
             {{-- Date de référence --}}
             <div class="mb-5">
-                <label class="block text-xs font-semibold text-slate-600 mb-1.5">Date de la première prise (optionnel)</label>
+                <label class="block text-xs font-semibold text-slate-600 mb-1.5">{{ __('treatments.first_intake_date') }}</label>
                 <x-datepicker model="editRecurrenceStart" :value="$editRecurrenceStart" />
             </div>
         @else
             {{-- Cyclique : date + fréquence --}}
             <div class="mb-3">
-                <label class="block text-xs font-semibold text-slate-600 mb-1.5">Date de début</label>
+                <label class="block text-xs font-semibold text-slate-600 mb-1.5">{{ __('treatments.start_date') }}</label>
                 <x-datepicker model="editRecurrenceStart" :value="$editRecurrenceStart" />
             </div>
 
             <div class="mb-5">
-                <label class="block text-xs font-semibold text-slate-600 mb-1.5">Fréquence (semaines)</label>
+                <label class="block text-xs font-semibold text-slate-600 mb-1.5">{{ __('treatments.frequency_weeks') }}</label>
                 <div class="flex items-center gap-3">
                     <button wire:click="decrementFrequency"
                             class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 text-xl font-light hover:bg-slate-200 transition-colors flex items-center justify-center">
@@ -312,7 +311,7 @@
                     </button>
                     <div class="flex-1 text-center">
                         <p class="text-lg font-extrabold text-slate-800">
-                            {{ $frequencyWeeks === 1 ? 'Toutes les semaines' : 'Toutes les ' . $frequencyWeeks . ' semaines' }}
+                            {{ $frequencyWeeks === 1 ? __('treatments.every_week') : __('treatments.every_n_weeks', ['weeks' => $frequencyWeeks]) }}
                         </p>
                     </div>
                     <button wire:click="incrementFrequency"
@@ -327,7 +326,7 @@
         <button wire:click="saveRecurrence"
                 class="w-full py-3 rounded-xl text-sm font-bold text-white transition-colors hover:opacity-90"
                 style="background: linear-gradient(135deg, #0ea5e9, #6366f1);">
-            Enregistrer la planification
+            {{ __('treatments.save_scheduling') }}
         </button>
     </div>
     @endif
@@ -335,11 +334,11 @@
     {{-- Panel 4 : Posologie actuelle --}}
     @if(!$editIsMedicalAct)
     <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
-        <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-4">Posologie actuelle</p>
+        <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-4">{{ __('treatments.panel_current_posology') }}</p>
 
         {{-- Mode selector --}}
         <div class="flex flex-col gap-2 mb-5">
-            @foreach([['single', 'Dose unique'], ['dayparts', 'Matin / Midi / Soir'], ['interval', 'Intervalle régulier']] as [$val, $lbl])
+            @foreach([['single', __('treatments.dose_single')], ['dayparts', __('treatments.dose_dayparts')], ['interval', __('treatments.dose_interval')]] as [$val, $lbl])
             <label class="flex items-center px-4 py-3 rounded-xl border cursor-pointer transition-colors
                           {{ $dosageMode === $val ? 'border-sky-400 bg-sky-50 text-sky-700' : 'border-slate-200 text-slate-600 hover:border-slate-300' }}">
                 <input type="radio" wire:model.live="dosageMode" value="{{ $val }}" class="hidden">
@@ -354,9 +353,9 @@
         @if($dosageMode === 'dayparts')
             {{-- Day-part posology: Matin / Midi / Soir --}}
             @foreach([
-                ['label' => 'Matin',  'inc' => 'incrementMorning', 'dec' => 'decrementMorning', 'value' => $newDoseMorning],
-                ['label' => 'Midi',   'inc' => 'incrementNoon',    'dec' => 'decrementNoon',    'value' => $newDoseNoon],
-                ['label' => 'Soir',   'inc' => 'incrementEvening', 'dec' => 'decrementEvening', 'value' => $newDoseEvening],
+                ['label' => __('treatments.morning'), 'inc' => 'incrementMorning', 'dec' => 'decrementMorning', 'value' => $newDoseMorning],
+                ['label' => __('treatments.noon'),    'inc' => 'incrementNoon',    'dec' => 'decrementNoon',    'value' => $newDoseNoon],
+                ['label' => __('treatments.evening'), 'inc' => 'incrementEvening', 'dec' => 'decrementEvening', 'value' => $newDoseEvening],
             ] as $part)
             <div class="mb-4">
                 <p class="text-xs font-semibold text-slate-500 mb-2">{{ $part['label'] }}</p>
@@ -383,7 +382,7 @@
             @endforeach
         @elseif($dosageMode === 'interval')
             {{-- Dose par prise --}}
-            <p class="text-xs font-semibold text-slate-500 mb-2">Dose par prise</p>
+            <p class="text-xs font-semibold text-slate-500 mb-2">{{ __('treatments.dose_per_intake') }}</p>
             <div class="flex flex-row items-center gap-4 mb-5">
                 <button wire:click="decrement"
                         class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 text-xl font-light hover:bg-slate-200 transition-colors flex items-center justify-center">
@@ -395,7 +394,7 @@
                         {{ number_format($eid, $eidec, ',', '') }}
                     </p>
                     @if($treatment->unit)
-                    <p class="text-sm text-slate-400 font-medium mt-1">{{ $treatment->unit }} / prise</p>
+                    <p class="text-sm text-slate-400 font-medium mt-1">{{ __('treatments.per_intake_suffix', ['unit' => $treatment->unit]) }}</p>
                     @endif
                 </div>
                 <button wire:click="increment"
@@ -404,7 +403,7 @@
                 </button>
             </div>
             {{-- Nombre de prises --}}
-            <p class="text-xs font-semibold text-slate-500 mb-2">Nombre de prises par jour</p>
+            <p class="text-xs font-semibold text-slate-500 mb-2">{{ __('treatments.intakes_per_day') }}</p>
             <div class="flex flex-row items-center gap-4 mb-2">
                 <button wire:click="decrementTimesPerDay"
                         class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 text-xl font-light hover:bg-slate-200 transition-colors flex items-center justify-center">
@@ -413,7 +412,7 @@
                 <div class="flex-1 text-center">
                     @php $intervalH = $newTimesPerDay > 0 ? round(24 / $newTimesPerDay) : 0; @endphp
                     <p class="text-4xl font-extrabold leading-none" style="color: {{ $treatment->color }};">{{ $newTimesPerDay }}</p>
-                    <p class="text-sm text-slate-400 font-medium mt-1">× / jour · toutes les {{ $intervalH }}h</p>
+                    <p class="text-sm text-slate-400 font-medium mt-1">{{ __('treatments.times_per_day_suffix', ['hours' => $intervalH]) }}</p>
                 </div>
                 <button wire:click="incrementTimesPerDay"
                         class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 text-xl font-light hover:bg-slate-200 transition-colors flex items-center justify-center">
@@ -432,7 +431,7 @@
                     <p class="text-4xl font-extrabold leading-none" style="color: {{ $treatment->color }};">
                         {{ number_format($esd, $esdec, ',', '') }}
                     </p>
-                    <p class="text-sm text-slate-400 font-medium mt-1">{{ $treatment->unit }} / {{ $treatment->type === 'daily' ? 'jour' : ($treatment->type === 'weekly' ? $treatment->dayOfWeekName() : 'prise') }}</p>
+                    <p class="text-sm text-slate-400 font-medium mt-1">{{ __('treatments.per_unit', ['unit' => $treatment->unit, 'period' => $treatment->type === 'daily' ? __('treatments.period_day') : ($treatment->type === 'weekly' ? $treatment->dayOfWeekName() : __('treatments.period_intake'))]) }}</p>
                 </div>
                 <button wire:click="increment"
                         class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 text-xl font-light hover:bg-slate-200 transition-colors flex items-center justify-center">
@@ -448,14 +447,14 @@
             </svg>
             <input type="text"
                    wire:model="note"
-                   placeholder="Note optionnelle..."
+                   placeholder="{{ __('treatments.note_placeholder') }}"
                    class="flex-1 bg-transparent text-xs text-slate-600 focus:outline-none">
         </div>
 
         <button wire:click="save"
                 class="w-full py-3 rounded-xl text-sm font-bold text-white transition-colors hover:opacity-90"
                 style="background: linear-gradient(135deg, #0ea5e9, #6366f1);">
-            Enregistrer la posologie
+            {{ __('treatments.save_posology') }}
         </button>
     </div>
     @endif
@@ -463,7 +462,7 @@
     {{-- Historique --}}
     @if(!$editIsMedicalAct && $history->isNotEmpty())
     <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
-        <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-4">Historique</p>
+        <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-4">{{ __('treatments.panel_history') }}</p>
 
         <div class="relative pl-5">
             <div class="absolute left-[3px] top-2 bottom-2 w-0.5 bg-slate-200 rounded-full"></div>
@@ -478,39 +477,39 @@
                             <div class="{{ $index === 0 ? 'text-slate-800' : 'text-slate-500' }}">
                                 @if($entry->dose_morning !== null)
                                 @php $hm = (float)$entry->dose_morning; $hmdec = $treatment->unit === 'ml' ? 1 : ($hm != (int)$hm ? 1 : 0); @endphp
-                                <p class="text-xs font-semibold">Matin · {{ number_format($hm, $hmdec, ',', '') }}{{ $treatment->unit ? ' ' . $treatment->unit : '' }}</p>
+                                <p class="text-xs font-semibold">{{ __('treatments.morning') }} · {{ number_format($hm, $hmdec, ',', '') }}{{ $treatment->unit ? ' ' . $treatment->unit : '' }}</p>
                                 @endif
                                 @if($entry->dose_noon !== null)
                                 @php $hn = (float)$entry->dose_noon; $hndec = $treatment->unit === 'ml' ? 1 : ($hn != (int)$hn ? 1 : 0); @endphp
-                                <p class="text-xs font-semibold">Midi · {{ number_format($hn, $hndec, ',', '') }}{{ $treatment->unit ? ' ' . $treatment->unit : '' }}</p>
+                                <p class="text-xs font-semibold">{{ __('treatments.noon') }} · {{ number_format($hn, $hndec, ',', '') }}{{ $treatment->unit ? ' ' . $treatment->unit : '' }}</p>
                                 @endif
                                 @if($entry->dose_evening !== null)
                                 @php $hev = (float)$entry->dose_evening; $hevdec = $treatment->unit === 'ml' ? 1 : ($hev != (int)$hev ? 1 : 0); @endphp
-                                <p class="text-xs font-semibold">Soir · {{ number_format($hev, $hevdec, ',', '') }}{{ $treatment->unit ? ' ' . $treatment->unit : '' }}</p>
+                                <p class="text-xs font-semibold">{{ __('treatments.evening') }} · {{ number_format($hev, $hevdec, ',', '') }}{{ $treatment->unit ? ' ' . $treatment->unit : '' }}</p>
                                 @endif
                             </div>
                         @elseif($entry->times_per_day)
                             @php $intervalH = $entry->times_per_day > 0 ? round(24 / $entry->times_per_day) : 0;
                                  $hid = (float)($entry->dose ?? 0); $hiddec = $treatment->unit === 'ml' ? 1 : ($hid != (int)$hid ? 1 : 0); @endphp
                             <p class="text-sm font-bold {{ $index === 0 ? 'text-slate-800' : 'text-slate-500' }}">
-                                {{ number_format($hid, $hiddec, ',', '') }} {{ $treatment->unit }} / prise
+                                {{ __('treatments.per_intake_suffix', ['unit' => number_format($hid, $hiddec, ',', '') . ' ' . $treatment->unit]) }}
                             </p>
-                            <p class="text-xs {{ $index === 0 ? 'text-slate-500' : 'text-slate-400' }}">{{ $entry->times_per_day }}×/jour · toutes les {{ $intervalH }}h</p>
+                            <p class="text-xs {{ $index === 0 ? 'text-slate-500' : 'text-slate-400' }}">{{ __('treatments.times_per_day_interval', ['count' => $entry->times_per_day, 'hours' => $intervalH]) }}</p>
                         @else
                         @php $hsd = (float)($entry->dose ?? 0); $hsddec = $treatment->unit === 'ml' ? 1 : ($hsd != (int)$hsd ? 1 : 0); @endphp
                         <p class="text-sm font-bold {{ $index === 0 ? 'text-slate-800' : 'text-slate-500' }}">
-                            {{ number_format($hsd, $hsddec, ',', '') }} {{ $treatment->unit }} / {{ $treatment->type === 'daily' ? 'jour' : 'prise' }}
+                            {{ __('treatments.per_unit', ['unit' => number_format($hsd, $hsddec, ',', '') . ' ' . $treatment->unit, 'period' => $treatment->type === 'daily' ? __('treatments.period_day') : __('treatments.period_intake')]) }}
                         </p>
                         @endif
                         <p class="text-xs text-slate-400">
-                            Depuis le {{ $entry->started_at->locale('fr')->isoFormat('D MMM YYYY') }}
+                            {{ __('treatments.history_since', ['date' => $entry->started_at->isoFormat('D MMM YYYY')]) }}
                         </p>
                         @if($entry->note)
                         <p class="text-xs text-slate-500 italic mt-0.5">{{ $entry->note }}</p>
                         @endif
                     </div>
                     @if($index === 0)
-                    <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 flex-shrink-0">Actuel</span>
+                    <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 flex-shrink-0">{{ __('treatments.history_current') }}</span>
                     @endif
                 </div>
             </div>
@@ -523,19 +522,19 @@
     @if($showRecalculateModal)
     <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
-            <h2 class="text-base font-extrabold text-slate-900 mb-2">Recalculer les événements ?</h2>
+            <h2 class="text-base font-extrabold text-slate-900 mb-2">{{ __('treatments.recalculate_title') }}</h2>
             <p class="text-xs text-slate-500 mb-5">
-                Les événements futurs seront supprimés et recalculés avec la nouvelle fréquence et date de début. Cette action est irréversible.
+                {{ __('treatments.recalculate_description') }}
             </p>
             <div class="flex gap-3">
                 <button wire:click="cancelRecalculate"
                         class="flex-1 py-2.5 rounded-xl text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">
-                    Annuler
+                    {{ __('common.cancel') }}
                 </button>
                 <button wire:click="confirmRecalculate"
                         class="flex-1 py-2.5 rounded-xl text-sm font-bold text-white transition-colors hover:opacity-90"
                         style="background: linear-gradient(135deg, #0ea5e9, #6366f1);">
-                    Confirmer
+                    {{ __('common.confirm') }}
                 </button>
             </div>
         </div>

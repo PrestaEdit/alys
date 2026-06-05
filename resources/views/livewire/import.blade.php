@@ -5,7 +5,7 @@
            class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors text-lg">
             ‹
         </a>
-        <h1 class="text-xl font-extrabold text-slate-900">Importer</h1>
+        <h1 class="text-xl font-extrabold text-slate-900">{{ __('data.import_title') }}</h1>
     </div>
 
     @if($error)
@@ -17,44 +17,44 @@
     @if($success)
         <div class="bg-green-50 border border-green-200 rounded-2xl p-5 shadow-sm text-center">
             <p class="text-2xl mb-2">✓</p>
-            <p class="text-sm font-semibold text-green-800">Importation réussie !</p>
-            <p class="text-xs text-green-600 mt-1">Votre calendrier de traitement a été restauré.</p>
+            <p class="text-sm font-semibold text-green-800">{{ __('data.import_success') }}</p>
+            <p class="text-xs text-green-600 mt-1">{{ __('data.import_success_detail') }}</p>
             <a href="{{ route('home') }}"
                class="mt-4 inline-block bg-green-600 text-white font-semibold py-2 px-6 rounded-2xl text-sm">
-                Retour à l'accueil
+                {{ __('data.import_back_home') }}
             </a>
         </div>
     @elseif($importing)
         <div class="bg-white rounded-2xl p-5 shadow-sm text-center">
-            <p class="text-sm text-slate-600">Importation en cours…</p>
+            <p class="text-sm text-slate-600">{{ __('data.import_in_progress') }}</p>
         </div>
     @elseif($previewing)
         @php
             $labels = [
-                'commercial_name'  => 'Nom commercial',
-                'type'             => 'Type',
-                'unit'             => 'Unité',
-                'current_dose'     => 'Dose actuelle',
-                'dose_morning'     => 'Dose matin',
-                'dose_noon'        => 'Dose midi',
-                'dose_evening'     => 'Dose soir',
-                'color'            => 'Couleur',
-                'frequency_weeks'  => 'Fréquence (semaines)',
-                'day_of_week'      => 'Jour de la semaine',
-                'is_medical_act'   => 'Acte médical',
-                'requires_fasting' => 'À jeun',
-                'archived_at'      => 'Archivé le',
+                'commercial_name'  => __('data.field_commercial_name'),
+                'type'             => __('data.field_type'),
+                'unit'             => __('data.field_unit'),
+                'current_dose'     => __('data.field_current_dose'),
+                'dose_morning'     => __('data.field_dose_morning'),
+                'dose_noon'        => __('data.field_dose_noon'),
+                'dose_evening'     => __('data.field_dose_evening'),
+                'color'            => __('data.field_color'),
+                'frequency_weeks'  => __('data.field_frequency_weeks'),
+                'day_of_week'      => __('data.field_day_of_week'),
+                'is_medical_act'   => __('data.field_is_medical_act'),
+                'requires_fasting' => __('data.field_requires_fasting'),
+                'archived_at'      => __('data.field_archived_at'),
             ];
             $totalTreatments = collect($previewData)->sum(fn($p) => count($p['treatments']));
-            $exportDate = $exportedAt ? \Carbon\Carbon::parse($exportedAt)->format('d/m/Y à H:i') : '—';
+            $exportDate = $exportedAt ? \Carbon\Carbon::parse($exportedAt)->isoFormat('D MMM YYYY [·] HH:mm') : '—';
         @endphp
 
         {{-- Summary --}}
         <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 mb-4 text-sm text-slate-600">
-            <p><span class="font-semibold text-slate-800">Exporté le :</span> {{ $exportDate }}</p>
+            <p><span class="font-semibold text-slate-800">{{ __('data.import_exported_at') }}</span> {{ $exportDate }}</p>
             <p class="mt-1">
-                <span class="font-semibold text-slate-800">{{ count($previewData) }}</span> profil{{ count($previewData) !== 1 ? 's' : '' }},
-                <span class="font-semibold text-slate-800">{{ $totalTreatments }}</span> traitement{{ $totalTreatments !== 1 ? 's' : '' }}
+                <span class="font-semibold text-slate-800">{{ count($previewData) }}</span> {{ trans_choice('data.import_summary_profiles', count($previewData)) }},
+                <span class="font-semibold text-slate-800">{{ $totalTreatments }}</span> {{ trans_choice('data.import_summary_treatments', $totalTreatments) }}
             </p>
         </div>
 
@@ -72,7 +72,7 @@
                         <span class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: {{ $profile['color'] }};"></span>
                         <span class="font-semibold text-slate-900 flex-1 text-sm">{{ $profile['name'] }}</span>
                         @if($profile['status'] === 'new')
-                            <span class="bg-blue-100 text-blue-700 text-xs font-semibold px-2 py-0.5 rounded-full">NOUVEAU PROFIL</span>
+                            <span class="bg-blue-100 text-blue-700 text-xs font-semibold px-2 py-0.5 rounded-full">{{ __('data.import_badge_new_profile') }}</span>
                         @endif
                     </label>
 
@@ -88,9 +88,9 @@
                                         default     => 'bg-slate-100 text-slate-500',
                                     };
                                     $badgeLabel = match($treatment['status']) {
-                                        'new'       => 'NOUVEAU',
-                                        'modified'  => 'MODIFIÉ',
-                                        default     => 'IDENTIQUE',
+                                        'new'       => __('data.import_badge_new'),
+                                        'modified'  => __('data.import_badge_modified'),
+                                        default     => __('data.import_badge_identical'),
                                     };
                                 @endphp
                                 <div class="px-4 py-3">
@@ -107,8 +107,8 @@
                                     @if($treatment['status'] === 'modified' && count($treatment['diff_fields']) > 0)
                                         <div class="mt-2 rounded-xl overflow-hidden border border-slate-100 text-xs">
                                             <div class="grid grid-cols-2 bg-slate-100 text-slate-500 font-semibold">
-                                                <div class="px-3 py-1.5">Avant</div>
-                                                <div class="px-3 py-1.5 border-l border-slate-200">Après</div>
+                                                <div class="px-3 py-1.5">{{ __('data.import_before') }}</div>
+                                                <div class="px-3 py-1.5 border-l border-slate-200">{{ __('data.import_after') }}</div>
                                             </div>
                                             @foreach($treatment['diff_fields'] as $field)
                                                 @php
@@ -139,13 +139,13 @@
                         <details class="border-t border-slate-100">
                             <summary class="px-4 py-3 text-xs text-slate-400 cursor-pointer list-none flex items-center gap-1">
                                 <span>▸</span>
-                                <span>{{ count($profile['local_only']) }} traitement{{ count($profile['local_only']) !== 1 ? 's' : '' }} loc{{ count($profile['local_only']) !== 1 ? 'aux' : 'al' }} non inclus dans le fichier</span>
+                                <span>{{ trans_choice('data.import_local_only', count($profile['local_only']), ['count' => count($profile['local_only'])]) }}</span>
                             </summary>
                             <div class="divide-y divide-slate-50">
                                 @foreach($profile['local_only'] as $localTreatment)
                                     <div class="px-4 py-2 flex items-center gap-2">
                                         <span class="text-sm text-slate-400">{{ $localTreatment['name'] }}</span>
-                                        <span class="text-[10px] bg-slate-100 text-slate-400 px-1.5 py-0.5 rounded-full">LOCAL</span>
+                                        <span class="text-[10px] bg-slate-100 text-slate-400 px-1.5 py-0.5 rounded-full">{{ __('data.import_badge_local') }}</span>
                                     </div>
                                 @endforeach
                             </div>
@@ -163,28 +163,27 @@
                     wire:target="confirmImport"
                     @disabled(count($selectedTreatments) === 0)
                     class="w-full bg-blue-600 text-white font-semibold py-3 rounded-2xl text-sm disabled:opacity-50">
-                Importer ({{ count($selectedTreatments) }} traitement{{ count($selectedTreatments) !== 1 ? 's' : '' }})
+                {{ trans_choice('data.import_button', count($selectedTreatments), ['count' => count($selectedTreatments)]) }}
             </button>
             <button wire:click="cancelPreview"
                     class="w-full border border-slate-200 text-slate-600 font-medium py-3 rounded-2xl text-sm hover:bg-slate-50 transition-colors">
-                Annuler
+                {{ __('common.cancel') }}
             </button>
         </div>
     @else
         <div class="bg-white rounded-2xl p-5 shadow-sm">
             <p class="text-sm text-slate-600 mb-5">
-                Sélectionnez votre fichier <strong>.alys</strong> depuis votre gestionnaire de fichiers ou
-                messagerie.
+                {!! __('data.import_intro') !!}
             </p>
 
             <button wire:click="pickFile"
                     wire:loading.attr="disabled"
                     class="w-full bg-blue-600 text-white font-semibold py-3 rounded-2xl disabled:opacity-50">
                 @if($picking)
-                    Sélection en cours…
+                    {{ __('data.import_picking') }}
                 @else
-                    <span wire:loading.remove wire:target="pickFile">Sélectionner un fichier .alys</span>
-                    <span wire:loading wire:target="pickFile">Ouverture…</span>
+                    <span wire:loading.remove wire:target="pickFile">{{ __('data.import_pick') }}</span>
+                    <span wire:loading wire:target="pickFile">{{ __('data.import_opening') }}</span>
                 @endif
             </button>
         </div>

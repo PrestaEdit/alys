@@ -33,7 +33,7 @@
                 <button type="button" @click="incH"
                         class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600 text-xl font-light hover:bg-slate-200 active:bg-slate-300 transition-colors select-none">+</button>
             </div>
-            <span class="text-xs text-slate-400">heure</span>
+            <span class="text-xs text-slate-400">{{ __('components.picker_hour') }}</span>
         </div>
 
         <span class="text-3xl font-bold text-slate-300 mb-4">:</span>
@@ -49,7 +49,7 @@
                 <button type="button" @click="incM"
                         class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600 text-xl font-light hover:bg-slate-200 active:bg-slate-300 transition-colors select-none">+</button>
             </div>
-            <span class="text-xs text-slate-400">min (×5)</span>
+            <span class="text-xs text-slate-400">{{ __('components.picker_minute') }}</span>
         </div>
     </div>
 </div>

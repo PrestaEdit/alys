@@ -1,8 +1,12 @@
 @props([
     'model',
-    'placeholder' => 'Sélectionner une date',
+    'placeholder' => null,
     'value'       => null,
 ])
+
+@php
+    $placeholder ??= __('components.date_placeholder');
+@endphp
 
 @php
 $dpOptions = [

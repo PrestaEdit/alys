@@ -67,6 +67,6 @@ class Treatments extends Component
             'archived' => Treatment::archived()
                 ->orderBy('name')
                 ->get(),
-        ])->layout('layouts.app', ['title' => 'Traitements']);
+        ])->layout('layouts.app', ['title' => __('nav.treatments')]);
     }
 }

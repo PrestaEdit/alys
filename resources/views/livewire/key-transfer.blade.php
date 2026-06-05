@@ -5,7 +5,7 @@
            class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors text-lg">
             ‹
         </a>
-        <h1 class="text-xl font-extrabold text-slate-900">Transfert de clés</h1>
+        <h1 class="text-xl font-extrabold text-slate-900">{{ __('data.key_title') }}</h1>
     </div>
 
     @if($error)
@@ -16,43 +16,43 @@
 
     @if($importSuccess)
         <div class="bg-green-50 border border-green-200 rounded-2xl p-4 mb-4 text-sm text-green-700">
-            Clés importées avec succès. Vos exports seront maintenant déchiffrables sur cet appareil.
+            {{ __('data.key_import_success') }}
         </div>
     @endif
 
     @if($confirmReplace)
         <div class="bg-amber-50 border border-amber-300 rounded-2xl p-5 mb-4">
             <p class="text-sm font-semibold text-amber-800 mb-3">
-                Des clés existent déjà sur cet appareil. Les remplacer rendra illisibles les exports précédents chiffrés avec ces clés. Confirmer ?
+                {{ __('data.key_confirm_replace') }}
             </p>
             <div class="flex gap-3">
                 <button wire:click="confirmReplaceKeys"
                         class="flex-1 bg-amber-600 text-white font-semibold py-2 rounded-xl text-sm">
-                    Remplacer
+                    {{ __('data.key_replace') }}
                 </button>
                 <button wire:click="cancelReplace"
                         class="flex-1 bg-white border border-amber-300 text-amber-700 font-semibold py-2 rounded-xl text-sm">
-                    Annuler
+                    {{ __('common.cancel') }}
                 </button>
             </div>
         </div>
     @endif
 
     <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
-        <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Appareil source</p>
+        <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">{{ __('data.key_source_device') }}</p>
         <p class="text-sm text-slate-600 mb-4">
-            Générez le QR code de votre clé, puis scannez-le depuis votre nouvel appareil pour lui transférer l'accès.
+            {{ __('data.key_source_intro') }}
         </p>
 
         <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4">
             <p class="text-xs text-amber-700">
-                ⚠️ Ce QR code donne accès à tous vos exports. Ne le montrez qu'à votre nouvel appareil.
+                {{ __('data.key_warning') }}
             </p>
         </div>
 
         <button wire:click="showQr"
                 class="w-full bg-slate-800 text-white font-semibold py-3 rounded-2xl text-sm">
-            Afficher le QR code de ma clé
+            {{ __('data.key_show_qr') }}
         </button>
 
         @if($qrContent)
@@ -65,14 +65,14 @@
     </div>
 
     <div class="bg-white rounded-2xl p-5 shadow-sm">
-        <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Nouvel appareil</p>
+        <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">{{ __('data.key_new_device') }}</p>
         <p class="text-sm text-slate-600 mb-4">
-            Scannez le QR code affiché sur votre ancien appareil pour récupérer les clés de chiffrement.
+            {{ __('data.key_new_intro') }}
         </p>
 
         <button wire:click="startScan"
                 class="w-full bg-blue-600 text-white font-semibold py-3 rounded-2xl text-sm">
-            Scanner le QR code d'un autre appareil
+            {{ __('data.key_scan') }}
         </button>
     </div>
 

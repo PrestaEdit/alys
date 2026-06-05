@@ -2,12 +2,25 @@
 
 namespace App\Livewire;
 
+use App\Models\Setting;
 use App\Services\NotificationScheduler;
 use Ikromjon\LocalNotifications\Facades\LocalNotifications;
 use Livewire\Component;
 
 class Settings extends Component
 {
+    public function setLocale(string $locale): void
+    {
+        if (! in_array($locale, ['fr', 'en'], true)) {
+            return;
+        }
+
+        Setting::set('locale', $locale);
+
+        // Recharger pour que le middleware SetLocale ré-applique la langue.
+        $this->redirect(route('settings'), navigate: false);
+    }
+
     public function enableNotifications(NotificationScheduler $scheduler): void
     {
         $check  = LocalNotifications::checkPermission();
@@ -16,7 +29,7 @@ class Settings extends Component
         if ($status === 'granted') {
             $scheduler->rescheduleAll();
             $this->requestBatteryUnrestricted();
-            $this->dispatch('toast', message: 'Autorisation déjà accordée — rappels replanifiés.');
+            $this->dispatch('toast', message: __('settings.toast_already_granted'));
             return;
         }
 
@@ -26,9 +39,9 @@ class Settings extends Component
         if ($granted) {
             $scheduler->rescheduleAll();
             $this->requestBatteryUnrestricted();
-            $this->dispatch('toast', message: 'Autorisation accordée — rappels activés.');
+            $this->dispatch('toast', message: __('settings.toast_granted'));
         } else {
-            $this->dispatch('toast', message: "Statut : {$status}. Autorisez les notifications dans les Paramètres Android.");
+            $this->dispatch('toast', message: __('settings.toast_denied', ['status' => $status]));
         }
     }
 
@@ -67,6 +80,6 @@ class Settings extends Component
     public function render(): \Illuminate\View\View
     {
         return view('livewire.settings')
-            ->layout('layouts.app', ['title' => 'Paramètres']);
+            ->layout('layouts.app', ['title' => __('nav.settings')]);
     }
 }

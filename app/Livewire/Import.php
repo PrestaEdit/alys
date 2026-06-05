@@ -35,7 +35,7 @@ class Import extends Component
         $content = base64_decode($alysData, true);
         if ($content === false || $content === '') {
             $this->error = true;
-            $this->errorMessage = 'Fichier reçu invalide.';
+            $this->errorMessage = __('data.import_err_invalid_file');
             $this->importing = false;
             return;
         }
@@ -64,7 +64,7 @@ class Import extends Component
         $rawContent = base64_decode($content, true);
         if ($rawContent === false || $rawContent === '') {
             $this->error = true;
-            $this->errorMessage = 'Fichier reçu invalide.';
+            $this->errorMessage = __('data.import_err_invalid_file');
             return;
         }
 
@@ -77,7 +77,7 @@ class Import extends Component
 
         if ($key === null) {
             $this->error = true;
-            $this->errorMessage = 'Clés de chiffrement introuvables. Effectuez un transfert de clés depuis votre ancien appareil.';
+            $this->errorMessage = __('data.import_err_no_keys');
             $this->importing = false;
             return;
         }
@@ -86,7 +86,7 @@ class Import extends Component
             $data = $importer->parse($content, $key);
         } catch (\Throwable) {
             $this->error = true;
-            $this->errorMessage = 'Fichier invalide ou chiffré avec une autre clé.';
+            $this->errorMessage = __('data.import_err_wrong_key');
             $this->importing = false;
             return;
         }
@@ -181,14 +181,14 @@ class Import extends Component
         $json = session()->pull('alys_pending');
         if (! $json) {
             $this->error = true;
-            $this->errorMessage = 'Session expirée. Veuillez recommencer.';
+            $this->errorMessage = __('data.import_err_session');
             return;
         }
         try {
             $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
         } catch (\JsonException) {
             $this->error = true;
-            $this->errorMessage = 'Données de prévisualisation corrompues.';
+            $this->errorMessage = __('data.import_err_corrupt');
             return;
         }
 
@@ -196,7 +196,7 @@ class Import extends Component
             $importer->restoreFromData($data, $this->selectedTreatments);
         } catch (\Throwable) {
             $this->error = true;
-            $this->errorMessage = 'Erreur lors de l\'import. Veuillez réessayer.';
+            $this->errorMessage = __('data.import_err_restore');
             return;
         }
 
@@ -224,6 +224,6 @@ class Import extends Component
     public function render(): \Illuminate\View\View
     {
         return view('livewire.import')
-            ->layout('layouts.app', ['title' => 'Importer']);
+            ->layout('layouts.app', ['title' => __('data.import_title')]);
     }
 }

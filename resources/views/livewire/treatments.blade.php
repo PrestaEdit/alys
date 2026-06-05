@@ -1,6 +1,6 @@
 <div class="p-4 max-w-lg mx-auto">
     <div class="flex items-center justify-between mb-5">
-        <h1 class="text-xl font-extrabold text-slate-900">Traitements</h1>
+        <h1 class="text-xl font-extrabold text-slate-900">{{ __('treatments.title') }}</h1>
         <div class="flex items-center gap-2">
             <livewire:profile-switcher />
             <a href="{{ route('treatments.create') }}"
@@ -19,14 +19,14 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z"/>
             </svg>
         </div>
-        <h3 class="text-base font-bold text-slate-800 mb-1">Aucun traitement</h3>
-        <p class="text-sm text-slate-400 mb-6 max-w-xs">Ce profil n'a pas encore de traitement associé. Ajoutez-en un pour commencer le suivi.</p>
+        <h3 class="text-base font-bold text-slate-800 mb-1">{{ __('treatments.empty') }}</h3>
+        <p class="text-sm text-slate-400 mb-6 max-w-xs">{{ __('treatments.empty_description') }}</p>
         <a href="{{ route('treatments.create') }}"
            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-500 text-white text-sm font-semibold hover:bg-sky-600 transition-colors shadow-sm">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
             </svg>
-            Ajouter un traitement
+            {{ __('treatments.add_treatment') }}
         </a>
     </div>
     @else
@@ -62,11 +62,11 @@
                 <div class="flex items-center gap-1.5">
                     <a href="{{ route('treatments.edit', $treatment) }}"
                        class="text-xs text-sky-500 font-semibold border border-sky-200 rounded-xl px-3 py-1.5 bg-sky-50 hover:bg-sky-100 transition-colors">
-                        Modifier
+                        {{ __('common.edit') }}
                     </a>
                     <button wire:click="archive({{ $treatment->id }})"
                             class="text-xs text-slate-400 font-semibold border border-slate-200 rounded-xl px-2.5 py-1.5 bg-slate-50 hover:bg-slate-100 transition-colors">
-                        Archiver
+                        {{ __('common.archive') }}
                     </button>
                 </div>
             </div>
@@ -78,19 +78,19 @@
                             @if($treatment->dose_morning !== null)
                             @php $dm = (float)$treatment->dose_morning; $dmdec = $treatment->unit === 'ml' ? 1 : ($dm != (int)$dm ? 1 : 0); @endphp
                             <p class="text-xs font-semibold" style="color: {{ $treatment->color }};">
-                                Matin · {{ number_format($dm, $dmdec, ',', '') }}{{ $treatment->unit ? ' ' . $treatment->unit : '' }}
+                                {{ __('treatments.morning') }} · {{ number_format($dm, $dmdec, ',', '') }}{{ $treatment->unit ? ' ' . $treatment->unit : '' }}
                             </p>
                             @endif
                             @if($treatment->dose_noon !== null)
                             @php $dn = (float)$treatment->dose_noon; $dndec = $treatment->unit === 'ml' ? 1 : ($dn != (int)$dn ? 1 : 0); @endphp
                             <p class="text-xs font-semibold" style="color: {{ $treatment->color }};">
-                                Midi · {{ number_format($dn, $dndec, ',', '') }}{{ $treatment->unit ? ' ' . $treatment->unit : '' }}
+                                {{ __('treatments.noon') }} · {{ number_format($dn, $dndec, ',', '') }}{{ $treatment->unit ? ' ' . $treatment->unit : '' }}
                             </p>
                             @endif
                             @if($treatment->dose_evening !== null)
                             @php $dev = (float)$treatment->dose_evening; $devdec = $treatment->unit === 'ml' ? 1 : ($dev != (int)$dev ? 1 : 0); @endphp
                             <p class="text-xs font-semibold" style="color: {{ $treatment->color }};">
-                                Soir · {{ number_format($dev, $devdec, ',', '') }}{{ $treatment->unit ? ' ' . $treatment->unit : '' }}
+                                {{ __('treatments.evening') }} · {{ number_format($dev, $devdec, ',', '') }}{{ $treatment->unit ? ' ' . $treatment->unit : '' }}
                             </p>
                             @endif
                         </div>
@@ -101,7 +101,7 @@
                             {{ number_format($icd, $icddec, ',', '') }}
                             <span class="text-sm font-normal text-slate-400">{{ $treatment->unit }}</span>
                         </p>
-                        <p class="text-xs text-slate-400 mt-0.5">{{ $treatment->times_per_day }}×/jour · toutes les {{ $intervalH }}h</p>
+                        <p class="text-xs text-slate-400 mt-0.5">{{ __('treatments.times_per_day_interval', ['count' => $treatment->times_per_day, 'hours' => $intervalH]) }}</p>
                     @elseif($treatment->current_dose !== null)
                     @php $scd = (float)$treatment->current_dose; $scddec = $treatment->unit === 'ml' ? 1 : ($scd != (int)$scd ? 1 : 0); @endphp
                     <p class="text-xl font-extrabold leading-none" style="color: {{ $treatment->color }};">
@@ -112,16 +112,16 @@
                 </div>
                 <span class="text-xs font-semibold px-2 py-1 rounded-full"
                       style="color: {{ $treatment->color }}; background-color: {{ $treatment->color }}18;">
-                    @if($treatment->type === 'daily') Quotidien
+                    @if($treatment->type === 'daily') {{ __('treatments.type_daily') }}
                     @elseif($treatment->type === 'weekly')
                         @if($treatment->frequency_weeks && $treatment->frequency_weeks > 1)
-                            1 sem. / {{ $treatment->frequency_weeks }} · {{ $treatment->dayOfWeekName() }}
+                            {{ __('treatments.one_week_per_n', ['weeks' => $treatment->frequency_weeks]) }} · {{ $treatment->dayOfWeekName() }}
                         @else
-                            Hebdo · {{ $treatment->dayOfWeekName() }}
+                            {{ __('treatments.weekly_short') }} · {{ $treatment->dayOfWeekName() }}
                         @endif
-                    @elseif($treatment->is_medical_act) Acte médical
-                    @elseif($treatment->frequency_weeks) / {{ $treatment->frequency_weeks }} sem.
-                    @else Cyclique
+                    @elseif($treatment->is_medical_act) {{ __('treatments.medical_act') }}
+                    @elseif($treatment->frequency_weeks) {{ __('treatments.every_n_weeks_short', ['weeks' => $treatment->frequency_weeks]) }}
+                    @else {{ __('treatments.type_cyclic') }}
                     @endif
                 </span>
             </div>
@@ -131,7 +131,7 @@
             <div class="mt-2 pt-2 border-t border-slate-100 flex items-center gap-1.5">
                 <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
                 <p class="text-xs text-slate-400">
-                    Modifié le {{ $treatment->posologyHistory->first()->started_at->locale('fr')->isoFormat('D MMM YYYY') }}
+                    {{ __('treatments.modified_on', ['date' => $treatment->posologyHistory->first()->started_at->isoFormat('D MMM YYYY')]) }}
                 </p>
             </div>
             @endif
@@ -149,7 +149,7 @@
                 <svg class="w-3 h-3 text-amber-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M10 2a6 6 0 0 0-6 6v3.586l-.707.707A1 1 0 0 0 4 14h12a1 1 0 0 0 .707-1.707L16 11.586V8a6 6 0 0 0-6-6zM10 18a3 3 0 0 1-2.83-2h5.66A3 3 0 0 1 10 18z"/>
                 </svg>
-                <p class="text-xs text-slate-400">Rappels · {{ implode(' · ', $notifTimes) }}</p>
+                <p class="text-xs text-slate-400">{{ __('treatments.reminders') }} · {{ implode(' · ', $notifTimes) }}</p>
             </div>
             @endif
         </div>
@@ -164,7 +164,7 @@
             class="w-full py-3 rounded-2xl font-bold text-white text-sm"
             style="background: linear-gradient(135deg, #0ea5e9, #6366f1);"
         >
-            Enregistrer l'ordre
+            {{ __('treatments.save_order') }}
         </button>
     </div>
     @endif
@@ -182,19 +182,19 @@
                     </svg>
                 </div>
                 <div>
-                    <h3 class="text-sm font-bold text-slate-800">Archiver le traitement</h3>
-                    <p class="text-xs text-slate-400 mt-0.5">Ce traitement sera masqué de la liste active.</p>
+                    <h3 class="text-sm font-bold text-slate-800">{{ __('treatments.archive_title') }}</h3>
+                    <p class="text-xs text-slate-400 mt-0.5">{{ __('treatments.archive_subtitle') }}</p>
                 </div>
             </div>
-            <p class="text-xs text-slate-500 mb-4 pl-13">Vous pourrez le désarchiver à tout moment depuis la section traitements archivés.</p>
+            <p class="text-xs text-slate-500 mb-4 pl-13">{{ __('treatments.archive_description') }}</p>
             <div class="flex gap-2">
                 <button wire:click="cancelArchive"
                         class="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors">
-                    Annuler
+                    {{ __('common.cancel') }}
                 </button>
                 <button wire:click="confirmArchive"
                         class="flex-1 py-2.5 rounded-xl bg-slate-700 text-sm font-semibold text-white hover:bg-slate-800 transition-colors">
-                    Archiver
+                    {{ __('common.archive') }}
                 </button>
             </div>
         </div>
@@ -204,7 +204,7 @@
     @if($archived->isNotEmpty())
     <details class="mt-6">
         <summary class="text-sm font-semibold text-slate-500 cursor-pointer">
-            Traitements archivés ({{ $archived->count() }})
+            {{ __('treatments.archived_section') }} ({{ $archived->count() }})
         </summary>
         <div class="space-y-2 mt-3">
             @foreach($archived as $treatment)
@@ -219,7 +219,7 @@
                 </div>
                 <button wire:click="unarchive({{ $treatment->id }})"
                         class="text-xs font-semibold text-sky-500 shrink-0">
-                    Désarchiver
+                    {{ __('treatments.unarchive') }}
                 </button>
             </div>
             @endforeach
