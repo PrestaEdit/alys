@@ -77,3 +77,43 @@ it('getEventsForDay returns correct dose for a date between two posology history
     expect($sixTg)->not->toBeNull();
     expect($sixTg['dose'])->toBe('2,8 ml');
 });
+
+it('getEventsForMonth includes a personal event on each day of its range', function () {
+    \App\Models\PersonalEvent::create([
+        'title' => 'Vacances', 'category' => 'vacances', 'color' => '#0ea5e9', 'icon' => '🏖️',
+        'start_date' => '2026-04-10', 'end_date' => '2026-04-12',
+    ]);
+
+    $month = $this->service->getEventsForMonth(2026, 4);
+
+    foreach (['2026-04-10', '2026-04-11', '2026-04-12'] as $day) {
+        $titles = collect($month[$day] ?? [])->where('kind', 'personal')->pluck('name')->toArray();
+        expect($titles)->toContain('Vacances');
+    }
+    // Hors plage : pas d'événement personnel le 13
+    $day13 = collect($month['2026-04-13'] ?? [])->where('kind', 'personal')->pluck('name')->toArray();
+    expect($day13)->not->toContain('Vacances');
+});
+
+it('getEventsForDay returns a personal event with its metadata', function () {
+    \App\Models\PersonalEvent::create([
+        'title' => 'Excursion', 'category' => 'excursion', 'color' => '#10b981', 'icon' => '🚌',
+        'start_date' => '2026-04-16', 'end_date' => '2026-04-18',
+    ]);
+
+    $events = collect($this->service->getEventsForDay(\Carbon\Carbon::parse('2026-04-17')));
+    $personal = $events->firstWhere('kind', 'personal');
+
+    expect($personal)->not->toBeNull();
+    expect($personal['title'])->toBe('Excursion');
+    expect($personal['icon'])->toBe('🚌');
+    expect($personal['is_multi_day'])->toBeTrue();
+    expect($personal['start_date'])->toBe('2026-04-16');
+    expect($personal['end_date'])->toBe('2026-04-18');
+});
+
+it('treatment entries are flagged with kind=treatment', function () {
+    $events = collect($this->service->getEventsForDay(\Carbon\Carbon::parse('2026-04-29')));
+    $hospital = $events->firstWhere('name', 'Hôpital');
+    expect($hospital['kind'])->toBe('treatment');
+});

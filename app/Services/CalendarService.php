@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\CalendarEvent;
+use App\Models\PersonalEvent;
 use App\Models\Treatment;
 use App\Services\ActiveProfile;
 use Carbon\Carbon;
@@ -99,6 +100,7 @@ class CalendarService
         $dailyTreatments = Treatment::active()->where('type', 'daily')->with('posologyHistory')->get();
         foreach ($dailyTreatments as $treatment) {
             $events[] = [
+                'kind'            => 'treatment',
                 'id'              => null,
                 'treatment_id'    => $treatment->id,
                 'name'            => $treatment->name,
@@ -123,6 +125,7 @@ class CalendarService
 
         foreach ($calendarEvents as $event) {
             $events[] = [
+                'kind'            => 'treatment',
                 'id'              => $event->id,
                 'treatment_id'    => $event->treatment_id,
                 'name'            => $event->treatment->name,
@@ -140,6 +143,31 @@ class CalendarService
             ];
         }
 
+        $personalEvents = PersonalEvent::whereDate('start_date', '<=', $dateStr)
+            ->whereDate('end_date', '>=', $dateStr)
+            ->orderBy('start_date')
+            ->get();
+
+        foreach ($personalEvents as $event) {
+            $events[] = [
+                'kind'             => 'personal',
+                'id'               => $event->id,
+                'title'            => $event->title,
+                'name'             => $event->title,
+                'display_name'     => $event->title,
+                'category'         => $event->category,
+                'icon'             => $event->icon,
+                'color'            => $event->color,
+                'notes'            => $event->notes,
+                'start_date'       => $event->start_date->toDateString(),
+                'end_date'         => $event->end_date->toDateString(),
+                'is_multi_day'     => ! $event->start_date->isSameDay($event->end_date),
+                'requires_fasting' => false,
+                'can_move'         => false,
+                'moved'            => false,
+            ];
+        }
+
         return $events;
     }
 
@@ -148,20 +176,38 @@ class CalendarService
         $start = Carbon::create($year, $month, 1)->startOfMonth();
         $end = $start->copy()->endOfMonth();
 
-        $events = CalendarEvent::with('treatment')
+        $grouped = CalendarEvent::with('treatment')
             ->whereBetween('scheduled_date', [$start->toDateString(), $end->toDateString()])
             ->where('is_cancelled', false)
             ->whereHas('treatment', fn($q) => $q->whereNull('archived_at'))
             ->get()
             ->groupBy(fn($e) => $e->scheduled_date->toDateString());
 
-        return $events->map(fn($dayEvents) => $dayEvents->map(fn($e) => [
-            'treatment_id'    => $e->treatment_id,
-            'name'            => $e->treatment->name,
-            'display_name'    => $e->treatment->displayName(),
-            'color'           => $e->treatment->color,
+        $result = $grouped->map(fn($dayEvents) => $dayEvents->map(fn($e) => [
+            'kind'             => 'treatment',
+            'treatment_id'     => $e->treatment_id,
+            'name'             => $e->treatment->name,
+            'display_name'     => $e->treatment->displayName(),
+            'color'            => $e->treatment->color,
             'requires_fasting' => $e->treatment->requiresFasting(),
         ])->values()->toArray())->toArray();
+
+        foreach (PersonalEvent::forMonth($year, $month)->get() as $event) {
+            $cursor = $event->start_date->copy()->max($start);
+            $last   = $event->end_date->copy()->min($end);
+            for (; $cursor->lte($last); $cursor->addDay()) {
+                $key = $cursor->toDateString();
+                $result[$key][] = [
+                    'kind'             => 'personal',
+                    'name'             => $event->title,
+                    'display_name'     => $event->title,
+                    'color'            => $event->color,
+                    'requires_fasting' => false,
+                ];
+            }
+        }
+
+        return $result;
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────
