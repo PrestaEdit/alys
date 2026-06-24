@@ -122,9 +122,15 @@
     {{-- Panneau de détail du jour sélectionné --}}
     @if($selectedDate)
     <div class="bg-white rounded-2xl p-4 shadow-sm mb-4">
-        <p class="text-xs font-bold text-slate-800 uppercase tracking-wide mb-3">
-            {{ \Carbon\Carbon::parse($selectedDate)->isoFormat('dddd D MMMM YYYY') }}
-        </p>
+        <div class="flex items-center justify-between mb-3">
+            <p class="text-xs font-bold text-slate-800 uppercase tracking-wide">
+                {{ \Carbon\Carbon::parse($selectedDate)->isoFormat('dddd D MMMM YYYY') }}
+            </p>
+            <button wire:click="openEventModal"
+                    class="text-xs text-sky-600 font-semibold border border-sky-200 rounded-lg px-2 py-1 bg-sky-50 hover:bg-sky-100 transition-colors flex items-center gap-1">
+                <span class="text-sm leading-none">+</span> {{ __('events.add') }}
+            </button>
+        </div>
 
         @if(empty($selectedDayEvents))
         <p class="text-xs text-slate-400 text-center py-2">{{ __('calendar.empty_day') }}</p>
@@ -132,29 +138,58 @@
         <div class="space-y-2">
             @foreach($selectedDayEvents as $event)
             <div class="flex items-start gap-3 px-3 py-2 rounded-xl
-                        {{ $event['requires_fasting'] ? 'bg-amber-50 border border-amber-200' : 'bg-slate-50' }}">
-                <span class="w-2 h-2 rounded-full flex-shrink-0 mt-1" style="background-color: {{ $event['color'] }};"></span>
-                <div class="flex-1 min-w-0">
-                    <p class="text-xs font-semibold text-slate-800">{{ $event['display_name'] ?? $event['name'] }}</p>
-                    @if($event['requires_fasting'])
-                        <p class="text-xs text-amber-600 font-bold">⚠️ {{ __('calendar.fasting_warning', ['name' => $profileName]) }}</p>
+                        {{ ($event['kind'] ?? 'treatment') === 'personal' ? 'bg-slate-50' : ($event['requires_fasting'] ? 'bg-amber-50 border border-amber-200' : 'bg-slate-50') }}">
+                @if(($event['kind'] ?? 'treatment') === 'personal')
+                    <span class="text-base leading-none flex-shrink-0 mt-0.5">{{ $event['icon'] }}</span>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs font-semibold text-slate-800">{{ $event['title'] }}</p>
+                        @if(!empty($event['is_multi_day']))
+                            <p class="text-xs text-slate-400">
+                                {{ __('events.period', [
+                                    'start' => \Carbon\Carbon::parse($event['start_date'])->isoFormat('D MMM'),
+                                    'end'   => \Carbon\Carbon::parse($event['end_date'])->isoFormat('D MMM'),
+                                ]) }}
+                            </p>
+                        @endif
+                        @if(!empty($event['notes']))
+                            <p class="text-xs text-slate-400">{{ $event['notes'] }}</p>
+                        @endif
+                    </div>
+                    <div class="flex items-center gap-1 flex-shrink-0">
+                        <button wire:click="editEvent({{ $event['id'] }})"
+                                class="text-xs text-sky-500 font-semibold border border-sky-200 rounded-lg px-2 py-1 bg-sky-50 hover:bg-sky-100 transition-colors">
+                            {{ __('events.edit') }}
+                        </button>
+                        <button wire:click="deleteEvent({{ $event['id'] }})"
+                                wire:confirm="{{ __('events.delete_confirm') }}"
+                                class="text-xs text-red-500 font-semibold border border-red-200 rounded-lg px-2 py-1 bg-red-50 hover:bg-red-100 transition-colors">
+                            {{ __('events.delete') }}
+                        </button>
+                    </div>
+                @else
+                    <span class="w-2 h-2 rounded-full flex-shrink-0 mt-1" style="background-color: {{ $event['color'] }};"></span>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs font-semibold text-slate-800">{{ $event['display_name'] ?? $event['name'] }}</p>
+                        @if($event['requires_fasting'])
+                            <p class="text-xs text-amber-600 font-bold">⚠️ {{ __('calendar.fasting_warning', ['name' => $profileName]) }}</p>
+                        @endif
+                        @if(!empty($event['notes']))
+                            <p class="text-xs text-slate-400">{{ $event['notes'] }}</p>
+                        @elseif(isset($event['dose']) && $event['dose'])
+                            @foreach(explode(' · ', $event['dose']) as $dosePart)
+                            <p class="text-xs text-slate-400">{{ $dosePart }}</p>
+                            @endforeach
+                        @endif
+                        @if(!empty($event['moved']) && $event['moved'])
+                            <p class="text-xs text-orange-500 italic">{{ __('calendar.moved_from', ['date' => \Carbon\Carbon::parse($event['original_date'])->isoFormat('D MMM')]) }}</p>
+                        @endif
+                    </div>
+                    @if(!empty($event['can_move']) && $event['can_move'])
+                    <button wire:click="openMoveModal({{ $event['id'] }})"
+                            class="text-xs text-sky-500 font-semibold border border-sky-200 rounded-lg px-2 py-1 bg-sky-50 hover:bg-sky-100 transition-colors flex-shrink-0">
+                        {{ __('calendar.move') }}
+                    </button>
                     @endif
-                    @if(!empty($event['notes']))
-                        <p class="text-xs text-slate-400">{{ $event['notes'] }}</p>
-                    @elseif(isset($event['dose']) && $event['dose'])
-                        @foreach(explode(' · ', $event['dose']) as $dosePart)
-                        <p class="text-xs text-slate-400">{{ $dosePart }}</p>
-                        @endforeach
-                    @endif
-                    @if(!empty($event['moved']) && $event['moved'])
-                        <p class="text-xs text-orange-500 italic">{{ __('calendar.moved_from', ['date' => \Carbon\Carbon::parse($event['original_date'])->isoFormat('D MMM')]) }}</p>
-                    @endif
-                </div>
-                @if(!empty($event['can_move']) && $event['can_move'])
-                <button wire:click="openMoveModal({{ $event['id'] }})"
-                        class="text-xs text-sky-500 font-semibold border border-sky-200 rounded-lg px-2 py-1 bg-sky-50 hover:bg-sky-100 transition-colors flex-shrink-0">
-                    {{ __('calendar.move') }}
-                </button>
                 @endif
             </div>
             @endforeach
@@ -183,6 +218,80 @@
                 <button wire:click="confirmMove"
                         class="flex-1 py-2.5 rounded-xl bg-sky-500 text-sm font-semibold text-white hover:bg-sky-600 transition-colors">
                     {{ __('common.confirm') }}
+                </button>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    {{-- Modal événement personnel --}}
+    @if($showEventModal)
+    <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-5 w-full max-w-sm shadow-xl max-h-[90vh] overflow-y-auto">
+            <h3 class="text-sm font-bold text-slate-800 mb-4">
+                {{ $editingEventId ? __('events.edit_title') : __('events.new_title') }}
+            </h3>
+
+            <label class="block text-xs font-semibold text-slate-600 mb-1">{{ __('events.field_title') }}</label>
+            <input type="text" wire:model="eventTitle" placeholder="{{ __('events.field_title_ph') }}"
+                   class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-400 mb-1">
+            @error('eventTitle') <p class="text-xs text-red-500 mb-2">{{ $message }}</p> @enderror
+
+            <label class="block text-xs font-semibold text-slate-600 mb-1 mt-3">{{ __('events.field_category') }}</label>
+            <div class="grid grid-cols-3 gap-2 mb-3">
+                @foreach($eventCategories as $cat)
+                <button type="button" wire:click="selectCategory('{{ $cat }}')"
+                        class="px-2 py-2 rounded-xl border text-xs font-semibold transition-colors
+                               {{ $eventCategory === $cat ? 'bg-sky-100 ring-2 ring-sky-400 text-sky-700 border-sky-200' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100' }}">
+                    {{ __('events.category_' . $cat) }}
+                </button>
+                @endforeach
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 mb-1">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">{{ __('events.field_start') }}</label>
+                    <x-datepicker model="eventStartDate" :value="$eventStartDate" wire:key="ev-start-{{ $editingEventId ?? 'new' }}" />
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">{{ __('events.field_end') }}</label>
+                    <x-datepicker model="eventEndDate" :value="$eventEndDate" wire:key="ev-end-{{ $editingEventId ?? 'new' }}" />
+                </div>
+            </div>
+            @error('eventEndDate') <p class="text-xs text-red-500 mb-2">{{ $message }}</p> @enderror
+
+            <label class="block text-xs font-semibold text-slate-600 mb-1 mt-3">{{ __('events.field_color') }}</label>
+            <div class="flex flex-wrap gap-2 mb-3">
+                @foreach($eventColors as $c)
+                <button type="button" wire:click="$set('eventColor', '{{ $c }}')"
+                        class="w-7 h-7 rounded-full transition-transform {{ $eventColor === $c ? 'ring-2 ring-offset-2 ring-slate-400 scale-110' : '' }}"
+                        style="background-color: {{ $c }};"></button>
+                @endforeach
+            </div>
+
+            <label class="block text-xs font-semibold text-slate-600 mb-1">{{ __('events.field_icon') }}</label>
+            <div class="flex flex-wrap gap-2 mb-3">
+                @foreach($eventIcons as $icon)
+                <button type="button" wire:click="$set('eventIcon', '{{ $icon }}')"
+                        class="w-9 h-9 rounded-xl flex items-center justify-center text-lg transition-colors
+                               {{ $eventIcon === $icon ? 'bg-sky-100 ring-2 ring-sky-400' : 'bg-slate-100 hover:bg-slate-200' }}">
+                    {{ $icon }}
+                </button>
+                @endforeach
+            </div>
+
+            <label class="block text-xs font-semibold text-slate-600 mb-1">{{ __('events.field_notes') }}</label>
+            <textarea wire:model="eventNotes" rows="2" placeholder="{{ __('events.field_notes_ph') }}"
+                      class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-400 mb-4"></textarea>
+
+            <div class="flex gap-3">
+                <button wire:click="cancelEventModal"
+                        class="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors">
+                    {{ __('common.cancel') }}
+                </button>
+                <button wire:click="saveEvent"
+                        class="flex-1 py-2.5 rounded-xl bg-sky-500 text-sm font-semibold text-white hover:bg-sky-600 transition-colors">
+                    {{ __('events.save') }}
                 </button>
             </div>
         </div>
