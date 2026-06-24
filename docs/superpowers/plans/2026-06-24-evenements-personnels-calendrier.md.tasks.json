@@ -1,0 +1,39 @@
+{
+  "planPath": "docs/superpowers/plans/2026-06-24-evenements-personnels-calendrier.md",
+  "tasks": [
+    {
+      "id": 1,
+      "subject": "Task 1: Modèle PersonalEvent + migration",
+      "status": "pending",
+      "description": "**Goal:** Créer la table personal_events et le modèle Eloquent.\n\n```json:metadata\n{\"files\": [\"database/migrations/2026_06_24_000000_create_personal_events_table.php\", \"app/Models/PersonalEvent.php\", \"tests/Unit/Models/PersonalEventTest.php\"], \"verifyCommand\": \"php artisan test --filter=PersonalEventTest\", \"acceptanceCriteria\": [\"table personal_events créée\", \"BelongsToActiveProfile\", \"CATEGORIES + ICONS consts\", \"scope forMonth chevauchement\"]}\n```"
+    },
+    {
+      "id": 2,
+      "subject": "Task 2: Fusion des événements dans CalendarService",
+      "status": "pending",
+      "blockedBy": [1],
+      "description": "**Goal:** Fusionner les événements personnels dans getEventsForMonth/getEventsForDay avec drapeau kind.\n\n```json:metadata\n{\"files\": [\"app/Services/CalendarService.php\", \"tests/Unit/Services/CalendarServiceTest.php\"], \"verifyCommand\": \"php artisan test --filter=CalendarServiceTest\", \"acceptanceCriteria\": [\"événement multi-jours sur chaque jour\", \"getEventsForDay retourne kind=personal\", \"traitements kind=treatment\"]}\n```"
+    },
+    {
+      "id": 3,
+      "subject": "Task 3: Chaînes i18n events.php (FR + EN)",
+      "status": "pending",
+      "description": "**Goal:** Fournir les chaînes FR/EN avec parité des clés.\n\n```json:metadata\n{\"files\": [\"lang/fr/events.php\", \"lang/en/events.php\"], \"verifyCommand\": \"php artisan test --filter=TranslationParityTest\", \"acceptanceCriteria\": [\"events.php FR et EN existent\", \"clés identiques\", \"parité verte\"]}\n```"
+    },
+    {
+      "id": 4,
+      "subject": "Task 4: CRUD événements dans le composant Calendar",
+      "status": "pending",
+      "blockedBy": [1],
+      "description": "**Goal:** État + méthodes CRUD via modal dans le composant Livewire Calendar.\n\n```json:metadata\n{\"files\": [\"app/Livewire/Calendar.php\", \"tests/Feature/Livewire/CalendarTest.php\"], \"verifyCommand\": \"php artisan test --filter=CalendarTest\", \"acceptanceCriteria\": [\"openEventModal pré-remplit dates\", \"selectCategory applique défauts\", \"saveEvent valide+crée/maj\", \"editEvent charge\", \"deleteEvent supprime\", \"end_date < start_date rejetée\"]}\n```"
+    },
+    {
+      "id": 5,
+      "subject": "Task 5: UI — bouton, rendu du jour et modal",
+      "status": "pending",
+      "blockedBy": [2, 3, 4],
+      "description": "**Goal:** Bouton + Événement, rendu des événements personnels et modal de création/édition.\n\n```json:metadata\n{\"files\": [\"resources/views/livewire/calendar.blade.php\"], \"verifyCommand\": \"php artisan test --filter=CalendarTest\", \"acceptanceCriteria\": [\"bouton + Événement visible\", \"événement perso avec icône/titre/période/actions\", \"traitement garde Déplacer\", \"modal complet\", \"CalendarTest vert\"]}\n```"
+    }
+  ],
+  "lastUpdated": "2026-06-24T00:00:00Z"
+}
