@@ -1,0 +1,24 @@
+<?php
+
+return [
+    'add'              => 'Événement',
+    'new_title'        => 'Nouvel événement',
+    'edit_title'       => 'Modifier l\'événement',
+    'field_title'      => 'Titre',
+    'field_title_ph'   => 'Ex : Vacances en Espagne',
+    'field_category'   => 'Catégorie',
+    'field_start'      => 'Du',
+    'field_end'        => 'Au',
+    'field_color'      => 'Couleur',
+    'field_icon'       => 'Icône',
+    'field_notes'      => 'Note',
+    'field_notes_ph'   => 'Note optionnelle',
+    'category_vacances'  => 'Vacances',
+    'category_excursion' => 'Excursion',
+    'category_autre'     => 'Autre',
+    'period'           => 'Du :start au :end',
+    'save'             => 'Enregistrer',
+    'edit'             => 'Modifier',
+    'delete'           => 'Supprimer',
+    'delete_confirm'   => 'Supprimer cet événement ?',
+];
