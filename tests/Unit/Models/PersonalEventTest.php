@@ -43,3 +43,26 @@ it('forMonth returns events whose range overlaps the month', function () {
     expect($july)->toHaveCount(1);
     expect($july->first()->title)->toBe('Pont');
 });
+
+it('does not expose events from another profile', function () {
+    $other = \App\Models\Profile::create([
+        'name' => 'Autre', 'color' => '#000000', 'icon' => 'B',
+        'treatment_start' => '2025-11-26', 'treatment_end' => '2027-03-31',
+    ]);
+    $active = app(\App\Services\ActiveProfile::class);
+    $activeId = $active->id();
+
+    // Événement créé sous l'autre profil
+    $active->set($other->id);
+    $foreign = PersonalEvent::create([
+        'title' => 'Privé', 'category' => 'autre', 'color' => '#f59e0b',
+        'icon' => '📌', 'start_date' => '2026-07-10', 'end_date' => '2026-07-10',
+    ]);
+
+    // Retour au profil actif : invisible et inaccessible
+    $active->set($activeId);
+    expect(PersonalEvent::find($foreign->id))->toBeNull();
+    expect(PersonalEvent::forMonth(2026, 7)->get())->toHaveCount(0);
+    expect(fn () => PersonalEvent::findOrFail($foreign->id))
+        ->toThrow(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
+});

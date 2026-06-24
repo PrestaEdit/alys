@@ -132,7 +132,7 @@ class Calendar extends Component
     {
         $data = $this->validate([
             'eventTitle'     => 'required|string|max:255',
-            'eventCategory'  => 'required|in:vacances,excursion,autre',
+            'eventCategory'  => 'required|in:' . implode(',', array_keys(PersonalEvent::CATEGORIES)),
             'eventColor'     => 'required|string',
             'eventIcon'      => 'required|string',
             'eventStartDate' => 'required|date',
