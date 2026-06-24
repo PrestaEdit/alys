@@ -97,7 +97,7 @@ class Calendar extends Component
 
     public function openEventModal(): void
     {
-        $date = $this->selectedDate ?? now()->toDateString();
+        $date = $this->selectedDate ?? Carbon::create($this->year, $this->month, 1)->toDateString();
         $this->resetEventForm();
         $this->eventStartDate = $date;
         $this->eventEndDate = $date;

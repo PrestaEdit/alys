@@ -75,6 +75,12 @@
         </div>
     </div>
 
+    {{-- Bouton d'ajout d'événement (toujours visible) --}}
+    <button wire:click="openEventModal"
+            class="w-full mb-4 py-2.5 rounded-2xl bg-sky-500 text-white text-sm font-semibold hover:bg-sky-600 transition-colors flex items-center justify-center gap-1.5 shadow-sm">
+        <span class="text-base leading-none">+</span> {{ __('events.add') }}
+    </button>
+
     {{-- Légende (masquée par défaut) --}}
     <div x-show="legend"
          x-transition:enter="transition ease-out duration-200"
