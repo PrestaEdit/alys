@@ -17,7 +17,8 @@
         "nativephp/mobile-secure-storage": "^1.0",
         "nativephp/mobile-share": "^1.0",
         "prestaedit/alys-native": "^1.0",
-        "prestaedit/nativephp-android-widgets": "^1.0"
+        "prestaedit/nativephp-android-widgets": "^1.0",
+        "sentry/sentry-laravel": "^4.26"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
