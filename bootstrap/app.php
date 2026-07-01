@@ -24,8 +24,6 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        \Sentry\Laravel\Integration::handles($exceptions);
-
         // TEMPORAIRE (builds internes uniquement) : affiche l'exception réelle à
         // l'écran au lieu du « Erreur 500 » générique de NativePHP. Renvoyée en
         // HTTP 200 pour que la webview l'affiche comme une page normale.
