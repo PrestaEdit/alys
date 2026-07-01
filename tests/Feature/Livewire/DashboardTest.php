@@ -46,3 +46,17 @@ it('does not show export banner on dashboard', function () {
     Livewire::test(Dashboard::class)
         ->assertDontSee('Export réussi');
 });
+
+// Régression : un événement personnel couvrant aujourd'hui apparaît dans la
+// liste "aujourd'hui" du dashboard. Le blade lit $event['type'] — que seuls les
+// traitements possédaient — d'où un 500 "Undefined array key type" à l'ouverture.
+it('renders dashboard when a personal event covers today', function () {
+    \App\Models\PersonalEvent::create([
+        'title' => 'Vacances', 'category' => 'vacances', 'color' => '#0ea5e9', 'icon' => '🏖️',
+        'start_date' => now()->toDateString(), 'end_date' => now()->toDateString(),
+    ]);
+
+    Livewire::test(Dashboard::class)
+        ->assertStatus(200)
+        ->assertSee('Vacances');
+});

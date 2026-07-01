@@ -154,6 +154,7 @@ class CalendarService
         foreach ($personalEvents as $event) {
             $events[] = [
                 'kind'             => 'personal',
+                'type'             => 'personal',
                 'id'               => $event->id,
                 'title'            => $event->title,
                 'name'             => $event->title,
