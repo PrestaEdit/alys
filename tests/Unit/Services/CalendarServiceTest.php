@@ -117,3 +117,24 @@ it('treatment entries are flagged with kind=treatment', function () {
     $hospital = $events->firstWhere('name', 'Hôpital');
     expect($hospital['kind'])->toBe('treatment');
 });
+
+// Robustesse : sur un appareil dont le build précède la migration, la table
+// personal_events peut être absente. Le calendrier doit alors afficher les
+// traitements sans planter (pas de 500), plutôt que d'échouer sur la table manquante.
+it('getEventsForDay still returns treatments when personal_events table is missing', function () {
+    \Illuminate\Support\Facades\Schema::drop('personal_events');
+
+    $events = $this->service->getEventsForDay(Carbon::parse('2026-04-29'));
+
+    $names = collect($events)->pluck('name')->toArray();
+    expect($names)->toContain('Hôpital');
+});
+
+it('getEventsForMonth still returns treatments when personal_events table is missing', function () {
+    \Illuminate\Support\Facades\Schema::drop('personal_events');
+
+    $month = $this->service->getEventsForMonth(2026, 4);
+
+    expect($month)->toBeArray();
+    expect($month)->toHaveKey('2026-04-15');
+});

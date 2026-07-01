@@ -7,6 +7,7 @@ use App\Models\PersonalEvent;
 use App\Models\Treatment;
 use App\Services\ActiveProfile;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Schema;
 
 class CalendarService
 {
@@ -143,10 +144,12 @@ class CalendarService
             ];
         }
 
-        $personalEvents = PersonalEvent::whereDate('start_date', '<=', $dateStr)
-            ->whereDate('end_date', '>=', $dateStr)
-            ->orderBy('start_date')
-            ->get();
+        $personalEvents = $this->personalEventsAvailable()
+            ? PersonalEvent::whereDate('start_date', '<=', $dateStr)
+                ->whereDate('end_date', '>=', $dateStr)
+                ->orderBy('start_date')
+                ->get()
+            : collect();
 
         foreach ($personalEvents as $event) {
             $events[] = [
@@ -192,7 +195,11 @@ class CalendarService
             'requires_fasting' => $e->treatment->requiresFasting(),
         ])->values()->toArray())->toArray();
 
-        foreach (PersonalEvent::forMonth($year, $month)->get() as $event) {
+        $monthlyPersonalEvents = $this->personalEventsAvailable()
+            ? PersonalEvent::forMonth($year, $month)->get()
+            : collect();
+
+        foreach ($monthlyPersonalEvents as $event) {
             $cursor = $event->start_date->copy()->max($start);
             $last   = $event->end_date->copy()->min($end);
             for (; $cursor->lte($last); $cursor->addDay()) {
@@ -211,6 +218,17 @@ class CalendarService
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────
+
+    /**
+     * Les événements personnels sont une fonctionnalité optionnelle : sur un
+     * appareil dont le build précède la migration, la table peut être absente.
+     * On dégrade alors proprement (calendrier des traitements seuls) au lieu de
+     * planter tout l'écran d'accueil.
+     */
+    private function personalEventsAvailable(): bool
+    {
+        return Schema::hasTable('personal_events');
+    }
 
     private function getDoseForDate(Treatment $treatment, Carbon $date): ?string
     {
