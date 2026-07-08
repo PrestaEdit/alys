@@ -40,3 +40,36 @@ it('la vue contient le wrapper Alpine visibilitychange avec debounce 1s', functi
     expect($html)->toContain('$wire.refresh()');
     expect($html)->toMatch('/Date\.now\(\)\s*-\s*last\s*>\s*1000/');
 });
+
+it('affiche le prochain événement quand rien aujourd\'hui', function () {
+    \App\Models\CalendarEvent::query()->delete();
+    \App\Models\Treatment::query()->update(['archived_at' => now()]);
+
+    $activeProfile = app(\App\Services\ActiveProfile::class)->get();
+    $treatment = \App\Models\Treatment::create([
+        'profile_id'  => $activeProfile->id,
+        'name'        => 'Hôpital',
+        'type'        => 'cyclic',
+        'color'       => '#0ea5e9',
+        'unit'        => null,
+    ]);
+    \App\Models\CalendarEvent::create([
+        'treatment_id'   => $treatment->id,
+        'scheduled_date' => \Carbon\Carbon::today()->addDays(2),
+        'is_cancelled'   => false,
+    ]);
+
+    $html = Livewire::test(Dashboard::class)->html();
+
+    expect($html)->toContain('Rien de prévu aujourd');
+    expect($html)->toContain('Hôpital');
+});
+
+it('affiche le message vide 60j si aucun événement à venir', function () {
+    \App\Models\CalendarEvent::query()->delete();
+    \App\Models\Treatment::query()->update(['archived_at' => now()]);
+
+    $html = Livewire::test(Dashboard::class)->html();
+
+    expect($html)->toContain('Rien de prévu dans les 60 prochains jours');
+});

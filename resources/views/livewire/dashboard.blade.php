@@ -90,7 +90,24 @@
                 </div>
             </div>
             @empty
-            <p class="text-xs text-slate-400 text-center py-2">{{ __('dashboard.no_events_today') }}</p>
+            @if($nextEventPreview)
+                <div class="text-center py-3">
+                    <p class="text-xs text-slate-400 mb-2">{{ __('dashboard.nothing_today') }}</p>
+                    <div class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50">
+                        <span class="text-lg leading-none">{{ $nextEventPreview['event']['icon'] ?? '📅' }}</span>
+                        <div class="text-left">
+                            <p class="text-xs font-semibold text-slate-800">
+                                {{ $nextEventPreview['event']['display_name'] ?? $nextEventPreview['event']['name'] ?? ($nextEventPreview['event']['title'] ?? '') }}
+                            </p>
+                            <p class="text-xs text-slate-400">
+                                {{ __('dashboard.next_on', ['date' => $nextEventPreview['date']->isoFormat('dddd D MMMM')]) }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            @else
+                <p class="text-xs text-slate-400 text-center py-2">{{ __('dashboard.nothing_next_60d') }}</p>
+            @endif
             @endforelse
         </div>
     </div>

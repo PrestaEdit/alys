@@ -19,6 +19,7 @@ class Dashboard extends Component
     public string $patientName = '';
     public string $treatmentStartLabel = '';
     public string $treatmentEndLabel = '';
+    public ?array $nextEventPreview = null;
 
     public function mount(CalendarService $service, ActiveProfile $activeProfile, WidgetService $widgetService): void
     {
@@ -29,6 +30,9 @@ class Dashboard extends Component
         $this->counters = $service->getCounters($today);
         $this->widgets = $service->getWidgets($today);
         $this->todayEvents = $service->getEventsForDay($today);
+        $this->nextEventPreview = empty($this->todayEvents)
+            ? $service->getNextEventAfter($today)
+            : null;
         $this->daysRemaining = $service->getDaysRemaining($today);
 
         $nextVisit = $service->getNextHospitalVisit($today);
