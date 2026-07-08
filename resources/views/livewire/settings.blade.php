@@ -59,4 +59,12 @@
 
     <p class="text-center text-xs text-slate-300 mt-2">v{{ config('nativephp.version') }}</p>
 
+    <div class="text-xs text-slate-400 mt-4">
+        <p>{{ __('settings.attributions') }} :</p>
+        <ul class="list-disc list-inside mt-1">
+            <li>{{ __('settings.attributions_medical') }} : <a href="https://healthicons.org" class="underline">healthicons.org</a> (MIT)</li>
+            <li>{{ __('settings.attributions_emoji') }} : Twemoji (jdecked, CC-BY 4.0)</li>
+        </ul>
+    </div>
+
 </div>

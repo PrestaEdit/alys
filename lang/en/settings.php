@@ -21,4 +21,9 @@ return [
     'toast_already_granted' => 'Permission already granted — reminders rescheduled.',
     'toast_granted'         => 'Permission granted — reminders enabled.',
     'toast_denied'          => 'Status: :status. Enable notifications in the Android Settings.',
+
+    // Attributions (icons)
+    'attributions'         => 'Credits',
+    'attributions_medical' => 'Medical icons',
+    'attributions_emoji'   => 'Emoji icons',
 ];

@@ -21,4 +21,9 @@ return [
     'toast_already_granted' => 'Autorisation déjà accordée — rappels replanifiés.',
     'toast_granted'         => 'Autorisation accordée — rappels activés.',
     'toast_denied'          => 'Statut : :status. Autorisez les notifications dans les Paramètres Android.',
+
+    // Attributions (icônes)
+    'attributions'         => 'Crédits',
+    'attributions_medical' => 'Icônes médicales',
+    'attributions_emoji'   => 'Icônes emoji',
 ];
