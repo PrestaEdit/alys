@@ -52,7 +52,7 @@ class TreatmentSeeder extends Seeder
                 'day_of_week' => 1, // mardi (0=lun)
                 'recurrence_start' => null,
                 'show_widget' => true,
-                'widget_icon' => '💊',
+                'widget_icon' => 'pill',
             ],
             [
                 'name' => 'VCR',
@@ -65,7 +65,7 @@ class TreatmentSeeder extends Seeder
                 'day_of_week' => null,
                 'recurrence_start' => '2025-11-26',
                 'show_widget' => true,
-                'widget_icon' => '💉',
+                'widget_icon' => 'syringe',
             ],
             [
                 'name' => 'IT MTTX',
@@ -80,7 +80,7 @@ class TreatmentSeeder extends Seeder
                 'day_of_week' => null,
                 'recurrence_start' => '2026-01-21',
                 'show_widget' => true,
-                'widget_icon' => '🔬',
+                'widget_icon' => 'microscope',
             ],
             [
                 'name' => 'Dexaméthasone',
@@ -122,7 +122,7 @@ class TreatmentSeeder extends Seeder
                 'day_of_week' => null,
                 'recurrence_start' => '2025-11-26',
                 'show_widget' => true,
-                'widget_icon' => '🏥',
+                'widget_icon' => 'hospital',
             ],
         ];
 

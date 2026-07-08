@@ -24,7 +24,7 @@ it('refresh() re-hydrate les widgets du Dashboard', function () {
         'color'       => '#000000',
         'unit'        => 'mg',
         'show_widget' => true,
-        'widget_icon' => '💊',
+        'widget_icon' => 'pill',
     ]);
 
     $component->call('refresh');

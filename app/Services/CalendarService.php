@@ -73,7 +73,7 @@ class CalendarService
         return $treatments->map(fn($t) => [
             'display_name' => $t->displayName(),
             'count'        => (int) ($t->future_count ?? 0),
-            'icon'         => $t->widget_icon ?? '💊',
+            'icon'         => $t->widget_icon ?? 'pill',
             'color'        => $t->color,
         ])->values()->toArray();
     }
