@@ -218,6 +218,24 @@ class CalendarService
         return $result;
     }
 
+    /**
+     * Cherche le prochain jour (dans une fenêtre bornée) contenant au moins un
+     * événement. Utile pour l'empty state du Dashboard.
+     *
+     * @return array{date: \Carbon\Carbon, event: array}|null
+     */
+    public function getNextEventAfter(Carbon $from, int $maxDays = 60): ?array
+    {
+        for ($i = 1; $i <= $maxDays; $i++) {
+            $day = $from->copy()->addDays($i);
+            $events = $this->getEventsForDay($day);
+            if (!empty($events)) {
+                return ['date' => $day, 'event' => $events[0]];
+            }
+        }
+        return null;
+    }
+
     // ── Helpers ──────────────────────────────────────────────────────────
 
     /**
