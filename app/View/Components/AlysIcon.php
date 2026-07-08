@@ -37,12 +37,16 @@ class AlysIcon extends Component
             ? public_path('icons/medical/' . $this->value . '.svg')
             : public_path('icons/twemoji/' . $this->emojiToCodepoint($this->value) . '.svg');
 
-        if (isset(self::$svgCache[$path])) {
-            return self::$svgCache[$path];
+        // Le cache inclut la classe CSS : la même icône peut être rendue
+        // avec des tailles différentes sur une même page (widget 40px vs preview 24px).
+        $cacheKey = $path . '|' . $this->class;
+
+        if (isset(self::$svgCache[$cacheKey])) {
+            return self::$svgCache[$cacheKey];
         }
 
         if (! is_file($path)) {
-            return self::$svgCache[$path] = $this->fallbackSvg();
+            return self::$svgCache[$cacheKey] = $this->fallbackSvg();
         }
 
         $content = (string) file_get_contents($path);
@@ -54,7 +58,13 @@ class AlysIcon extends Component
             1,
         );
 
-        return self::$svgCache[$path] = $content;
+        return self::$svgCache[$cacheKey] = $content;
+    }
+
+    /** Vide le cache statique — utile en test pour éviter la pollution inter-cas. */
+    public static function flushCache(): void
+    {
+        self::$svgCache = [];
     }
 
     protected function emojiToCodepoint(string $char): string
