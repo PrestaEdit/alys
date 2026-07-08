@@ -73,3 +73,24 @@ it('affiche le message vide 60j si aucun événement à venir', function () {
 
     expect($html)->toContain('Rien de prévu dans les 60 prochains jours');
 });
+
+it('les widgets du Dashboard rendent via alys-icon en 40px', function () {
+    // Créer un traitement widget-visible
+    $activeProfile = app(\App\Services\ActiveProfile::class)->get();
+    \App\Models\Treatment::create([
+        'profile_id'  => $activeProfile->id,
+        'name'        => 'Widget test',
+        'type'        => 'daily',
+        'color'       => '#0ea5e9',
+        'unit'        => 'mg',
+        'show_widget' => true,
+        'widget_icon' => '💊',
+    ]);
+
+    $html = Livewire::test(Dashboard::class)->html();
+
+    // Container widget en 40px
+    expect($html)->toContain('w-10 h-10');
+    // SVG rendu par alys-icon
+    expect($html)->toContain('<svg');
+});

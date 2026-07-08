@@ -140,7 +140,7 @@
             <div class="flex items-start gap-3 px-3 py-2 rounded-xl
                         {{ ($event['kind'] ?? 'treatment') === 'personal' ? 'bg-slate-50' : ($event['requires_fasting'] ? 'bg-amber-50 border border-amber-200' : 'bg-slate-50') }}">
                 @if(($event['kind'] ?? 'treatment') === 'personal')
-                    <span class="text-base leading-none flex-shrink-0 mt-0.5">{{ $event['icon'] }}</span>
+                    <x-alys-icon :value="$event['icon']" kind="twemoji" class="w-6 h-6 flex-shrink-0 mt-0.5" />
                     <div class="flex-1 min-w-0">
                         <p class="text-xs font-semibold text-slate-800">{{ $event['title'] }}</p>
                         @if(!empty($event['is_multi_day']))

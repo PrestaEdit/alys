@@ -58,9 +58,9 @@
     <div class="grid grid-cols-2 gap-3 mb-4">
         @foreach($widgets as $widget)
         <div class="bg-white rounded-2xl p-3 shadow-sm">
-            <div class="w-8 h-8 rounded-xl flex items-center justify-center text-lg mb-1"
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center mb-1"
                  style="background-color: {{ $widget['color'] }}18;">
-                {{ $widget['icon'] }}
+                <x-alys-icon :value="$widget['icon']" kind="auto" class="w-6 h-6" />
             </div>
             <p class="text-2xl font-extrabold leading-none" style="color: {{ $widget['color'] }};">{{ $widget['count'] }}</p>
             <p class="text-xs text-slate-400 font-medium mt-0.5">{{ $widget['display_name'] }}</p>
@@ -94,7 +94,7 @@
                 <div class="text-center py-3">
                     <p class="text-xs text-slate-400 mb-2">{{ __('dashboard.nothing_today') }}</p>
                     <div class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50">
-                        <span class="text-lg leading-none">{{ $nextEventPreview['event']['icon'] ?? '📅' }}</span>
+                        <x-alys-icon :value="$nextEventPreview['event']['icon'] ?? '📅'" kind="auto" class="w-6 h-6" />
                         <div class="text-left">
                             <p class="text-xs font-semibold text-slate-800">
                                 {{ $nextEventPreview['event']['display_name'] ?? $nextEventPreview['event']['name'] ?? ($nextEventPreview['event']['title'] ?? '') }}
