@@ -75,12 +75,6 @@
         </div>
     </div>
 
-    {{-- Bouton d'ajout d'événement (toujours visible) --}}
-    <button wire:click="openEventModal"
-            class="w-full mb-4 py-2.5 rounded-2xl bg-sky-500 text-white text-sm font-semibold hover:bg-sky-600 transition-colors flex items-center justify-center gap-1.5 shadow-sm">
-        <span class="text-base leading-none">+</span> {{ __('events.add') }}
-    </button>
-
     {{-- Légende (masquée par défaut) --}}
     <div x-show="legend"
          x-transition:enter="transition ease-out duration-200"
@@ -133,7 +127,7 @@
                 {{ \Carbon\Carbon::parse($selectedDate)->isoFormat('dddd D MMMM YYYY') }}
             </p>
             <button wire:click="openEventModal"
-                    class="text-xs text-sky-600 font-semibold border border-sky-200 rounded-lg px-2 py-1 bg-sky-50 hover:bg-sky-100 transition-colors flex items-center gap-1">
+                    class="text-xs text-white font-semibold rounded-lg px-3 py-1.5 bg-sky-500 hover:bg-sky-600 transition-colors flex items-center gap-1 shadow-sm">
                 <span class="text-sm leading-none">+</span> {{ __('events.add') }}
             </button>
         </div>
