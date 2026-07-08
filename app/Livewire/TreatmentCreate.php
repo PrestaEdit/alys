@@ -6,6 +6,7 @@ use App\Models\CalendarEvent;
 use App\Models\PosologyHistory;
 use App\Models\Setting;
 use App\Models\Treatment;
+use App\Support\MedicalIcons;
 use Carbon\Carbon;
 use Livewire\Component;
 
@@ -29,7 +30,7 @@ class TreatmentCreate extends Component
 
     // Widget
     public bool $showWidget = false;
-    public string $widgetIcon = '💊';
+    public string $widgetIcon = 'pill';
 
     // Recurrence (cyclic)
     public int $frequencyWeeks = 4;
@@ -51,7 +52,7 @@ class TreatmentCreate extends Component
     public string $notificationTimeNoon = '12:30';
     public string $notificationTimeEvening = '20:00';
 
-    public const WIDGET_ICONS = ['🏥', '💉', '🔬', '💊', '🧪', '🩺', '🩹', '❤️', '🫀', '🧬'];
+    public const WIDGET_ICONS = MedicalIcons::KEYS;
 
     public const COLORS = [
         '#3b82f6', '#10b981', '#ef4444', '#8b5cf6',

@@ -6,6 +6,7 @@ use App\Models\CalendarEvent;
 use App\Models\PosologyHistory;
 use App\Models\Setting;
 use App\Models\Treatment;
+use App\Support\MedicalIcons;
 use Carbon\Carbon;
 use Livewire\Component;
 
@@ -46,7 +47,7 @@ class TreatmentEdit extends Component
 
     // Widget config
     public bool $showWidget = false;
-    public string $widgetIcon = '💊';
+    public string $widgetIcon = 'pill';
 
     // Modal state
     public bool $showRecalculateModal = false;
@@ -57,7 +58,7 @@ class TreatmentEdit extends Component
     public string $notificationTimeNoon = '12:30';
     public string $notificationTimeEvening = '20:00';
 
-    public const WIDGET_ICONS = ['🏥', '💉', '🔬', '💊', '🧪', '🩺', '🩹', '❤️', '🫀', '🧬'];
+    public const WIDGET_ICONS = MedicalIcons::KEYS;
 
     public const COLORS = [
         '#3b82f6', '#10b981', '#ef4444', '#8b5cf6',
@@ -104,7 +105,7 @@ class TreatmentEdit extends Component
 
         // Widget
         $this->showWidget = (bool) $treatment->show_widget;
-        $this->widgetIcon = $treatment->widget_icon ?? '💊';
+        $this->widgetIcon = $treatment->widget_icon ?? 'pill';
 
         // Notifications
         $this->notificationEnabled     = (bool) $treatment->notification_enabled;

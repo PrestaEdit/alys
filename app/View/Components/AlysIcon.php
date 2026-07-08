@@ -2,6 +2,7 @@
 
 namespace App\View\Components;
 
+use App\Support\MedicalIcons;
 use Illuminate\View\Component;
 use Illuminate\View\View;
 
@@ -10,11 +11,8 @@ class AlysIcon extends Component
     /** @var array<string,string> Cache pour la requête courante */
     protected static array $svgCache = [];
 
-    /** Clés médicales connues (fichiers présents dans public/icons/medical/). */
-    protected const MEDICAL_KEYS = [
-        'pill', 'syringe', 'stethoscope', 'test-tube', 'blood-drop',
-        'hospital', 'dna', 'microscope', 'bandage',
-    ];
+    // Note : la liste des clés vit dans App\Support\MedicalIcons pour éviter la
+    // duplication avec TreatmentCreate/Edit et la migration DB.
 
     public function __construct(
         public string $value,
@@ -30,7 +28,7 @@ class AlysIcon extends Component
     public function svg(): string
     {
         $resolvedKind = $this->kind === 'auto'
-            ? (in_array($this->value, self::MEDICAL_KEYS, true) ? 'medical' : 'twemoji')
+            ? (in_array($this->value, MedicalIcons::KEYS, true) ? 'medical' : 'twemoji')
             : $this->kind;
 
         $path = $resolvedKind === 'medical'

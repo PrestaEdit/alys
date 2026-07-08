@@ -185,7 +185,7 @@
                         wire:click="$set('widgetIcon', '{{ $icon }}')"
                         class="w-10 h-10 rounded-xl text-xl flex items-center justify-center transition-all
                                {{ $widgetIcon === $icon ? 'bg-sky-100 ring-2 ring-sky-400' : 'bg-slate-100 hover:bg-slate-200' }}">
-                    {{ $icon }}
+                    <x-alys-icon :value="$icon" kind="medical" class="w-6 h-6" />
                 </button>
                 @endforeach
             </div>
@@ -553,7 +553,7 @@
         @if($showWidget)
         <div class="flex justify-between items-center py-3 border-b border-slate-100">
             <span class="text-xs text-slate-400 font-medium">{{ __('treatments.summary_widget') }}</span>
-            <span class="text-lg">{{ $widgetIcon }}</span>
+            <x-alys-icon :value="$widgetIcon" kind="medical" class="w-5 h-5" />
         </div>
         @endif
 
