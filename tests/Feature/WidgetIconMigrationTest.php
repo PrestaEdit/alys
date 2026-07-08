@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\Profile;
-use App\Models\Treatment;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 
@@ -104,4 +103,25 @@ it('down() ré-inverse le mapping', function () {
     $migration->down();
 
     expect(DB::table('treatments')->where('name', 'Trt reverse')->value('widget_icon'))->toBe('💊');
+});
+
+it('n\'altère pas les traitements sans widget_icon (NULL)', function () {
+    DB::table('calendar_events')->delete();
+    DB::table('treatments')->delete();
+    $profile = Profile::first() ?? Profile::factory()->create();
+
+    DB::table('treatments')->insert([
+        'profile_id'  => $profile->id,
+        'name'        => 'Trt sans icône',
+        'type'        => 'daily',
+        'color'       => '#000',
+        'widget_icon' => null,
+        'created_at'  => now(),
+        'updated_at'  => now(),
+    ]);
+
+    $migration = require database_path('migrations/2026_07_08_000000_migrate_widget_icons_to_keys.php');
+    $migration->up();
+
+    expect(DB::table('treatments')->where('name', 'Trt sans icône')->value('widget_icon'))->toBeNull();
 });
