@@ -1,13 +1,10 @@
 <div class="p-4 max-w-lg mx-auto"
-     x-data
-     x-init="
-       let last = Date.now();
-       document.addEventListener('visibilitychange', () => {
-         if (document.visibilityState === 'visible' && Date.now() - last > 1000) {
-           last = Date.now();
-           $wire.refresh();
-         }
-       });
+     x-data="{ last: Date.now() }"
+     x-on:visibilitychange.window="
+       if (document.visibilityState === 'visible' && Date.now() - last > 1000) {
+         last = Date.now();
+         $wire.refresh();
+       }
      ">
 
     {{-- En-tête --}}

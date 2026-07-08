@@ -49,7 +49,7 @@ class Dashboard extends Component
         $this->mount($service, $activeProfile, $widgetService);
     }
 
-public function render(): \Illuminate\View\View
+    public function render(): \Illuminate\View\View
     {
         return view('livewire.dashboard')
             ->layout('layouts.app', ['title' => __('nav.home')]);
