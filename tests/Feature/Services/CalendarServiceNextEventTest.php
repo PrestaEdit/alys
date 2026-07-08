@@ -96,3 +96,39 @@ it('respecte le paramètre maxDays', function () {
 
     expect($result)->toBeNull();
 });
+
+it('retourne null si maxDays est 0 (aucune itération)', function () {
+    $result = app(CalendarService::class)->getNextEventAfter(Carbon::today(), maxDays: 0);
+
+    expect($result)->toBeNull();
+});
+
+it('avec maxDays=1, ne regarde que le jour from+1', function () {
+    CalendarEvent::query()->delete();
+    Treatment::query()->update(['archived_at' => now()]);
+
+    $profile = app(ActiveProfile::class)->get();
+    $treatment = Treatment::create([
+        'profile_id'  => $profile->id,
+        'name'        => 'IT MTTX',
+        'type'        => 'cyclic',
+        'color'       => '#3b82f6',
+        'unit'        => 'mg',
+    ]);
+    // Un événement à J+1 (visible) et un à J+2 (hors fenêtre maxDays=1)
+    CalendarEvent::create([
+        'treatment_id'   => $treatment->id,
+        'scheduled_date' => Carbon::today()->addDays(1),
+        'is_cancelled'   => false,
+    ]);
+    CalendarEvent::create([
+        'treatment_id'   => $treatment->id,
+        'scheduled_date' => Carbon::today()->addDays(2),
+        'is_cancelled'   => false,
+    ]);
+
+    $result = app(CalendarService::class)->getNextEventAfter(Carbon::today(), maxDays: 1);
+
+    expect($result)->not->toBeNull();
+    expect($result['date']->toDateString())->toBe(Carbon::today()->addDays(1)->toDateString());
+});
