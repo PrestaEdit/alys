@@ -1,4 +1,14 @@
-<div class="p-4 max-w-lg mx-auto">
+<div class="p-4 max-w-lg mx-auto"
+     x-data
+     x-init="
+       let last = Date.now();
+       document.addEventListener('visibilitychange', () => {
+         if (document.visibilityState === 'visible' && Date.now() - last > 1000) {
+           last = Date.now();
+           $wire.refresh();
+         }
+       });
+     ">
 
     {{-- En-tête --}}
     <div class="flex items-center justify-between mb-5">

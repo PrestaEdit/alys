@@ -44,6 +44,11 @@ class Dashboard extends Component
         $widgetService->refresh();
     }
 
+    public function refresh(CalendarService $service, ActiveProfile $activeProfile, WidgetService $widgetService): void
+    {
+        $this->mount($service, $activeProfile, $widgetService);
+    }
+
 public function render(): \Illuminate\View\View
     {
         return view('livewire.dashboard')
