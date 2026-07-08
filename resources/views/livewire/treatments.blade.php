@@ -31,7 +31,7 @@
     </div>
     @else
     <div
-        wire:ignore
+        wire:ignore.self
         x-data="{
             init() {
                 new Sortable(this.$refs.sortable, {
@@ -48,7 +48,7 @@
     >
     <div x-ref="sortable" class="space-y-3">
         @foreach($treatments as $treatment)
-        <div class="bg-white rounded-2xl p-4 shadow-sm" data-id="{{ $treatment->id }}">
+        <div class="bg-white rounded-2xl p-4 shadow-sm" data-id="{{ $treatment->id }}" wire:key="treatment-{{ $treatment->id }}">
             <div class="flex items-center justify-between mb-2">
                 <div class="flex items-center gap-2">
                     <span class="drag-handle text-slate-300 text-xl cursor-grab leading-none flex-shrink-0 select-none" aria-hidden="true">⠿</span>
