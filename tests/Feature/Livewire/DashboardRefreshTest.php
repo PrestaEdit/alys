@@ -75,7 +75,12 @@ it('affiche le message vide 60j si aucun événement à venir', function () {
 });
 
 it('les widgets du Dashboard rendent via alys-icon en 40px', function () {
-    // Créer un traitement widget-visible
+    // Isolation : on désactive les widgets du seeder pour ne tester QUE le nôtre.
+    // Certains widget_icon seedés (💊, 💉, 🔬) n'ont pas de SVG Twemoji embarqué
+    // en attendant Task 8 (migration vers clés), donc ils rendraient le fallback
+    // et fausseraient l'assertion `not->toContain('alys-icon-fallback')`.
+    \App\Models\Treatment::query()->update(['show_widget' => false]);
+
     $activeProfile = app(\App\Services\ActiveProfile::class)->get();
     \App\Models\Treatment::create([
         'profile_id'  => $activeProfile->id,
@@ -84,7 +89,7 @@ it('les widgets du Dashboard rendent via alys-icon en 40px', function () {
         'color'       => '#0ea5e9',
         'unit'        => 'mg',
         'show_widget' => true,
-        'widget_icon' => '💊',
+        'widget_icon' => 'pill',   // clé médicale : SVG présent dans public/icons/medical/
     ]);
 
     $html = Livewire::test(Dashboard::class)->html();
@@ -93,4 +98,6 @@ it('les widgets du Dashboard rendent via alys-icon en 40px', function () {
     expect($html)->toContain('w-10 h-10');
     // SVG rendu par alys-icon
     expect($html)->toContain('<svg');
+    // Ce n'est PAS le fallback — l'asset réel a été trouvé et rendu
+    expect($html)->not->toContain('alys-icon-fallback');
 });
