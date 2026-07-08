@@ -102,7 +102,7 @@
                             <span class="text-sm font-normal text-slate-400">{{ $treatment->unit }}</span>
                         </p>
                         <p class="text-xs text-slate-400 mt-0.5">{{ __('treatments.times_per_day_interval', ['count' => $treatment->times_per_day, 'hours' => $intervalH]) }}</p>
-                    @elseif($treatment->current_dose !== null)
+                    @elseif($treatment->current_dose !== null && (float)$treatment->current_dose > 0)
                     @php $scd = (float)$treatment->current_dose; $scddec = $treatment->unit === 'ml' ? 1 : ($scd != (int)$scd ? 1 : 0); @endphp
                     <p class="text-xl font-extrabold leading-none" style="color: {{ $treatment->color }};">
                         {{ number_format($scd, $scddec, ',', '') }}
@@ -173,7 +173,7 @@
 
     {{-- Modal confirmation archivage --}}
     @if($showArchiveModal)
-    <div class="fixed inset-0 bg-black/50 z-50 flex items-end justify-center p-4 sm:items-center">
+    <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl p-5 w-full max-w-sm shadow-xl">
             <div class="flex items-center gap-3 mb-3">
                 <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center flex-shrink-0">
