@@ -124,7 +124,21 @@ class CalendarService
             ->whereHas('treatment', fn($q) => $q->whereNull('archived_at'))
             ->get();
 
+        // First-day-of-block lookup: for each parent_event_id present today,
+        // find the earliest sibling date. Enfant déplaçable ssi jour == min.
+        $parentEventIds = $calendarEvents->pluck('parent_event_id')->filter()->unique()->values();
+        $firstDateByParent = $parentEventIds->isEmpty()
+            ? collect()
+            : CalendarEvent::whereIn('parent_event_id', $parentEventIds)
+                ->where('is_cancelled', false)
+                ->selectRaw('parent_event_id, MIN(scheduled_date) as first_date')
+                ->groupBy('parent_event_id')
+                ->pluck('first_date', 'parent_event_id');
+
         foreach ($calendarEvents as $event) {
+            $canMove = $event->parent_event_id === null
+                || $firstDateByParent->get($event->parent_event_id) === $dateStr;
+
             $events[] = [
                 'kind'            => 'treatment',
                 'id'              => $event->id,
@@ -137,7 +151,7 @@ class CalendarService
                 'dose'            => $this->formatDose($event->treatment),
                 'color'           => $event->treatment->color,
                 'requires_fasting' => $event->treatment->requiresFasting(),
-                'can_move'        => $event->parent_event_id === null,
+                'can_move'        => $canMove,
                 'moved'           => $event->hasMoved(),
                 'original_date'   => $event->original_date?->toDateString(),
                 'notes'           => $event->notes,

@@ -111,6 +111,38 @@ it('moving VCR shifts its dexamethasone children by the same delta', function ()
     }
 });
 
+it('moving the first day of a child block shifts its siblings and leaves the parent untouched', function () {
+    $vcr = Treatment::where('name', 'VCR')->first();
+
+    $vcrEvent = CalendarEvent::where('treatment_id', $vcr->id)->first();
+    $vcrDateBefore = $vcrEvent->scheduled_date->toDateString();
+
+    // Snapshot [id => scheduled_date] BEFORE the move — the Eloquent models
+    // in $childrenBefore share references that get mutated by move().
+    $datesBefore = CalendarEvent::where('parent_event_id', $vcrEvent->id)
+        ->orderBy('scheduled_date')
+        ->get()
+        ->mapWithKeys(fn($e) => [$e->id => $e->scheduled_date->toDateString()])
+        ->toArray();
+
+    $day0Id = array_key_first($datesBefore);
+    $day0 = CalendarEvent::find($day0Id);
+    $newDay0Date = Carbon::parse($datesBefore[$day0Id])->addDays(2)->toDateString();
+
+    $this->service->move($day0, $newDay0Date);
+
+    // Parent (VCR) untouched
+    $vcrEvent->refresh();
+    expect($vcrEvent->scheduled_date->toDateString())->toBe($vcrDateBefore);
+
+    // All siblings (including the moved day-0) shifted by +2 days
+    foreach ($datesBefore as $id => $before) {
+        $expected = Carbon::parse($before)->addDays(2)->toDateString();
+        $after = CalendarEvent::find($id)->scheduled_date->toDateString();
+        expect($after)->toBe($expected);
+    }
+});
+
 it('moving a non-IT-MTTX event does not affect MTX', function () {
     $hopital = Treatment::where('name', 'Hôpital')->first();
     $mtx = Treatment::where('name', 'MTX')->first();

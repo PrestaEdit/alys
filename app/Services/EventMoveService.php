@@ -19,6 +19,12 @@ class EventMoveService
         $event->scheduled_date = $newDate;
         $event->save();
 
+        if ($event->parent_event_id !== null) {
+            // Enfant : décale les jours suivants du bloc, ne touche pas au parent.
+            $this->shiftSiblingEvents($event, $previousDate, $newDate);
+            return;
+        }
+
         if ($event->treatment->name === 'IT MTTX') {
             $this->applyMtxCoherenceRule($previousDate, $newDate);
         }
@@ -37,6 +43,22 @@ class EventMoveService
                 }
                 $child->scheduled_date = $child->scheduled_date->copy()->addDays($delta)->toDateString();
                 $child->save();
+            });
+    }
+
+    private function shiftSiblingEvents(CalendarEvent $moved, string $previousDate, string $newDate): void
+    {
+        $delta = Carbon::parse($previousDate)->diffInDays(Carbon::parse($newDate), false);
+
+        CalendarEvent::where('parent_event_id', $moved->parent_event_id)
+            ->where('id', '!=', $moved->id)
+            ->get()
+            ->each(function (CalendarEvent $sibling) use ($delta) {
+                if ($sibling->original_date === null) {
+                    $sibling->original_date = $sibling->scheduled_date->toDateString();
+                }
+                $sibling->scheduled_date = $sibling->scheduled_date->copy()->addDays($delta)->toDateString();
+                $sibling->save();
             });
     }
 
