@@ -145,6 +145,8 @@ class CalendarService
             $canMove = $event->parent_event_id === null
                 || $firstDateByParent->get($event->parent_event_id) === $dateStr;
 
+            $dayparts = $this->buildDaypartsForEvent($event);
+
             $events[] = [
                 'kind'            => 'treatment',
                 'id'              => $event->id,
@@ -155,6 +157,8 @@ class CalendarService
                 'type'            => $event->treatment->type,
                 'unit'            => $event->treatment->unit,
                 'dose'            => $this->formatDose($event->treatment),
+                'dose_parts'      => $dayparts,
+                'has_dayparts'    => $dayparts !== null,
                 'color'           => $event->treatment->color,
                 'requires_fasting' => $event->treatment->requiresFasting(),
                 'can_move'        => $canMove,
@@ -323,6 +327,45 @@ class CalendarService
         if ($t->dose_noon    !== null) $parts[] = $this->formatAmount($noon,    $t->unit) . ' midi';
         if ($t->dose_evening !== null) $parts[] = $this->formatAmount($evening, $t->unit) . ' soir';
         return implode(' · ', $parts);
+    }
+
+    /**
+     * Structured dayparts for a calendar event — used by the view to render each
+     * dose separately and mark skipped ones visually. Returns null if the
+     * treatment does not use dayparts.
+     *
+     * @return list<array{daypart: string, text: string, skipped: bool}>|null
+     */
+    private function buildDaypartsForEvent(CalendarEvent $event): ?array
+    {
+        $t = $event->treatment;
+        if ($t->is_medical_act || ! $t->hasDayPartDoses()) {
+            return null;
+        }
+
+        $parts = [];
+        if ($t->dose_morning !== null) {
+            $parts[] = [
+                'daypart' => 'morning',
+                'text'    => $this->formatAmount((float) $t->dose_morning, $t->unit) . ' matin',
+                'skipped' => (bool) $event->skip_morning,
+            ];
+        }
+        if ($t->dose_noon !== null) {
+            $parts[] = [
+                'daypart' => 'noon',
+                'text'    => $this->formatAmount((float) $t->dose_noon, $t->unit) . ' midi',
+                'skipped' => (bool) $event->skip_noon,
+            ];
+        }
+        if ($t->dose_evening !== null) {
+            $parts[] = [
+                'daypart' => 'evening',
+                'text'    => $this->formatAmount((float) $t->dose_evening, $t->unit) . ' soir',
+                'skipped' => (bool) $event->skip_evening,
+            ];
+        }
+        return $parts;
     }
 
     private function formatInterval(Treatment $t, float $dose, int $times): string

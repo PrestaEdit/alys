@@ -175,6 +175,19 @@
                         @endif
                         @if(!empty($event['notes']))
                             <p class="text-xs text-slate-400">{{ $event['notes'] }}</p>
+                        @elseif(!empty($event['dose_parts']))
+                            @foreach($event['dose_parts'] as $part)
+                                @if(!empty($event['id']))
+                                    <button type="button"
+                                            wire:click="toggleDaypartSkip({{ $event['id'] }}, '{{ $part['daypart'] }}')"
+                                            title="{{ $part['skipped'] ? __('calendar.daypart_restore') : __('calendar.daypart_skip') }}"
+                                            class="text-xs text-left {{ $part['skipped'] ? 'text-slate-300 line-through italic' : 'text-slate-500' }} hover:text-sky-500 transition-colors">
+                                        {{ $part['text'] }}
+                                    </button>
+                                @else
+                                    <p class="text-xs {{ $part['skipped'] ? 'text-slate-300 line-through italic' : 'text-slate-400' }}">{{ $part['text'] }}</p>
+                                @endif
+                            @endforeach
                         @elseif(isset($event['dose']) && $event['dose'])
                             @foreach(explode(' · ', $event['dose']) as $dosePart)
                             <p class="text-xs text-slate-400">{{ $dosePart }}</p>
@@ -210,6 +223,23 @@
             @error('moveToDate')
             <p class="text-xs text-red-500 mb-3">{{ $message }}</p>
             @enderror
+
+            @if(!empty($moveMomentOptions))
+                <p class="text-xs text-slate-400 mb-2">{{ __('calendar.move_choose_moment') }}</p>
+                <div class="flex gap-2 mb-4">
+                    @foreach($moveMomentOptions as $moment)
+                        <button type="button"
+                                wire:click="$set('moveToMoment', '{{ $moment }}')"
+                                class="flex-1 py-2 rounded-xl text-xs font-semibold border transition-colors
+                                       {{ $moveToMoment === $moment
+                                          ? 'bg-sky-500 text-white border-sky-500'
+                                          : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50' }}">
+                            {{ __('calendar.moment_' . $moment) }}
+                        </button>
+                    @endforeach
+                </div>
+            @endif
+
             <div class="flex gap-3">
                 <button wire:click="cancelMove"
                         class="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors">

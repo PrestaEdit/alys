@@ -200,6 +200,9 @@ class ImportService
                     'original_date' => $e['original_date'] ?? null,
                     'is_cancelled'  => $e['is_cancelled'] ?? false,
                     'notes'         => $e['notes'] ?? null,
+                    'skip_morning'  => $e['skip_morning'] ?? false,
+                    'skip_noon'     => $e['skip_noon'] ?? false,
+                    'skip_evening'  => $e['skip_evening'] ?? false,
                 ]
             );
         }

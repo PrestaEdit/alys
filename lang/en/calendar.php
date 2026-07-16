@@ -15,4 +15,10 @@ return [
     'move'               => 'Move',
     'move_event'         => 'Move the event',
     'move_choose_date'   => 'Choose the new date:',
+    'move_choose_moment' => 'Time of intake:',
+    'moment_morning'     => 'Morning',
+    'moment_noon'        => 'Noon',
+    'moment_evening'     => 'Evening',
+    'daypart_skip'       => 'Skip this intake',
+    'daypart_restore'    => 'Restore this intake',
 ];

@@ -15,4 +15,10 @@ return [
     'move'               => 'Déplacer',
     'move_event'         => 'Déplacer l\'événement',
     'move_choose_date'   => 'Choisir la nouvelle date :',
+    'move_choose_moment' => 'Moment de la prise :',
+    'moment_morning'     => 'Matin',
+    'moment_noon'        => 'Midi',
+    'moment_evening'     => 'Soir',
+    'daypart_skip'       => 'Sauter cette prise',
+    'daypart_restore'    => 'Restaurer cette prise',
 ];

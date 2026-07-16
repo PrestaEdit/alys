@@ -14,13 +14,27 @@ class CalendarEvent extends Model
     protected $fillable = [
         'profile_id',
         'treatment_id', 'scheduled_date', 'original_date', 'is_cancelled', 'notes', 'parent_event_id',
+        'skip_morning', 'skip_noon', 'skip_evening',
     ];
 
     protected $casts = [
         'scheduled_date' => 'date',
         'original_date' => 'date',
         'is_cancelled' => 'boolean',
+        'skip_morning' => 'boolean',
+        'skip_noon' => 'boolean',
+        'skip_evening' => 'boolean',
     ];
+
+    public function isDaypartSkipped(string $daypart): bool
+    {
+        return match ($daypart) {
+            'morning' => (bool) $this->skip_morning,
+            'noon'    => (bool) $this->skip_noon,
+            'evening' => (bool) $this->skip_evening,
+            default   => false,
+        };
+    }
 
     public function treatment(): BelongsTo
     {

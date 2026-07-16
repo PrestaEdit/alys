@@ -88,6 +88,9 @@ class ExportService
             'original_date'  => $e->original_date?->toDateString(),
             'is_cancelled'   => $e->is_cancelled,
             'notes'          => $e->notes,
+            'skip_morning'   => $e->skip_morning,
+            'skip_noon'      => $e->skip_noon,
+            'skip_evening'   => $e->skip_evening,
         ])->toArray();
 
         return json_encode([

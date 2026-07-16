@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\CalendarEvent;
 use App\Models\PersonalEvent;
 use App\Services\ActiveProfile;
+use App\Services\BlockShiftService;
 use App\Services\CalendarService;
 use App\Services\EventMoveService;
 use Carbon\Carbon;
@@ -20,6 +21,9 @@ class Calendar extends Component
     public bool $showMoveModal = false;
     public ?int $movingEventId = null;
     public string $moveToDate = '';
+    public string $moveToMoment = '';
+    /** @var list<string> Dayparts available for the moving event's treatment. */
+    public array $moveMomentOptions = [];
 
     // Événements personnels
     public bool $showEventModal = false;
@@ -70,20 +74,39 @@ class Calendar extends Component
     public function openMoveModal(int $eventId): void
     {
         $this->movingEventId = $eventId;
-        $event = CalendarEvent::findOrFail($eventId);
+        $event = CalendarEvent::with('treatment')->findOrFail($eventId);
         $this->moveToDate = $event->scheduled_date->toDateString();
+
+        $this->moveMomentOptions = $this->momentOptionsForEvent($event);
+        $this->moveToMoment = $this->moveMomentOptions[0] ?? '';
+
         $this->showMoveModal = true;
     }
 
-    public function confirmMove(EventMoveService $moveService, CalendarService $calendarService): void
-    {
-        $this->validate(['moveToDate' => 'required|date']);
+    public function confirmMove(
+        EventMoveService $moveService,
+        BlockShiftService $blockShiftService,
+        CalendarService $calendarService,
+    ): void {
+        $this->validate([
+            'moveToDate'   => 'required|date',
+            'moveToMoment' => 'nullable|in:morning,noon,evening',
+        ]);
 
-        $event = CalendarEvent::findOrFail($this->movingEventId);
-        $moveService->move($event, $this->moveToDate);
+        $event = CalendarEvent::with('treatment')->findOrFail($this->movingEventId);
+
+        // Traitement enfant à dayparts + moment choisi → shift avec extension.
+        // Sinon → shift classique (parent, ou enfant sans daypart).
+        if (! empty($this->moveMomentOptions) && $event->parent_event_id !== null) {
+            $blockShiftService->shift($event, $this->moveToDate, $this->moveToMoment);
+        } else {
+            $moveService->move($event, $this->moveToDate);
+        }
 
         $this->showMoveModal = false;
         $this->movingEventId = null;
+        $this->moveToMoment = '';
+        $this->moveMomentOptions = [];
         $this->loadMonth($calendarService);
         $this->loadDay($calendarService);
     }
@@ -93,6 +116,35 @@ class Calendar extends Component
         $this->showMoveModal = false;
         $this->movingEventId = null;
         $this->moveToDate = '';
+        $this->moveToMoment = '';
+        $this->moveMomentOptions = [];
+    }
+
+    /** @return list<string> */
+    private function momentOptionsForEvent(CalendarEvent $event): array
+    {
+        $t = $event->treatment;
+        if ($t->is_medical_act || ! $t->hasDayPartDoses() || $event->parent_event_id === null) {
+            return [];
+        }
+        $options = [];
+        if ($t->dose_morning !== null) $options[] = 'morning';
+        if ($t->dose_noon    !== null) $options[] = 'noon';
+        if ($t->dose_evening !== null) $options[] = 'evening';
+        return $options;
+    }
+
+    public function toggleDaypartSkip(int $eventId, string $daypart, CalendarService $service): void
+    {
+        if (! in_array($daypart, ['morning', 'noon', 'evening'], true)) {
+            return;
+        }
+        $event = CalendarEvent::findOrFail($eventId);
+        $column = 'skip_' . $daypart;
+        $event->{$column} = ! $event->{$column};
+        $event->save();
+
+        $this->loadDay($service);
     }
 
     public function openEventModal(): void
