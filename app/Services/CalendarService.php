@@ -124,16 +124,22 @@ class CalendarService
             ->whereHas('treatment', fn($q) => $q->whereNull('archived_at'))
             ->get();
 
-        // First-day-of-block lookup: for each parent_event_id present today,
-        // find the earliest sibling date. Enfant déplaçable ssi jour == min.
+        // "Porteur" du bloc = jour à partir duquel on peut décaler le bloc.
+        // Priorité au premier jour restant (≥ aujourd'hui) pour qu'un bloc dont
+        // le début est passé reste manipulable ; fallback sur le min global si
+        // tout le bloc est passé.
+        $today = Carbon::today()->toDateString();
         $parentEventIds = $calendarEvents->pluck('parent_event_id')->filter()->unique()->values();
         $firstDateByParent = $parentEventIds->isEmpty()
             ? collect()
             : CalendarEvent::whereIn('parent_event_id', $parentEventIds)
                 ->where('is_cancelled', false)
-                ->selectRaw('parent_event_id, MIN(scheduled_date) as first_date')
+                ->selectRaw('parent_event_id, MIN(scheduled_date) as first_overall, MIN(CASE WHEN scheduled_date >= ? THEN scheduled_date END) as first_future', [$today])
                 ->groupBy('parent_event_id')
-                ->pluck('first_date', 'parent_event_id');
+                ->get()
+                ->mapWithKeys(fn($row) => [
+                    $row->parent_event_id => $row->first_future ?? $row->first_overall,
+                ]);
 
         foreach ($calendarEvents as $event) {
             $canMove = $event->parent_event_id === null
