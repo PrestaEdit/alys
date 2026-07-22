@@ -13,6 +13,14 @@ return [
     'start_date'         => 'Date de début',
     'end_date'           => 'Date de fin',
 
+    // Medical fiche
+    'medical_section'    => 'Fiche médicale',
+    'weight'             => 'Poids (kg)',
+    'weight_placeholder' => 'ex. 70',
+    'height'             => 'Taille (cm)',
+    'height_placeholder' => 'ex. 175',
+    'blood_group'        => 'Groupe sanguin',
+
     // Create screen
     'title_create'       => 'Nouveau profil',
     'first_name'         => 'Prénom',
@@ -34,4 +42,7 @@ return [
     'validation_start_date'     => 'La date de début doit être une date valide.',
     'validation_end_date'       => 'La date de fin doit être une date valide.',
     'validation_end_after'      => 'La date de fin doit être postérieure à la date de début.',
+    'validation_weight_range'   => 'Le poids doit être compris entre 1 et 500 kg.',
+    'validation_height_range'   => 'La taille doit être comprise entre 30 et 250 cm.',
+    'validation_blood_group_in' => "Ce groupe sanguin n'est pas valide.",
 ];

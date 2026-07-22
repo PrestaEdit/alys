@@ -13,12 +13,20 @@ class Profile extends Model
         '#f59e0b', '#8b5cf6', '#64748b', '#14b8a6',
     ];
 
-    protected $fillable = ['name', 'color', 'icon', 'treatment_start', 'treatment_end', 'archived_at'];
+    public const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+
+    protected $fillable = [
+        'name', 'color', 'icon',
+        'treatment_start', 'treatment_end', 'archived_at',
+        'weight_kg', 'height_cm', 'blood_group',
+    ];
 
     protected $casts = [
         'treatment_start' => 'date',
         'treatment_end'   => 'date',
         'archived_at'     => 'datetime',
+        'weight_kg'       => 'decimal:1',
+        'height_cm'       => 'integer',
     ];
 
     public function scopeActive(Builder $query): Builder

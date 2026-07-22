@@ -38,6 +38,43 @@
             </div>
             @error('editEnd')<p class="text-xs text-red-500 mb-2">{{ $message }}</p>@enderror
 
+            <div class="border-t border-slate-100 pt-3 mt-1 mb-3">
+                <p class="text-xs font-bold text-slate-700 mb-2">{{ __('profiles.medical_section') }}</p>
+
+                <div class="grid grid-cols-2 gap-2 mb-2">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">{{ __('profiles.weight') }}</label>
+                        <input type="number" step="0.1" min="1" max="500" inputmode="decimal"
+                               wire:model="editWeight"
+                               placeholder="{{ __('profiles.weight_placeholder') }}"
+                               class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">{{ __('profiles.height') }}</label>
+                        <input type="number" step="1" min="30" max="250" inputmode="numeric"
+                               wire:model="editHeight"
+                               placeholder="{{ __('profiles.height_placeholder') }}"
+                               class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400">
+                    </div>
+                </div>
+                @error('editWeight')<p class="text-xs text-red-500 mb-2">{{ $message }}</p>@enderror
+                @error('editHeight')<p class="text-xs text-red-500 mb-2">{{ $message }}</p>@enderror
+
+                <label class="block text-xs font-semibold text-slate-600 mb-1">{{ __('profiles.blood_group') }}</label>
+                <div class="flex flex-wrap gap-2">
+                    @foreach($bloodGroups as $group)
+                    <button type="button" wire:click="toggleBloodGroup('{{ $group }}')"
+                            class="px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors
+                                   {{ $editBloodGroup === $group
+                                      ? 'bg-sky-500 text-white border-sky-500'
+                                      : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50' }}">
+                        {{ $group }}
+                    </button>
+                    @endforeach
+                </div>
+                @error('editBloodGroup')<p class="text-xs text-red-500 mt-2">{{ $message }}</p>@enderror
+            </div>
+
             <div class="flex gap-2">
                 <button wire:click="saveEdit" class="flex-1 py-2 rounded-lg text-white text-sm font-bold"
                         style="background: linear-gradient(135deg, #0ea5e9, #6366f1);">{{ __('common.save') }}</button>
