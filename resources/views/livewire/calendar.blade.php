@@ -256,8 +256,8 @@
 
     {{-- Modal événement personnel --}}
     @if($showEventModal)
-    <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl p-5 w-full max-w-sm shadow-xl max-h-[90vh] overflow-y-auto">
+    <div class="fixed inset-0 bg-black/50 z-50 overflow-y-auto flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-5 w-full max-w-sm shadow-xl max-h-[90dvh] overflow-y-auto my-auto">
             <h3 class="text-sm font-bold text-slate-800 mb-4">
                 {{ $editingEventId ? __('events.edit_title') : __('events.new_title') }}
             </h3>
