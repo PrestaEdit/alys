@@ -19,7 +19,7 @@ return [
 
     // Retour haptique
     'haptics'         => 'Vibrations',
-    'haptics_desc'    => 'Léger retour tactile lors des interactions clés.',
+    'haptics_desc'    => 'Léger retour tactile lors des interactions clés. Nécessite « Retour haptique » activé dans les paramètres Android.',
     'haptics_on'      => 'Activé',
     'haptics_off'     => 'Désactivé',
     'haptics_test'    => 'Tester la vibration',
