@@ -21,4 +21,7 @@ return [
     'edit'             => 'Modifier',
     'delete'           => 'Supprimer',
     'delete_confirm'   => 'Supprimer cet événement ?',
+    'delete_title'     => 'Supprimer cet événement ?',
+    'delete_subtitle'  => 'Cette action est définitive.',
+    'delete_description' => "L'événement sera retiré du calendrier. Vous ne pourrez pas le récupérer.",
 ];

@@ -101,13 +101,34 @@ it('edits an existing personal event', function () {
     expect($event->fresh()->title)->toBe('Après');
 });
 
-it('deletes a personal event', function () {
+it('deletes a personal event after confirmation', function () {
     $event = PersonalEvent::create([
         'title' => 'À supprimer', 'category' => 'autre', 'color' => '#f59e0b', 'icon' => '📌',
         'start_date' => '2026-04-10', 'end_date' => '2026-04-10',
     ]);
 
-    Livewire::test(Calendar::class)->call('deleteEvent', $event->id);
+    Livewire::test(Calendar::class)
+        ->call('openDeleteEventModal', $event->id)
+        ->assertSet('showDeleteEventModal', true)
+        ->assertSet('deletingEventId', $event->id)
+        ->call('confirmDeleteEvent')
+        ->assertSet('showDeleteEventModal', false)
+        ->assertSet('deletingEventId', null);
 
     expect(PersonalEvent::find($event->id))->toBeNull();
+});
+
+it('cancelling the delete modal keeps the event', function () {
+    $event = PersonalEvent::create([
+        'title' => 'À garder', 'category' => 'autre', 'color' => '#f59e0b', 'icon' => '📌',
+        'start_date' => '2026-04-10', 'end_date' => '2026-04-10',
+    ]);
+
+    Livewire::test(Calendar::class)
+        ->call('openDeleteEventModal', $event->id)
+        ->call('cancelDeleteEvent')
+        ->assertSet('showDeleteEventModal', false)
+        ->assertSet('deletingEventId', null);
+
+    expect(PersonalEvent::find($event->id))->not->toBeNull();
 });

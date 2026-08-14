@@ -27,7 +27,8 @@
     "android": {
         "min_version": 26,
         "permissions": [
-            "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"
+            "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS",
+            "android.permission.VIBRATE"
         ],
         "dependencies": {
             "implementation": []

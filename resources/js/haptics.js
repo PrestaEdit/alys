@@ -1,6 +1,7 @@
 // Retour haptique léger via l'API navigator.vibrate du WebView Android.
-// Aucune permission requise. Silencieux si l'API n'existe pas ou si
-// window.alysHapticsEnabled est explicitement false.
+// Requiert android.permission.VIBRATE au manifest (déclarée dans
+// packages/alys-native/nativephp.json). Silencieux si l'API n'existe pas
+// ou si window.alysHapticsEnabled est explicitement false.
 //
 // Le flag global est renseigné depuis le layout Blade
 // (voir layouts/app.blade.php) et mis à jour à la volée via l'événement
