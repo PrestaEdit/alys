@@ -11,6 +11,16 @@
         :root { --safe-top: 0px; --safe-bottom: 0px; color-scheme: light; }
     </style>
     <script>
+        // Haptics : préférence utilisateur ('1' par défaut). Modifié en direct
+        // par le composant Settings via l'événement Livewire "haptics-changed".
+        window.alysHapticsEnabled = @json(\App\Models\Setting::get('haptics_enabled', '1') === '1');
+        document.addEventListener('livewire:initialized', () => {
+            Livewire.on('haptics-changed', ({ enabled }) => {
+                window.alysHapticsEnabled = !!enabled;
+            });
+        });
+    </script>
+    <script>
         (function () {
             // Mesure réelle de env(safe-area-inset-*) via un élément test
             var probe = document.createElement('div');
@@ -139,7 +149,7 @@
     {{-- Toast global (hors Livewire pour ne pas être réinitialisé au re-render) --}}
     <div
         x-data="{ show: false, message: '' }"
-        x-on:toast.window="message = $event.detail.message; show = true; setTimeout(() => show = false, 3000)"
+        x-on:toast.window="message = $event.detail.message; show = true; $haptic('light'); setTimeout(() => show = false, 3000)"
         x-show="show"
         x-transition:enter="transition ease-out duration-300"
         x-transition:enter-start="opacity-0 translate-y-4"

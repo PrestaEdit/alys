@@ -5,6 +5,7 @@ import 'preline';
 import { Calendar } from 'vanilla-calendar-pro';
 import QRCode from 'qrcode';
 window.QRCode = QRCode;
+import './haptics';
 
 // Initialize all Preline components (autoInit is NOT called automatically in the ESM bundle)
 document.addEventListener('DOMContentLoaded', () => {

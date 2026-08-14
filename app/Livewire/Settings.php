@@ -21,6 +21,16 @@ class Settings extends Component
         $this->redirect(route('settings'), navigate: false);
     }
 
+    public function toggleHaptics(): void
+    {
+        $enabled = Setting::get('haptics_enabled', '1') === '1';
+        $next    = $enabled ? '0' : '1';
+        Setting::set('haptics_enabled', $next);
+
+        // Met à jour window.alysHapticsEnabled côté client sans reload.
+        $this->dispatch('haptics-changed', enabled: $next === '1');
+    }
+
     public function enableNotifications(NotificationScheduler $scheduler): void
     {
         $check  = LocalNotifications::checkPermission();

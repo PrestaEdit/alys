@@ -1,5 +1,21 @@
 <div class="p-4 max-w-lg mx-auto">
 
+    {{-- Sélecteur de langue (visible dès le premier lancement) --}}
+    <div class="flex justify-end mb-3">
+        <div class="inline-flex bg-white rounded-full shadow-sm p-0.5 gap-0.5" role="group" aria-label="{{ __('settings.language') }}">
+            @foreach (['fr' => __('settings.language_fr'), 'en' => __('settings.language_en')] as $code => $label)
+                <button type="button"
+                        wire:click="setLocale('{{ $code }}')"
+                        x-on:click="$haptic('light')"
+                        class="px-3 py-1 rounded-full text-xs font-semibold transition-colors
+                               {{ app()->getLocale() === $code ? 'bg-sky-500 text-white' : 'text-slate-500 hover:bg-slate-100' }}"
+                        aria-pressed="{{ app()->getLocale() === $code ? 'true' : 'false' }}">
+                    {{ $label }}
+                </button>
+            @endforeach
+        </div>
+    </div>
+
     <div class="text-center mb-6">
         <img src="{{ asset('icon.png') }}"
              alt=""
@@ -23,6 +39,7 @@
     </div>
 
     <button wire:click="nextStep"
+            x-on:click="$haptic('light')"
             class="w-full py-3 rounded-xl text-sm font-bold text-white transition-colors hover:opacity-90"
             style="background: linear-gradient(135deg, #0ea5e9, #6366f1);">
         {{ __('onboarding.next') }}
@@ -38,6 +55,7 @@
             @foreach($colors as $hex)
             <button type="button"
                     wire:click="$set('color', '{{ $hex }}')"
+                    x-on:click="$haptic('light')"
                     class="w-10 h-10 rounded-xl transition-all"
                     style="background-color: {{ $hex }};{{ $color === $hex ? ' box-shadow: 0 0 0 2px #fff, 0 0 0 5px #0f172a;' : '' }}"></button>
             @endforeach
@@ -47,10 +65,12 @@
 
     <div class="flex gap-2">
         <button wire:click="previousStep"
+                x-on:click="$haptic('light')"
                 class="flex-1 py-3 rounded-xl text-sm font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors">
             {{ __('common.back') }}
         </button>
         <button wire:click="nextStep"
+                x-on:click="$haptic('light')"
                 class="flex-1 py-3 rounded-xl text-sm font-bold text-white transition-colors hover:opacity-90"
                 style="background: linear-gradient(135deg, #0ea5e9, #6366f1);">
             {{ __('onboarding.next') }}
@@ -83,10 +103,12 @@
 
     <div class="flex gap-2">
         <button wire:click="previousStep"
+                x-on:click="$haptic('light')"
                 class="flex-1 py-3 rounded-xl text-sm font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors">
             {{ __('common.back') }}
         </button>
         <button wire:click="nextStep"
+                x-on:click="$haptic('light')"
                 class="flex-1 py-3 rounded-xl text-sm font-bold text-white transition-colors hover:opacity-90"
                 style="background: linear-gradient(135deg, #0ea5e9, #6366f1);">
             {{ __('onboarding.next') }}
@@ -103,15 +125,18 @@
 
     <div class="flex flex-col gap-2">
         <button wire:click="completeAndAddTreatment"
+                x-on:click="$haptic('success')"
                 class="w-full py-3 rounded-xl text-sm font-bold text-white transition-colors hover:opacity-90"
                 style="background: linear-gradient(135deg, #0ea5e9, #6366f1);">
             {{ __('onboarding.add_treatment') }}
         </button>
         <button wire:click="complete"
+                x-on:click="$haptic('success')"
                 class="w-full py-3 rounded-xl text-sm font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors">
             {{ __('onboarding.later') }}
         </button>
         <button wire:click="previousStep"
+                x-on:click="$haptic('light')"
                 class="w-full py-2 text-xs font-semibold text-slate-500 hover:text-slate-700">
             ← {{ __('common.back') }}
         </button>
