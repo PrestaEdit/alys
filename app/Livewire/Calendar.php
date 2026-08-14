@@ -36,6 +36,10 @@ class Calendar extends Component
     public string $eventEndDate = '';
     public string $eventNotes = '';
 
+    // Modale de confirmation de suppression d'un événement personnel
+    public bool $showDeleteEventModal = false;
+    public ?int $deletingEventId = null;
+
     public function mount(CalendarService $service): void
     {
         $this->year = now()->year;
@@ -213,9 +217,25 @@ class Calendar extends Component
         $this->loadDay($service);
     }
 
-    public function deleteEvent(int $id, CalendarService $service): void
+    public function openDeleteEventModal(int $id): void
     {
-        PersonalEvent::findOrFail($id)->delete();
+        $this->deletingEventId = $id;
+        $this->showDeleteEventModal = true;
+    }
+
+    public function cancelDeleteEvent(): void
+    {
+        $this->showDeleteEventModal = false;
+        $this->deletingEventId = null;
+    }
+
+    public function confirmDeleteEvent(CalendarService $service): void
+    {
+        if ($this->deletingEventId !== null) {
+            PersonalEvent::findOrFail($this->deletingEventId)->delete();
+        }
+        $this->showDeleteEventModal = false;
+        $this->deletingEventId = null;
         $this->loadMonth($service);
         $this->loadDay($service);
     }
