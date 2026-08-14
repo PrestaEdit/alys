@@ -36,6 +36,18 @@ window.alysHapticStatus = () => ({
     magicRegistered: !!(window.Alpine && window.Alpine.magic && window.__alysHapticMagicOk),
 });
 
+// Test explicite — pattern long et fort (≈2 s) qu'aucun user ne pourrait rater
+// s'il est vraiment émis. Renvoie ce que navigator.vibrate a retourné.
+window.alysHapticTest = () => {
+    if (typeof navigator === 'undefined' || typeof navigator.vibrate !== 'function') return 'no-api';
+    try {
+        const ok = navigator.vibrate([400, 150, 400, 150, 400]);
+        return ok === true ? 'returned-true' : 'returned-false';
+    } catch (e) {
+        return 'threw:' + (e?.name || 'unknown');
+    }
+};
+
 // API globale : window.alysHaptic('light' | 'medium' | ...)
 window.alysHaptic = fire;
 
