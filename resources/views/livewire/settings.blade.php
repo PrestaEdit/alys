@@ -69,18 +69,26 @@
             </span>
             <span class="sr-only">{{ $hapticsOn ? __('settings.haptics_on') : __('settings.haptics_off') }}</span>
         </button>
-        {{-- Bouton diagnostic : tape directement window.alysHaptic (bypass Alpine magic)
-             et affiche l'état des capacités (API, magic, préférence). --}}
-        <div class="border-t border-slate-100 px-5 py-3 flex items-center justify-between gap-3"
-             x-data="{ status: null }">
-            <button type="button"
-                    x-on:click="window.alysHaptic && window.alysHaptic('heavy'); status = window.alysHapticStatus?.() || { hasApi: false, magicRegistered: false, enabled: false }"
-                    class="text-xs font-semibold text-sky-500 hover:text-sky-600 transition-colors">
-                {{ __('settings.haptics_test') }}
-            </button>
-            <p class="text-[10px] font-mono text-slate-400 text-right"
-               x-show="status"
-               x-text="'api:' + (status.hasApi ? 'ok' : 'ko') + ' · magic:' + (status.magicRegistered ? 'ok' : 'ko') + ' · on:' + (status.enabled ? 'ok' : 'ko')"></p>
+        {{-- Bouton diagnostic : émet une vibration longue (2 s, pattern à 3 pulsations)
+             et affiche le retour exact de navigator.vibrate + l'état des capacités.
+             Si le retour est « returned-true » mais qu'aucune vibration n'est
+             perçue, la permission android.permission.VIBRATE n'est pas dans le
+             manifest final (Chrome/WebView renvoie true silencieusement). --}}
+        <div class="border-t border-slate-100 px-5 py-3"
+             x-data="{ status: null, vibrateResult: null }">
+            <div class="flex items-center justify-between gap-3">
+                <button type="button"
+                        x-on:click="vibrateResult = window.alysHapticTest?.() || 'no-fn'; status = window.alysHapticStatus?.() || { hasApi: false, magicRegistered: false, enabled: false }"
+                        class="text-xs font-semibold text-sky-500 hover:text-sky-600 transition-colors">
+                    {{ __('settings.haptics_test') }}
+                </button>
+                <p class="text-[10px] font-mono text-slate-400 text-right"
+                   x-show="status"
+                   x-text="'api:' + (status.hasApi ? 'ok' : 'ko') + ' · magic:' + (status.magicRegistered ? 'ok' : 'ko') + ' · on:' + (status.enabled ? 'ok' : 'ko')"></p>
+            </div>
+            <p class="text-[10px] font-mono text-slate-400 mt-1"
+               x-show="vibrateResult"
+               x-text="'navigator.vibrate → ' + vibrateResult"></p>
         </div>
     </div>
 
