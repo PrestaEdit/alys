@@ -42,6 +42,7 @@
         <div class="flex gap-2">
             @foreach (['fr' => __('settings.language_fr'), 'en' => __('settings.language_en')] as $code => $label)
                 <button wire:click="setLocale('{{ $code }}')"
+                        x-on:click="$haptic('light')"
                         class="flex-1 rounded-xl py-2 text-sm font-semibold transition-colors
                                {{ app()->getLocale() === $code ? 'bg-sky-500 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
                     {{ $label }}
@@ -49,6 +50,24 @@
             @endforeach
         </div>
     </div>
+
+    {{-- Vibrations (haptics) --}}
+    @php($hapticsOn = \App\Models\Setting::get('haptics_enabled', '1') === '1')
+    <button wire:click="toggleHaptics"
+            x-on:click="$haptic('medium')"
+            class="w-full bg-white rounded-2xl p-5 shadow-sm mb-4 text-left hover:bg-slate-50 transition-colors flex items-center gap-3">
+        <div class="flex-1">
+            <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">{{ __('settings.haptics') }}</p>
+            <p class="text-sm text-slate-700">{{ __('settings.haptics_desc') }}</p>
+        </div>
+        <span aria-hidden="true"
+              class="relative inline-flex h-6 w-11 flex-shrink-0 rounded-full transition-colors
+                     {{ $hapticsOn ? 'bg-sky-500' : 'bg-slate-300' }}">
+            <span class="pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform transition-transform
+                         {{ $hapticsOn ? 'translate-x-5' : 'translate-x-0.5' }} translate-y-0.5"></span>
+        </span>
+        <span class="sr-only">{{ $hapticsOn ? __('settings.haptics_on') : __('settings.haptics_off') }}</span>
+    </button>
 
     @if(config('app.debug'))
     <button wire:click="diagNotifications"

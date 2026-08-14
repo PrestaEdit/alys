@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\Profile;
 use App\Models\Setting;
 use App\Services\ActiveProfile;
+use Carbon\Carbon;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
 
@@ -15,6 +16,21 @@ class Onboarding extends Component
     public string $color = '#0ea5e9';
     public string $treatmentStart = '';
     public string $treatmentEnd = '';
+
+    public function setLocale(string $locale): void
+    {
+        if (! in_array($locale, ['fr', 'en'], true)) {
+            return;
+        }
+
+        Setting::set('locale', $locale);
+
+        // Applique immédiatement pour que le re-render Livewire soit dans la
+        // nouvelle langue sans perdre l'étape courante (le middleware SetLocale
+        // reprendra le relais à la prochaine requête).
+        app()->setLocale($locale);
+        Carbon::setLocale($locale);
+    }
 
     public function nextStep(): void
     {

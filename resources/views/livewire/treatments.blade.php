@@ -37,7 +37,9 @@
                 new Sortable(this.$refs.sortable, {
                     handle: '.drag-handle',
                     animation: 150,
+                    onStart: () => window.alysHaptic?.('medium'),
                     onEnd: () => {
+                        window.alysHaptic?.('light');
                         const ids = [...this.$refs.sortable.children]
                             .map(el => parseInt(el.dataset.id));
                         $wire.call('setOrder', ids);
@@ -161,6 +163,7 @@
     <div class="mt-3">
         <button
             wire:click="saveOrder"
+            x-on:click="$haptic('success')"
             class="w-full py-3 rounded-2xl font-bold text-white text-sm"
             style="background: linear-gradient(135deg, #0ea5e9, #6366f1);"
         >

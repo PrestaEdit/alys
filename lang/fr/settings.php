@@ -17,6 +17,12 @@ return [
     'language_fr' => 'Français',
     'language_en' => 'English',
 
+    // Retour haptique
+    'haptics'         => 'Vibrations',
+    'haptics_desc'    => 'Léger retour tactile lors des interactions clés.',
+    'haptics_on'      => 'Activé',
+    'haptics_off'     => 'Désactivé',
+
     // Toasts (déplacés depuis Settings.php)
     'toast_already_granted' => 'Autorisation déjà accordée — rappels replanifiés.',
     'toast_granted'         => 'Autorisation accordée — rappels activés.',

@@ -17,6 +17,12 @@ return [
     'language_fr' => 'Français',
     'language_en' => 'English',
 
+    // Haptic feedback
+    'haptics'         => 'Vibrations',
+    'haptics_desc'    => 'Light haptic feedback on key interactions.',
+    'haptics_on'      => 'On',
+    'haptics_off'     => 'Off',
+
     // Toasts (moved from Settings.php)
     'toast_already_granted' => 'Permission already granted — reminders rescheduled.',
     'toast_granted'         => 'Permission granted — reminders enabled.',
