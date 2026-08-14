@@ -22,6 +22,7 @@ return [
     'haptics_desc'    => 'Light haptic feedback on key interactions.',
     'haptics_on'      => 'On',
     'haptics_off'     => 'Off',
+    'haptics_test'    => 'Test vibration',
 
     // Toasts (moved from Settings.php)
     'toast_already_granted' => 'Permission already granted — reminders rescheduled.',

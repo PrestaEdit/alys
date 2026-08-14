@@ -22,6 +22,7 @@ return [
     'haptics_desc'    => 'Léger retour tactile lors des interactions clés.',
     'haptics_on'      => 'Activé',
     'haptics_off'     => 'Désactivé',
+    'haptics_test'    => 'Tester la vibration',
 
     // Toasts (déplacés depuis Settings.php)
     'toast_already_granted' => 'Autorisation déjà accordée — rappels replanifiés.',
