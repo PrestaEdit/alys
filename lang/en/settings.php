@@ -19,7 +19,7 @@ return [
 
     // Haptic feedback
     'haptics'         => 'Vibrations',
-    'haptics_desc'    => 'Light haptic feedback on key interactions.',
+    'haptics_desc'    => 'Light haptic feedback on key interactions. Requires "Haptic feedback" enabled in Android settings.',
     'haptics_on'      => 'On',
     'haptics_off'     => 'Off',
     'haptics_test'    => 'Test vibration',
