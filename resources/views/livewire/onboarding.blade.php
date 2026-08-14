@@ -1,21 +1,5 @@
 <div class="p-4 max-w-lg mx-auto">
 
-    {{-- Sélecteur de langue (visible dès le premier lancement) --}}
-    <div class="flex justify-end mb-3">
-        <div class="inline-flex bg-white rounded-full shadow-sm p-0.5 gap-0.5" role="group" aria-label="{{ __('settings.language') }}">
-            @foreach (['fr' => __('settings.language_fr'), 'en' => __('settings.language_en')] as $code => $label)
-                <button type="button"
-                        wire:click="setLocale('{{ $code }}')"
-                        x-on:click="$haptic('light')"
-                        class="px-3 py-1 rounded-full text-xs font-semibold transition-colors
-                               {{ app()->getLocale() === $code ? 'bg-sky-500 text-white' : 'text-slate-500 hover:bg-slate-100' }}"
-                        aria-pressed="{{ app()->getLocale() === $code ? 'true' : 'false' }}">
-                    {{ $label }}
-                </button>
-            @endforeach
-        </div>
-    </div>
-
     <div class="text-center mb-6">
         <img src="{{ asset('icon.png') }}"
              alt=""
@@ -142,5 +126,24 @@
         </button>
     </div>
     @endif
+
+    {{-- Sélecteur de langue (centré, sous le contenu) --}}
+    @php($locales = ['fr' => ['flag' => '🇫🇷', 'label' => __('settings.language_fr')],
+                     'en' => ['flag' => '🇬🇧', 'label' => __('settings.language_en')]])
+    <div class="flex justify-center mt-8">
+        <div class="inline-flex bg-white rounded-full shadow-sm p-1 gap-1" role="group" aria-label="{{ __('settings.language') }}">
+            @foreach ($locales as $code => $meta)
+                <button type="button"
+                        wire:click="setLocale('{{ $code }}')"
+                        x-on:click="$haptic('light')"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors
+                               {{ app()->getLocale() === $code ? 'bg-sky-500 text-white' : 'text-slate-500 hover:bg-slate-100' }}"
+                        aria-pressed="{{ app()->getLocale() === $code ? 'true' : 'false' }}">
+                    <span class="text-base leading-none" aria-hidden="true">{{ $meta['flag'] }}</span>
+                    <span>{{ $meta['label'] }}</span>
+                </button>
+            @endforeach
+        </div>
+    </div>
 
 </div>
