@@ -324,6 +324,7 @@ return [
 
     'permissions' => [
         'scanner',
+        'vibrate',
     ],
 
     /*

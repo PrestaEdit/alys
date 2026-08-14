@@ -53,21 +53,36 @@
 
     {{-- Vibrations (haptics) --}}
     @php($hapticsOn = \App\Models\Setting::get('haptics_enabled', '1') === '1')
-    <button wire:click="toggleHaptics"
-            x-on:click="$haptic('medium')"
-            class="w-full bg-white rounded-2xl p-5 shadow-sm mb-4 text-left hover:bg-slate-50 transition-colors flex items-center gap-3">
-        <div class="flex-1">
-            <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">{{ __('settings.haptics') }}</p>
-            <p class="text-sm text-slate-700">{{ __('settings.haptics_desc') }}</p>
+    <div class="bg-white rounded-2xl shadow-sm mb-4 overflow-hidden">
+        <button wire:click="toggleHaptics"
+                x-on:click="$haptic('medium')"
+                class="w-full p-5 text-left hover:bg-slate-50 transition-colors flex items-center gap-3">
+            <div class="flex-1">
+                <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">{{ __('settings.haptics') }}</p>
+                <p class="text-sm text-slate-700">{{ __('settings.haptics_desc') }}</p>
+            </div>
+            <span aria-hidden="true"
+                  class="relative inline-flex h-6 w-11 flex-shrink-0 rounded-full transition-colors
+                         {{ $hapticsOn ? 'bg-sky-500' : 'bg-slate-300' }}">
+                <span class="pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform transition-transform
+                             {{ $hapticsOn ? 'translate-x-5' : 'translate-x-0.5' }} translate-y-0.5"></span>
+            </span>
+            <span class="sr-only">{{ $hapticsOn ? __('settings.haptics_on') : __('settings.haptics_off') }}</span>
+        </button>
+        {{-- Bouton diagnostic : tape directement window.alysHaptic (bypass Alpine magic)
+             et affiche l'état des capacités (API, magic, préférence). --}}
+        <div class="border-t border-slate-100 px-5 py-3 flex items-center justify-between gap-3"
+             x-data="{ status: null }">
+            <button type="button"
+                    x-on:click="window.alysHaptic && window.alysHaptic('heavy'); status = window.alysHapticStatus?.() || { hasApi: false, magicRegistered: false, enabled: false }"
+                    class="text-xs font-semibold text-sky-500 hover:text-sky-600 transition-colors">
+                {{ __('settings.haptics_test') }}
+            </button>
+            <p class="text-[10px] font-mono text-slate-400 text-right"
+               x-show="status"
+               x-text="'api:' + (status.hasApi ? 'ok' : 'ko') + ' · magic:' + (status.magicRegistered ? 'ok' : 'ko') + ' · on:' + (status.enabled ? 'ok' : 'ko')"></p>
         </div>
-        <span aria-hidden="true"
-              class="relative inline-flex h-6 w-11 flex-shrink-0 rounded-full transition-colors
-                     {{ $hapticsOn ? 'bg-sky-500' : 'bg-slate-300' }}">
-            <span class="pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform transition-transform
-                         {{ $hapticsOn ? 'translate-x-5' : 'translate-x-0.5' }} translate-y-0.5"></span>
-        </span>
-        <span class="sr-only">{{ $hapticsOn ? __('settings.haptics_on') : __('settings.haptics_off') }}</span>
-    </button>
+    </div>
 
     @if(config('app.debug'))
     <button wire:click="diagNotifications"
