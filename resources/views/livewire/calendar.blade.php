@@ -161,7 +161,6 @@
                             {{ __('events.edit') }}
                         </button>
                         <button wire:click="openDeleteEventModal({{ $event['id'] }})"
-                                x-on:click="$haptic('warning')"
                                 class="text-xs text-red-500 font-semibold border border-red-200 rounded-lg px-2 py-1 bg-red-50 hover:bg-red-100 transition-colors">
                             {{ __('events.delete') }}
                         </button>
@@ -316,12 +315,10 @@
 
             <div class="flex gap-3">
                 <button wire:click="cancelEventModal"
-                        x-on:click="$haptic('light')"
                         class="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors">
                     {{ __('common.cancel') }}
                 </button>
                 <button wire:click="saveEvent"
-                        x-on:click="$haptic('success')"
                         class="flex-1 py-2.5 rounded-xl bg-sky-500 text-sm font-semibold text-white hover:bg-sky-600 transition-colors">
                     {{ __('events.save') }}
                 </button>
@@ -348,10 +345,10 @@
             <p class="text-xs text-slate-500 mb-4 pl-13">{{ __('events.delete_description') }}</p>
             <div class="flex gap-2">
                 <button wire:click="cancelDeleteEvent"
-                        x-on:click="$haptic('light')"
                         class="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors">
                     {{ __('common.cancel') }}
                 </button>
+                {{-- Haptic « warning » : action destructive irréversible. --}}
                 <button wire:click="confirmDeleteEvent"
                         x-on:click="$haptic('warning')"
                         class="flex-1 py-2.5 rounded-xl bg-red-500 text-sm font-semibold text-white hover:bg-red-600 transition-colors">
