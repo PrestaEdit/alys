@@ -42,7 +42,6 @@
         <div class="flex gap-2">
             @foreach (['fr' => __('settings.language_fr'), 'en' => __('settings.language_en')] as $code => $label)
                 <button wire:click="setLocale('{{ $code }}')"
-                        x-on:click="$haptic('light')"
                         class="flex-1 rounded-xl py-2 text-sm font-semibold transition-colors
                                {{ app()->getLocale() === $code ? 'bg-sky-500 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
                     {{ $label }}
@@ -55,7 +54,6 @@
     @php($hapticsOn = \App\Models\Setting::get('haptics_enabled', '1') === '1')
     <div class="bg-white rounded-2xl shadow-sm mb-4 overflow-hidden">
         <button wire:click="toggleHaptics"
-                x-on:click="$haptic('medium')"
                 class="w-full p-5 text-left hover:bg-slate-50 transition-colors flex items-center gap-3">
             <div class="flex-1">
                 <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">{{ __('settings.haptics') }}</p>
@@ -69,11 +67,10 @@
             </span>
             <span class="sr-only">{{ $hapticsOn ? __('settings.haptics_on') : __('settings.haptics_off') }}</span>
         </button>
-        {{-- Bouton diagnostic : émet une vibration longue (2 s, pattern à 3 pulsations)
-             et affiche le retour exact de navigator.vibrate + l'état des capacités.
-             Si le retour est « returned-true » mais qu'aucune vibration n'est
-             perçue, la permission android.permission.VIBRATE n'est pas dans le
-             manifest final (Chrome/WebView renvoie true silencieusement). --}}
+        @if(config('app.debug'))
+        {{-- Bouton diagnostic (builds debug uniquement) : émet une vibration
+             longue et affiche le retour de navigator.vibrate + l'état des
+             capacités. Utile pour investiguer un rapport « ça ne vibre pas ». --}}
         <div class="border-t border-slate-100 px-5 py-3"
              x-data="{ status: null, vibrateResult: null }">
             <div class="flex items-center justify-between gap-3">
@@ -90,6 +87,7 @@
                x-show="vibrateResult"
                x-text="'navigator.vibrate → ' + vibrateResult"></p>
         </div>
+        @endif
     </div>
 
     @if(config('app.debug'))

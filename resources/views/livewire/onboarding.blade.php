@@ -23,7 +23,6 @@
     </div>
 
     <button wire:click="nextStep"
-            x-on:click="$haptic('light')"
             class="w-full py-3 rounded-xl text-sm font-bold text-white transition-colors hover:opacity-90"
             style="background: linear-gradient(135deg, #0ea5e9, #6366f1);">
         {{ __('onboarding.next') }}
@@ -39,7 +38,6 @@
             @foreach($colors as $hex)
             <button type="button"
                     wire:click="$set('color', '{{ $hex }}')"
-                    x-on:click="$haptic('light')"
                     class="w-10 h-10 rounded-xl transition-all"
                     style="background-color: {{ $hex }};{{ $color === $hex ? ' box-shadow: 0 0 0 2px #fff, 0 0 0 5px #0f172a;' : '' }}"></button>
             @endforeach
@@ -49,12 +47,10 @@
 
     <div class="flex gap-2">
         <button wire:click="previousStep"
-                x-on:click="$haptic('light')"
                 class="flex-1 py-3 rounded-xl text-sm font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors">
             {{ __('common.back') }}
         </button>
         <button wire:click="nextStep"
-                x-on:click="$haptic('light')"
                 class="flex-1 py-3 rounded-xl text-sm font-bold text-white transition-colors hover:opacity-90"
                 style="background: linear-gradient(135deg, #0ea5e9, #6366f1);">
             {{ __('onboarding.next') }}
@@ -87,12 +83,10 @@
 
     <div class="flex gap-2">
         <button wire:click="previousStep"
-                x-on:click="$haptic('light')"
                 class="flex-1 py-3 rounded-xl text-sm font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors">
             {{ __('common.back') }}
         </button>
         <button wire:click="nextStep"
-                x-on:click="$haptic('light')"
                 class="flex-1 py-3 rounded-xl text-sm font-bold text-white transition-colors hover:opacity-90"
                 style="background: linear-gradient(135deg, #0ea5e9, #6366f1);">
             {{ __('onboarding.next') }}
@@ -108,6 +102,7 @@
     </div>
 
     <div class="flex flex-col gap-2">
+        {{-- Haptic « success » : fin du parcours d'onboarding = jalon. --}}
         <button wire:click="completeAndAddTreatment"
                 x-on:click="$haptic('success')"
                 class="w-full py-3 rounded-xl text-sm font-bold text-white transition-colors hover:opacity-90"
@@ -120,7 +115,6 @@
             {{ __('onboarding.later') }}
         </button>
         <button wire:click="previousStep"
-                x-on:click="$haptic('light')"
                 class="w-full py-2 text-xs font-semibold text-slate-500 hover:text-slate-700">
             ← {{ __('common.back') }}
         </button>
@@ -135,7 +129,6 @@
             @foreach ($locales as $code => $meta)
                 <button type="button"
                         wire:click="setLocale('{{ $code }}')"
-                        x-on:click="$haptic('light')"
                         class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors
                                {{ app()->getLocale() === $code ? 'bg-sky-500 text-white' : 'text-slate-500 hover:bg-slate-100' }}"
                         aria-pressed="{{ app()->getLocale() === $code ? 'true' : 'false' }}">

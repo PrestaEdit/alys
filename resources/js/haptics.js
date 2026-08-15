@@ -7,15 +7,18 @@
 // (voir layouts/app.blade.php) et mis à jour à la volée via l'événement
 // « haptics-changed » émis par le composant Settings.
 
+// Vocabulaire haptique — chaque nom correspond à un sens distinct.
+// Utilisé uniquement aux endroits où la vibration ajoute de la valeur
+// (drag & drop, jalons, actions destructives, confirmations invisibles).
 const PATTERNS = {
-    // Durées volontairement > 25 ms : sur beaucoup de téléphones Android
-    // (surtout Xiaomi/Realme), le moteur de vibration ignore les pulsations
-    // très courtes. 25/50/80 ms restent subtils tout en étant perçus.
-    light:   25,
-    medium:  50,
-    heavy:   80,
-    success: [15, 60, 30],
-    warning: [30, 60, 30],
+    // Pulsations simples : durées > 25 ms pour être perçues sur les
+    // moteurs Android à seuil élevé (Xiaomi / Realme / OnePlus).
+    light:   25,   // confirmation discrète (fin de drag, toast)
+    medium:  50,   // pickup (début de drag)
+    heavy:   80,   // rare — attention forte
+    // Patterns : le rythme porte le sens.
+    success: [15, 60, 30],           // bref-pause-plus long — jalon positif
+    warning: [40, 80, 40, 80, 40],   // triple pulsation ferme — irréversible
 };
 
 function fire(kind) {
