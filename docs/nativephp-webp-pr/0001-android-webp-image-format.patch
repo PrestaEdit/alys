@@ -1,0 +1,206 @@
+config/nativephp.php                         | 18 +++++++
+ src/Concerns/InstallsAndroidSplashScreen.php | 70 ++++++++++++++++++++++------
+ src/Concerns/InstallsAppIcon.php             | 70 ++++++++++++++++++++++------
+ 3 files changed, 132 insertions(+), 26 deletions(-)
+
+--- Changes ---
+
+config/nativephp.php
+  @@ -276,6 +276,24 @@
+  +        /*
+  +        |--------------------------------------------------------------------------
+  +        | Image Format for Generated Android Resources
+  +        |--------------------------------------------------------------------------
+  +        |
+  +        | Format used when NativePHP generates Android bitmap resources (launcher
+  +        | icons + splash screens) at build time from `public/icon.png`,
+  +        | `public/splash.png`, and `public/splash-dark.png`.
+  +        |
+  +        | Options:
+  +        |   'png'  - Default. Backwards compatible with existing projects.
+  +        |   'webp' - Recommended. 60-90% smaller AAB, satisfies Play Console's
+  +        |            "optimize bitmap images" recommendation. Requires PHP GD
+  +        |            compiled with WebP support (falls back to PNG otherwise).
+  +        |
+  +        */
+  +        'image_format' => env('NATIVEPHP_ANDROID_IMAGE_FORMAT', 'png'),
+  +
+           /*
+           |--------------------------------------------------------------------------
+           | Android Theme Colors
+  +18 -0
+
+src/Concerns/InstallsAndroidSplashScreen.php
+  @@ -13,14 +13,16 @@
+  -            $lightSplashPath = public_path('splash.png');
+  -            $darkSplashPath = public_path('splash-dark.png');
+  +            // Accept either splash.png or splash.webp as source (webp takes
+  +            // precedence when both exist, since it's the smaller of the two).
+  +            $lightSplashPath = $this->locateSplashSource('splash');
+  +            $darkSplashPath = $this->locateSplashSource('splash-dark');
+   
+  -            $hasLightSplash = File::exists($lightSplashPath);
+  -            $hasDarkSplash = File::exists($darkSplashPath);
+  +            $hasLightSplash = $lightSplashPath !== null;
+  +            $hasDarkSplash = $darkSplashPath !== null;
+   
+  -            $this->logToFile('  Light splash (splash.png): '.($hasLightSplash ? 'found' : 'not found'));
+  -            $this->logToFile('  Dark splash (splash-dark.png): '.($hasDarkSplash ? 'found' : 'not found'));
+  +            $this->logToFile('  Light splash: '.($hasLightSplash ? basename($lightSplashPath) : 'not found'));
+  +            $this->logToFile('  Dark splash: '.($hasDarkSplash ? basename($darkSplashPath) : 'not found'));
+   
+               if (! $hasLightSplash && ! $hasDarkSplash) {
+                   $this->logToFile('  No splash screens found, skipping');
+  @@ -29,6 +31,7 @@
+  +            $format = $this->androidImageFormat();
+   
+               $sizes = [
+                   'mdpi' => [320, 480],
+  @@ -39,14 +42,16 @@
+  -                $this->logToFile('  Generating light splash variants...');
+  +                $this->logToFile("  Generating light splash variants (.$format)...");
+                   foreach ($sizes as $density => $dimensions) {
+                       try {
+                           $dstDir = $resDir."drawable-{$density}";
+                           File::ensureDirectoryExists($dstDir);
+   
+  -                        $dstPath = $dstDir.DIRECTORY_SEPARATOR.'splash.png';
+  -                        $this->resizePng($lightSplashPath, $dstPath, $dimensions[0], $dimensions[1]);
+  +                        $this->cleanStaleSplash($dstDir, $format);
+  +
+  +                        $dstPath = $dstDir.DIRECTORY_SEPARATOR.'splash.'.$format;
+  +                        $this->resizeImage($lightSplashPath, $dstPath, $dimensions[0], $dimensions[1], $format);
+                       } catch (\Exception $e) {
+                           $this->logToFile("    Failed to generate $density: ".$e->getMessage());
+                       }
+  @@ -54,14 +59,16 @@
+  -                $this->logToFile('  Generating dark splash variants...');
+  +                $this->logToFile("  Generating dark splash variants (.$format)...");
+                   foreach ($sizes as $density => $dimensions) {
+                       try {
+                           $dstDir = $resDir."drawable-night-{$density}";
+                           File::ensureDirectoryExists($dstDir);
+   
+  -                        $dstPath = $dstDir.DIRECTORY_SEPARATOR.'splash.png';
+  -                        $this->resizePng($darkSplashPath, $dstPath, $dimensions[0], $dimensions[1]);
+  +                        $this->cleanStaleSplash($dstDir, $format);
+  +
+  +                        $dstPath = $dstDir.DIRECTORY_SEPARATOR.'splash.'.$format;
+  +                        $this->resizeImage($darkSplashPath, $dstPath, $dimensions[0], $dimensions[1], $format);
+                       } catch (\Exception $e) {
+                           $this->logToFile("    Failed to generate night-$density: ".$e->getMessage());
+                       }
+  @@ -75,9 +82,46 @@
+  +    /**
+  +     * Look for `public/{name}.webp` first, then `public/{name}.png`.
+  +     */
+  +    private function locateSplashSource(string $name): ?string
+  +    {
+  +        $webp = public_path($name.'.webp');
+  +        if (File::exists($webp) && function_exists('imagecreatefromwebp')) {
+  +            return $webp;
+  +        }
+  +
+  +        $png = public_path($name.'.png');
+  +        if (File::exists($png)) {
+  +            return $png;
+  +        }
+  +
+  +        return null;
+  +    }
+  +
+  +    /**
+  +     * Remove a splash resource of the opposite extension so AAPT does not see
+  +     * two entries for the same resource name in the same folder.
+  +     */
+  +    private function cleanStaleSplash(string $dir, string $keepFormat): void
+  +    {
+  +        $stale = $dir.DIRECTORY_SEPARATOR.'splash.'.($keepFormat === 'png' ? 'webp' : 'png');
+  +        if (File::exists($stale)) {
+  +            File::delete($stale);
+  +        }
+  +    }
+  +
+  ... (truncated)
+  +57 -13
+
+src/Concerns/InstallsAppIcon.php
+  @@ -85,6 +85,7 @@
+  +        $format = $this->androidImageFormat();
+   
+           $sizes = [
+               'mipmap-mdpi' => 48,
+  @@ -103,9 +104,9 @@
+  -            'ic_launcher.png',
+  -            'ic_launcher_round.png',
+  -            'ic_launcher_foreground.png',
+  +            'ic_launcher',
+  +            'ic_launcher_round',
+  +            'ic_launcher_foreground',
+           ];
+   
+           $this->logToFile('  Generating icon sizes: '.implode(', ', array_keys($sizes)));
+  @@ -114,26 +115,46 @@
+  -            foreach ($targets as $filename) {
+  -                $dstPath = $dstDir.'/'.$filename;
+  +            foreach ($targets as $basename) {
+  +                $dstPath = $dstDir.'/'.$basename.'.'.$format;
+   
+  -                $webpPath = str_replace('.png', '.webp', $dstPath);
+  -                if (File::exists($webpPath)) {
+  -                    File::delete($webpPath);
+  +                // Drop any stale resource of the opposite extension so AAPT does
+  +                // not see two entries for the same resource name.
+  +                $stalePath = $dstDir.'/'.$basename.'.'.($format === 'png' ? 'webp' : 'png');
+  +                if (File::exists($stalePath)) {
+  +                    File::delete($stalePath);
+                   }
+   
+  -                $targetSize = ($filename === 'ic_launcher_foreground.png') ? $adaptiveSizes[$folder] : $size;
+  +                $targetSize = ($basename === 'ic_launcher_foreground') ? $adaptiveSizes[$folder] : $size;
+   
+  -                $this->resizePng($iconPath, $dstPath, $targetSize, $targetSize);
+  +                $this->resizeImage($iconPath, $dstPath, $targetSize, $targetSize, $format);
+               }
+           }
+   
+           $this->logToFile('  Android icon installed');
+       }
+   
+  -    private function resizePng(string $src, string $dst, int $width, int $height): void
+  +    /**
+  +     * Output format for Android resource bitmaps (icons + splash).
+  +     * WebP is significantly smaller than PNG at equivalent quality and is
+  ... (truncated)
+  @@ -169,8 +190,31 @@
+  -        imagepng($resized, $dst, 0);
+  +        if ($format === 'webp') {
+  +            // Lossless WebP: preserves alpha and stays visually identical to the
+  +            // source. Roughly 60-90% smaller than an uncompressed PNG.
+  +            imagewebp($resized, $dst, IMG_WEBP_LOSSLESS);
+  +        } else {
+  +            // Level 9 = max PNG compression. The previous value (0) wrote
+  +            // uncompressed PNGs and made bundles 5-10x larger than needed.
+  +            imagepng($resized, $dst, 9);
+  +        }
+  +
+           imagedestroy($resized);
+           imagedestroy($srcImage);
+       }
+  +
+  +    /**
+  +     * Load a PNG or WebP source image with GD.
+  +     */
+  +    private function readImage(string $path)
+  +    {
+  +        $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+  +
+  +        if ($ext === 'webp' && function_exists('imagecreatefromwebp')) {
+  +            return imagecreatefromwebp($path);
+  +        }
+  +
+  +        return imagecreatefrompng($path);
+  +    }
+   }
+  +57 -13
+[full diff: rtk git diff --no-compact]

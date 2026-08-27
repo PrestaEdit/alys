@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'version' => env('NATIVEPHP_APP_VERSION', '1.0.0'),
+    'version' => env('NATIVEPHP_APP_VERSION', 'DEBUG'),
 
     /*
     |--------------------------------------------------------------------------
@@ -26,7 +26,7 @@ return [
     |
     */
 
-    'version_code' => env('NATIVEPHP_APP_VERSION_CODE', 24),
+    'version_code' => env('NATIVEPHP_APP_VERSION_CODE', 1),
 
     /*
     |--------------------------------------------------------------------------
@@ -82,6 +82,28 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Appearance
+    |--------------------------------------------------------------------------
+    |
+    | Pins the app to a single interface style, for apps whose identity is
+    | fixed light or fixed dark. Theme tokens only cover surfaces YOU draw —
+    | the system's own chrome (Liquid Glass bars, sheets, keyboards, the
+    | window background behind the safe areas) follows the device unless it
+    | is locked here.
+    |
+    | Options: 'system' - Follow the device (default)
+    |          'dark'   - Always dark
+    |          'light'  - Always light
+    |
+    | iOS only for now: written to the Info.plist as UIUserInterfaceStyle at
+    | build time.
+    |
+    */
+
+    'appearance' => env('NATIVEPHP_APPEARANCE', 'system'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Development Team (iOS)
     |--------------------------------------------------------------------------
     |
@@ -92,6 +114,80 @@ return [
     |
     */
     'development_team' => env('NATIVEPHP_DEVELOPMENT_TEAM'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | iOS Permission Strings (Info.plist Overrides)
+    |--------------------------------------------------------------------------
+    |
+    | Override iOS Info.plist usage descriptions provided by plugins. Anything
+    | you set here is applied AFTER all plugin manifests are merged, so it
+    | always wins — useful when multiple plugins claim the same key (e.g.
+    | mobile-camera and mobile-scanner both set NSCameraUsageDescription) and
+    | you want a single explicit string for App Store review.
+    |
+    | Android has no equivalent: permission rationale is shown by app code at
+    | runtime, not declared in the manifest, so this block is iOS-only.
+    |
+    */
+
+    'permissions' => [
+        // 'NSCameraUsageDescription' => 'Used to take a profile photo.',
+        // 'NSMicrophoneUsageDescription' => 'Used to record audio with your videos.',
+        // 'NSPhotoLibraryUsageDescription' => 'Used to select photos for your post.',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | iOS Permission String Localizations
+    |--------------------------------------------------------------------------
+    |
+    | Provide per-locale overrides for the strings declared above. Each key is
+    | a BCP 47 locale code (e.g. 'nl', 'fr', 'zh-Hans') and its value mirrors
+    | the `permissions` array shape. At build time these are written to
+    | {locale}.lproj/InfoPlist.strings inside the iOS bundle, and the locales
+    | are registered with the Xcode project so they ship with the app.
+    |
+    | iOS picks the right string at runtime based on the user's preferred
+    | language, falling back to the value in `permissions` (Info.plist).
+    |
+    | Plugins can ship their own localizations via `ios.info_plist_localizations`
+    | in their nativephp.json — app-level entries win on key collisions.
+    |
+    */
+
+    'permission_localizations' => [
+        // 'nl' => [
+        //     'NSCameraUsageDescription' => 'Gebruikt om een profielfoto te maken.',
+        //     'NSMicrophoneUsageDescription' => 'Gebruikt om audio op te nemen bij je video\'s.',
+        //     'NSPhotoLibraryUsageDescription' => 'Gebruikt om foto\'s voor je bericht te selecteren.',
+        // ],
+        // 'fr' => [
+        //     'NSCameraUsageDescription' => 'Utilisé pour prendre une photo de profil.',
+        // ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Runtime Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Controls how the PHP interpreter runs on device. In 'persistent' mode,
+    | PHP boots once and stays alive — subsequent requests dispatch through
+    | the running interpreter (~5-30ms instead of ~200-300ms). In 'classic'
+    | mode, each request does a full php_embed_init/shutdown cycle. Falls
+    | back to 'classic' mode if persistent boot fails.
+    |
+    | reset_instances:        Clear resolved facade instances between dispatches
+    | gc_between_dispatches:  Run gc_collect_cycles() between dispatches
+    |
+    */
+
+    'runtime' => [
+        'mode' => env('NATIVEPHP_RUNTIME_MODE', 'persistent'),
+        'reset_instances' => true,
+        'gc_between_dispatches' => false,
+    ],
 
     /*
     |--------------------------------------------------------------------------
@@ -128,26 +224,21 @@ return [
         'storage/framework/sessions',
         'storage/framework/cache',
         'storage/framework/testing',
-        'storage/logs/laravel.log'
+        'storage/logs/laravel.log',
     ],
 
     /*
     |--------------------------------------------------------------------------
-    | Runtime Configuration
+    | FPS Overlay
     |--------------------------------------------------------------------------
     |
-    | Controls the persistent PHP runtime behavior. In 'persistent' mode,
-    | Laravel boots once and the kernel is reused across requests (~5-30ms
-    | per dispatch instead of ~200-300ms). Falls back to 'classic' mode
-    | (full init/shutdown per request) if persistent boot fails.
+    | When true, shows a small dev overlay in the top-trailing corner with
+    | live FPS / p99 frame time / jank count. Useful for spotting jank
+    | during development. Default off so production users never see it.
+    | Toggle via `NATIVEPHP_FPS_OVERLAY=true` in `.env`.
     |
     */
-
-    'runtime' => [
-        'mode' => 'persistent', // 'classic' or 'persistent'
-        'reset_instances' => true,
-        'gc_between_dispatches' => false,
-    ],
+    'fps_overlay' => env('NATIVEPHP_FPS_OVERLAY', false),
 
     'android' => [
         'gradle_jdk_path' => env('NATIVEPHP_GRADLE_PATH'),
@@ -201,7 +292,33 @@ return [
         |            compiled with WebP support (falls back to PNG otherwise).
         |
         */
-        'image_format' => env('NATIVEPHP_ANDROID_IMAGE_FORMAT', 'webp'),
+        'image_format' => env('NATIVEPHP_ANDROID_IMAGE_FORMAT', 'png'),
+
+        /*
+        |--------------------------------------------------------------------------
+        | Android Theme Colors
+        |--------------------------------------------------------------------------
+        |
+        | Colors applied to the generated Android theme (Theme.AndroidPHP). These
+        | drive the colorPrimary / colorOnPrimary values used by native dialogs
+        | such as the date and time pickers (OK / Cancel buttons).
+        |
+        | The night value is written to values-night/themes.xml so Android can
+        | switch automatically when the device is in dark mode.
+        |
+        | Values must be hex strings: #RRGGBB or #AARRGGBB. Wrap them in quotes
+        | inside your .env file (e.g. NATIVEPHP_ANDROID_COLOR_PRIMARY="#04ABA6")
+        | because '#' starts a comment in .env.
+        |
+        | Both values/themes.xml and values-night/themes.xml are written from
+        | these values during `php artisan native:install`.
+        |
+        */
+        'theme' => [
+            'color_primary' => env('NATIVEPHP_ANDROID_COLOR_PRIMARY', '#04ABA6'),
+            'color_primary_night' => env('NATIVEPHP_ANDROID_COLOR_PRIMARY_NIGHT', '#FFFFFF'),
+            'color_on_primary' => env('NATIVEPHP_ANDROID_COLOR_ON_PRIMARY', '#FFFFFF'),
+        ],
 
         /*
         |--------------------------------------------------------------------------
@@ -264,8 +381,10 @@ return [
         // Build output directory (where the ZIP will be created)
         'build_path' => env('NATIVEPHP_BUILD_PATH', 'storage/app/native-build'),
 
-        // Automatically open browser with QR code when server starts
-        'open_browser' => env('NATIVEPHP_OPEN_BROWSER', true),
+        // Automatically open browser with QR code when server starts.
+        // Default off — the terminal renders a scannable QR. Pass --browser
+        // to native:jump (or set NATIVEPHP_OPEN_BROWSER=true) to opt in.
+        'open_browser' => env('NATIVEPHP_OPEN_BROWSER', false),
 
         // Watch these directories for changes
         'watch_paths' => [
@@ -340,11 +459,6 @@ return [
     */
     'ipad' => false,
 
-    'permissions' => [
-        'scanner',
-        'vibrate',
-    ],
-
     /*
     |--------------------------------------------------------------------------
     | Device Orientation Support
@@ -371,14 +485,10 @@ return [
             'landscape_right' => false,
         ],
         'android' => [
-            // All four enabled → NativePHP strips android:screenOrientation from
-            // MainActivity at build time. Android 16 (targetSdk 36) ignores
-            // orientation locks on large screens anyway; Play Console requires
-            // this to clear the "large-screen compatibility" warning.
             'portrait' => true,
-            'upside_down' => true,
-            'landscape_left' => true,
-            'landscape_right' => true,
+            'upside_down' => false,
+            'landscape_left' => false,
+            'landscape_right' => false,
         ],
     ],
 ];
