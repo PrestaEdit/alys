@@ -24,12 +24,14 @@ class PersonalEvent extends Model
     public const CATEGORIES = [
         'vacances'  => ['icon' => '🏖️', 'color' => '#0ea5e9'],
         'excursion' => ['icon' => '🚌', 'color' => '#10b981'],
+        'hopital'   => ['icon' => '🏥', 'color' => '#ef4444'],
+        'medecin'   => ['icon' => '🩺', 'color' => '#8b5cf6'],
         'autre'     => ['icon' => '📌', 'color' => '#f59e0b'],
     ];
 
     /** Emojis proposés dans le sélecteur d'icône. */
     public const ICONS = [
-        '🏖️', '🚌', '✈️', '🏕️', '⛰️', '🏊', '🎉', '🎂', '🎄', '🏠', '🚗', '📌',
+        '🏖️', '🚌', '✈️', '🏕️', '⛰️', '🏊', '🎉', '🎂', '🎄', '🏠', '🚗', '🏥', '🩺', '💊', '📌',
     ];
 
     /** Événements dont la plage [start_date, end_date] chevauche le mois donné. */

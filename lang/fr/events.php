@@ -15,6 +15,8 @@ return [
     'field_notes_ph'   => 'Note optionnelle',
     'category_vacances'  => 'Vacances',
     'category_excursion' => 'Excursion',
+    'category_hopital'   => 'Hôpital',
+    'category_medecin'   => 'Médecin',
     'category_autre'     => 'Autre',
     'period'           => 'Du :start au :end',
     'save'             => 'Enregistrer',

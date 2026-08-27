@@ -15,6 +15,8 @@ return [
     'field_notes_ph'   => 'Optional note',
     'category_vacances'  => 'Holidays',
     'category_excursion' => 'Excursion',
+    'category_hopital'   => 'Hospital',
+    'category_medecin'   => 'Doctor',
     'category_autre'     => 'Other',
     'period'           => 'From :start to :end',
     'save'             => 'Save',

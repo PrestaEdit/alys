@@ -131,13 +131,13 @@ class TreatmentEdit extends Component
 
     public function increment(): void
     {
-        $step = $this->treatment->unit === 'ml' ? 0.1 : 0.5;
+        $step = $this->treatment->unit === 'ml' ? 0.1 : 0.25;
         $this->newDose = round(($this->newDose ?? 0) + $step, 2);
     }
 
     public function decrement(): void
     {
-        $step = $this->treatment->unit === 'ml' ? 0.1 : 0.5;
+        $step = $this->treatment->unit === 'ml' ? 0.1 : 0.25;
         $this->newDose = max(0, round(($this->newDose ?? 0) - $step, 2));
     }
 
@@ -157,37 +157,37 @@ class TreatmentEdit extends Component
 
     public function incrementMorning(): void
     {
-        $step = $this->treatment->unit === 'ml' ? 0.1 : 0.5;
+        $step = $this->treatment->unit === 'ml' ? 0.1 : 0.25;
         $this->newDoseMorning = round(($this->newDoseMorning ?? 0) + $step, 2);
     }
 
     public function decrementMorning(): void
     {
-        $step = $this->treatment->unit === 'ml' ? 0.1 : 0.5;
+        $step = $this->treatment->unit === 'ml' ? 0.1 : 0.25;
         $this->newDoseMorning = max(0, round(($this->newDoseMorning ?? 0) - $step, 2));
     }
 
     public function incrementNoon(): void
     {
-        $step = $this->treatment->unit === 'ml' ? 0.1 : 0.5;
+        $step = $this->treatment->unit === 'ml' ? 0.1 : 0.25;
         $this->newDoseNoon = round(($this->newDoseNoon ?? 0) + $step, 2);
     }
 
     public function decrementNoon(): void
     {
-        $step = $this->treatment->unit === 'ml' ? 0.1 : 0.5;
+        $step = $this->treatment->unit === 'ml' ? 0.1 : 0.25;
         $this->newDoseNoon = max(0, round(($this->newDoseNoon ?? 0) - $step, 2));
     }
 
     public function incrementEvening(): void
     {
-        $step = $this->treatment->unit === 'ml' ? 0.1 : 0.5;
+        $step = $this->treatment->unit === 'ml' ? 0.1 : 0.25;
         $this->newDoseEvening = round(($this->newDoseEvening ?? 0) + $step, 2);
     }
 
     public function decrementEvening(): void
     {
-        $step = $this->treatment->unit === 'ml' ? 0.1 : 0.5;
+        $step = $this->treatment->unit === 'ml' ? 0.1 : 0.25;
         $this->newDoseEvening = max(0, round(($this->newDoseEvening ?? 0) - $step, 2));
     }
 

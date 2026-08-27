@@ -382,10 +382,14 @@ class CalendarService
         } elseif ($amount == (int) $amount) {
             $formatted = (string)(int)$amount;
         } else {
-            $rounded = round($amount * 2) / 2;
-            $formatted = $rounded == (int)$rounded
-                ? (string)(int)$rounded
-                : number_format($rounded, 1, ',', '');
+            $rounded = round($amount * 4) / 4;
+            if ($rounded == (int)$rounded) {
+                $formatted = (string)(int)$rounded;
+            } elseif (fmod($rounded * 2, 1) == 0.0) {
+                $formatted = number_format($rounded, 1, ',', '');
+            } else {
+                $formatted = number_format($rounded, 2, ',', '');
+            }
         }
         return $unit ? "{$formatted} {$unit}" : $formatted;
     }

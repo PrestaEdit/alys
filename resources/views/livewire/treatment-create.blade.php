@@ -245,7 +245,7 @@
                         −
                     </button>
                     <div class="flex-1 text-center">
-                        @php $pv = (float)($part['value'] ?? 0); $pdec = $unit === 'ml' ? 1 : ($pv != (int)$pv ? 1 : 0); @endphp
+                        @php $pv = (float)($part['value'] ?? 0); $pdec = $unit === 'ml' ? 1 : ($pv == (int)$pv ? 0 : (fmod($pv * 2, 1) == 0.0 ? 1 : 2)); @endphp
                         <p class="text-3xl font-extrabold leading-none" style="color: {{ $color }};">
                             {{ number_format($pv, $pdec, ',', '') }}
                         </p>
@@ -269,7 +269,7 @@
                     −
                 </button>
                 <div class="flex-1 text-center">
-                    @php $idec = $unit === 'ml' ? 1 : ($currentDose != (int)$currentDose ? 1 : 0); @endphp
+                    @php $idec = $unit === 'ml' ? 1 : ($currentDose == (int)$currentDose ? 0 : (fmod($currentDose * 2, 1) == 0.0 ? 1 : 2)); @endphp
                     <p class="text-4xl font-extrabold leading-none" style="color: {{ $color }};">
                         {{ number_format($currentDose, $idec, ',', '') }}
                     </p>
@@ -306,7 +306,7 @@
                     −
                 </button>
                 <div class="flex-1 text-center">
-                    @php $sdec = $unit === 'ml' ? 1 : ($currentDose != (int)$currentDose ? 1 : 0); @endphp
+                    @php $sdec = $unit === 'ml' ? 1 : ($currentDose == (int)$currentDose ? 0 : (fmod($currentDose * 2, 1) == 0.0 ? 1 : 2)); @endphp
                     <p class="text-4xl font-extrabold leading-none" style="color: {{ $color }};">
                         {{ number_format($currentDose, $sdec, ',', '') }}
                     </p>
@@ -578,19 +578,27 @@
         <div class="flex justify-between items-start py-3 border-b border-slate-100">
             <span class="text-xs text-slate-400 font-medium">{{ __('treatments.summary_posology') }}</span>
             <div class="text-right">
+                @php
+                    $fmtDose = function ($v) use ($unit) {
+                        $v = (float)($v ?? 0);
+                        if ($unit === 'ml') return number_format($v, 1, ',', '');
+                        if ($v == (int)$v) return (string)(int)$v;
+                        return number_format($v, fmod($v * 2, 1) == 0.0 ? 1 : 2, ',', '');
+                    };
+                @endphp
                 @if($dosageMode === 'dayparts')
-                    <p class="text-xs text-slate-600">{{ __('treatments.morning') }} : <strong>{{ number_format($doseMorning ?? 0, $unit === 'ml' ? 1 : 0, ',', '') }} {{ $unit }}</strong></p>
-                    <p class="text-xs text-slate-600">{{ __('treatments.noon') }} : <strong>{{ number_format($doseNoon ?? 0, $unit === 'ml' ? 1 : 0, ',', '') }} {{ $unit }}</strong></p>
-                    <p class="text-xs text-slate-600">{{ __('treatments.evening') }} : <strong>{{ number_format($doseEvening ?? 0, $unit === 'ml' ? 1 : 0, ',', '') }} {{ $unit }}</strong></p>
+                    <p class="text-xs text-slate-600">{{ __('treatments.morning') }} : <strong>{{ $fmtDose($doseMorning) }} {{ $unit }}</strong></p>
+                    <p class="text-xs text-slate-600">{{ __('treatments.noon') }} : <strong>{{ $fmtDose($doseNoon) }} {{ $unit }}</strong></p>
+                    <p class="text-xs text-slate-600">{{ __('treatments.evening') }} : <strong>{{ $fmtDose($doseEvening) }} {{ $unit }}</strong></p>
                 @elseif($dosageMode === 'interval')
                     @php $intervalH = $timesPerDay > 0 ? round(24 / $timesPerDay) : 0; @endphp
                     <span class="text-sm font-bold text-slate-800">
-                        {{ __('treatments.per_intake_suffix', ['unit' => number_format($currentDose, $unit === 'ml' ? 1 : 0, ',', '') . ' ' . $unit]) }}
+                        {{ __('treatments.per_intake_suffix', ['unit' => $fmtDose($currentDose) . ' ' . $unit]) }}
                     </span>
                     <p class="text-xs text-slate-400">{{ __('treatments.times_per_day_interval', ['count' => $timesPerDay, 'hours' => $intervalH]) }}</p>
                 @else
                     <span class="text-sm font-bold text-slate-800">
-                        {{ __('treatments.per_unit', ['unit' => number_format($currentDose, $unit === 'ml' ? 1 : 0, ',', '') . ' ' . $unit, 'period' => ['daily' => __('treatments.period_day'), 'weekly' => __('treatments.period_week'), 'cyclic' => __('treatments.period_intake')][$type] ?? '']) }}
+                        {{ __('treatments.per_unit', ['unit' => $fmtDose($currentDose) . ' ' . $unit, 'period' => ['daily' => __('treatments.period_day'), 'weekly' => __('treatments.period_week'), 'cyclic' => __('treatments.period_intake')][$type] ?? '']) }}
                     </span>
                 @endif
             </div>

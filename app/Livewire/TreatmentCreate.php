@@ -182,13 +182,13 @@ class TreatmentCreate extends Component
 
     public function increment(): void
     {
-        $step = $this->unit === 'ml' ? 0.1 : 0.5;
+        $step = $this->unit === 'ml' ? 0.1 : 0.25;
         $this->currentDose = round($this->currentDose + $step, 2);
     }
 
     public function decrement(): void
     {
-        $step = $this->unit === 'ml' ? 0.1 : 0.5;
+        $step = $this->unit === 'ml' ? 0.1 : 0.25;
         $this->currentDose = max(0, round($this->currentDose - $step, 2));
     }
 
@@ -206,37 +206,37 @@ class TreatmentCreate extends Component
 
     public function incrementMorning(): void
     {
-        $step = $this->unit === 'ml' ? 0.1 : 0.5;
+        $step = $this->unit === 'ml' ? 0.1 : 0.25;
         $this->doseMorning = round(($this->doseMorning ?? 0) + $step, 2);
     }
 
     public function decrementMorning(): void
     {
-        $step = $this->unit === 'ml' ? 0.1 : 0.5;
+        $step = $this->unit === 'ml' ? 0.1 : 0.25;
         $this->doseMorning = max(0, round(($this->doseMorning ?? 0) - $step, 2));
     }
 
     public function incrementNoon(): void
     {
-        $step = $this->unit === 'ml' ? 0.1 : 0.5;
+        $step = $this->unit === 'ml' ? 0.1 : 0.25;
         $this->doseNoon = round(($this->doseNoon ?? 0) + $step, 2);
     }
 
     public function decrementNoon(): void
     {
-        $step = $this->unit === 'ml' ? 0.1 : 0.5;
+        $step = $this->unit === 'ml' ? 0.1 : 0.25;
         $this->doseNoon = max(0, round(($this->doseNoon ?? 0) - $step, 2));
     }
 
     public function incrementEvening(): void
     {
-        $step = $this->unit === 'ml' ? 0.1 : 0.5;
+        $step = $this->unit === 'ml' ? 0.1 : 0.25;
         $this->doseEvening = round(($this->doseEvening ?? 0) + $step, 2);
     }
 
     public function decrementEvening(): void
     {
-        $step = $this->unit === 'ml' ? 0.1 : 0.5;
+        $step = $this->unit === 'ml' ? 0.1 : 0.25;
         $this->doseEvening = max(0, round(($this->doseEvening ?? 0) - $step, 2));
     }
 

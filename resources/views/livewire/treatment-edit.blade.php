@@ -365,7 +365,7 @@
                         −
                     </button>
                     <div class="flex-1 text-center">
-                        @php $epv = (float)($part['value'] ?? 0); $epdec = $treatment->unit === 'ml' ? 1 : ($epv != (int)$epv ? 1 : 0); @endphp
+                        @php $epv = (float)($part['value'] ?? 0); $epdec = $treatment->unit === 'ml' ? 1 : ($epv == (int)$epv ? 0 : (fmod($epv * 2, 1) == 0.0 ? 1 : 2)); @endphp
                         <p class="text-3xl font-extrabold leading-none" style="color: {{ $treatment->color }};">
                             {{ number_format($epv, $epdec, ',', '') }}
                         </p>
@@ -389,7 +389,7 @@
                     −
                 </button>
                 <div class="flex-1 text-center">
-                    @php $eid = (float)($newDose ?? 0); $eidec = $treatment->unit === 'ml' ? 1 : ($eid != (int)$eid ? 1 : 0); @endphp
+                    @php $eid = (float)($newDose ?? 0); $eidec = $treatment->unit === 'ml' ? 1 : ($eid == (int)$eid ? 0 : (fmod($eid * 2, 1) == 0.0 ? 1 : 2)); @endphp
                     <p class="text-4xl font-extrabold leading-none" style="color: {{ $treatment->color }};">
                         {{ number_format($eid, $eidec, ',', '') }}
                     </p>
@@ -427,7 +427,7 @@
                     −
                 </button>
                 <div class="flex-1 text-center">
-                    @php $esd = (float)($newDose ?? 0); $esdec = $treatment->unit === 'ml' ? 1 : ($esd != (int)$esd ? 1 : 0); @endphp
+                    @php $esd = (float)($newDose ?? 0); $esdec = $treatment->unit === 'ml' ? 1 : ($esd == (int)$esd ? 0 : (fmod($esd * 2, 1) == 0.0 ? 1 : 2)); @endphp
                     <p class="text-4xl font-extrabold leading-none" style="color: {{ $treatment->color }};">
                         {{ number_format($esd, $esdec, ',', '') }}
                     </p>
