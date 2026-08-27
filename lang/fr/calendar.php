@@ -16,6 +16,8 @@ return [
     'move_event'         => 'Déplacer l\'événement',
     'move_choose_date'   => 'Choisir la nouvelle date :',
     'move_choose_moment' => 'Moment de la prise :',
+    'move_shift_future'      => 'Décaler aussi les occurrences suivantes',
+    'move_shift_future_hint' => 'Ré-ancre le cycle sur la nouvelle date. Les occurrences passées et celles déjà déplacées manuellement restent inchangées.',
     'moment_morning'     => 'Matin',
     'moment_noon'        => 'Midi',
     'moment_evening'     => 'Soir',

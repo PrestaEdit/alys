@@ -24,6 +24,10 @@ class Calendar extends Component
     public string $moveToMoment = '';
     /** @var list<string> Dayparts available for the moving event's treatment. */
     public array $moveMomentOptions = [];
+    /** Le traitement de l'événement à déplacer est-il récurrent et ré-ancrable ? */
+    public bool $moveCanShiftFuture = false;
+    /** L'utilisateur veut-il aussi décaler toutes les occurrences suivantes ? */
+    public bool $moveShiftFuture = false;
 
     // Événements personnels
     public bool $showEventModal = false;
@@ -84,6 +88,11 @@ class Calendar extends Component
         $this->moveMomentOptions = $this->momentOptionsForEvent($event);
         $this->moveToMoment = $this->moveMomentOptions[0] ?? '';
 
+        // Ré-ancrage possible uniquement pour un événement racine d'un traitement récurrent.
+        $this->moveCanShiftFuture = $event->parent_event_id === null
+            && in_array($event->treatment->type, ['weekly', 'cyclic'], true);
+        $this->moveShiftFuture = false;
+
         $this->showMoveModal = true;
     }
 
@@ -107,12 +116,67 @@ class Calendar extends Component
             $moveService->move($event, $this->moveToDate);
         }
 
+        if ($this->moveCanShiftFuture && $this->moveShiftFuture) {
+            $this->reanchorRecurrence($event->treatment, $this->moveToDate, $event->id);
+        }
+
         $this->showMoveModal = false;
         $this->movingEventId = null;
         $this->moveToMoment = '';
         $this->moveMomentOptions = [];
+        $this->moveCanShiftFuture = false;
+        $this->moveShiftFuture = false;
         $this->loadMonth($calendarService);
         $this->loadDay($calendarService);
+    }
+
+    private function reanchorRecurrence(\App\Models\Treatment $treatment, string $newAnchorDate, int $movingEventId): void
+    {
+        $today = Carbon::today();
+        $newAnchor = Carbon::parse($newAnchorDate);
+
+        $updates = ['recurrence_start' => $newAnchorDate];
+        if ($treatment->type === 'weekly') {
+            $updates['day_of_week'] = $newAnchor->dayOfWeek;
+        }
+        $treatment->update($updates);
+        $treatment->refresh();
+
+        // Efface les occurrences futures non annulées et jamais déplacées manuellement.
+        // Preserve : l'événement qu'on vient de déplacer, les événements annulés, et
+        // ceux dont original_date est renseigné (déplacements manuels explicites).
+        $treatment->calendarEvents()
+            ->where('scheduled_date', '>', $today->toDateString())
+            ->where('is_cancelled', false)
+            ->whereNull('original_date')
+            ->where('id', '!=', $movingEventId)
+            ->delete();
+
+        $profile = app(ActiveProfile::class)->get();
+        if (! $profile) return;
+        $endDate = $profile->treatment_end;
+        if (! $endDate) return;
+
+        $freq = max(1, (int) $treatment->frequency_weeks);
+        $current = $newAnchor->copy();
+        // Avance jusqu'après aujourd'hui (l'événement déplacé peut être aujourd'hui ou dans le passé).
+        while ($current->lte($today)) {
+            $current->addWeeks($freq);
+        }
+
+        while ($current->lte($endDate)) {
+            $exists = $treatment->calendarEvents()
+                ->whereDate('scheduled_date', $current->toDateString())
+                ->exists();
+            if (! $exists) {
+                CalendarEvent::create([
+                    'treatment_id'   => $treatment->id,
+                    'scheduled_date' => $current->toDateString(),
+                    'is_cancelled'   => false,
+                ]);
+            }
+            $current->addWeeks($freq);
+        }
     }
 
     public function cancelMove(): void
@@ -122,6 +186,8 @@ class Calendar extends Component
         $this->moveToDate = '';
         $this->moveToMoment = '';
         $this->moveMomentOptions = [];
+        $this->moveCanShiftFuture = false;
+        $this->moveShiftFuture = false;
     }
 
     /** @return list<string> */

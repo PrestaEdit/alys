@@ -239,6 +239,17 @@
                 </div>
             @endif
 
+            @if($moveCanShiftFuture)
+                <label class="flex items-start gap-3 mb-4 p-3 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer">
+                    <input type="checkbox" wire:model.live="moveShiftFuture"
+                           class="mt-0.5 h-4 w-4 rounded border-slate-300 text-sky-500 focus:ring-sky-400">
+                    <span class="flex-1">
+                        <span class="block text-xs font-semibold text-slate-700">{{ __('calendar.move_shift_future') }}</span>
+                        <span class="block text-[11px] text-slate-500 mt-0.5">{{ __('calendar.move_shift_future_hint') }}</span>
+                    </span>
+                </label>
+            @endif
+
             <div class="flex gap-3">
                 <button wire:click="cancelMove"
                         class="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors">

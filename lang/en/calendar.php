@@ -16,6 +16,8 @@ return [
     'move_event'         => 'Move the event',
     'move_choose_date'   => 'Choose the new date:',
     'move_choose_moment' => 'Time of intake:',
+    'move_shift_future'      => 'Also shift all following occurrences',
+    'move_shift_future_hint' => 'Re-anchors the cycle to the new date. Past events and events already moved manually are left untouched.',
     'moment_morning'     => 'Morning',
     'moment_noon'        => 'Noon',
     'moment_evening'     => 'Evening',
