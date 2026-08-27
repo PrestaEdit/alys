@@ -78,19 +78,19 @@
                     @if($treatment->hasDayPartDoses())
                         <div class="space-y-0.5">
                             @if($treatment->dose_morning !== null)
-                            @php $dm = (float)$treatment->dose_morning; $dmdec = $treatment->unit === 'ml' ? 1 : ($dm != (int)$dm ? 1 : 0); @endphp
+                            @php $dm = (float)$treatment->dose_morning; $dmdec = $treatment->unit === 'ml' ? 1 : ($dm == (int)$dm ? 0 : (fmod($dm * 2, 1) == 0.0 ? 1 : 2)); @endphp
                             <p class="text-xs font-semibold" style="color: {{ $treatment->color }};">
                                 {{ __('treatments.morning') }} · {{ number_format($dm, $dmdec, ',', '') }}{{ $treatment->unit ? ' ' . $treatment->unit : '' }}
                             </p>
                             @endif
                             @if($treatment->dose_noon !== null)
-                            @php $dn = (float)$treatment->dose_noon; $dndec = $treatment->unit === 'ml' ? 1 : ($dn != (int)$dn ? 1 : 0); @endphp
+                            @php $dn = (float)$treatment->dose_noon; $dndec = $treatment->unit === 'ml' ? 1 : ($dn == (int)$dn ? 0 : (fmod($dn * 2, 1) == 0.0 ? 1 : 2)); @endphp
                             <p class="text-xs font-semibold" style="color: {{ $treatment->color }};">
                                 {{ __('treatments.noon') }} · {{ number_format($dn, $dndec, ',', '') }}{{ $treatment->unit ? ' ' . $treatment->unit : '' }}
                             </p>
                             @endif
                             @if($treatment->dose_evening !== null)
-                            @php $dev = (float)$treatment->dose_evening; $devdec = $treatment->unit === 'ml' ? 1 : ($dev != (int)$dev ? 1 : 0); @endphp
+                            @php $dev = (float)$treatment->dose_evening; $devdec = $treatment->unit === 'ml' ? 1 : ($dev == (int)$dev ? 0 : (fmod($dev * 2, 1) == 0.0 ? 1 : 2)); @endphp
                             <p class="text-xs font-semibold" style="color: {{ $treatment->color }};">
                                 {{ __('treatments.evening') }} · {{ number_format($dev, $devdec, ',', '') }}{{ $treatment->unit ? ' ' . $treatment->unit : '' }}
                             </p>
@@ -98,14 +98,14 @@
                         </div>
                     @elseif($treatment->hasIntervalDose())
                         @php $intervalH = $treatment->times_per_day > 0 ? round(24 / $treatment->times_per_day) : 0;
-                             $icd = (float)$treatment->current_dose; $icddec = $treatment->unit === 'ml' ? 1 : ($icd != (int)$icd ? 1 : 0); @endphp
+                             $icd = (float)$treatment->current_dose; $icddec = $treatment->unit === 'ml' ? 1 : ($icd == (int)$icd ? 0 : (fmod($icd * 2, 1) == 0.0 ? 1 : 2)); @endphp
                         <p class="text-xl font-extrabold leading-none" style="color: {{ $treatment->color }};">
                             {{ number_format($icd, $icddec, ',', '') }}
                             <span class="text-sm font-normal text-slate-400">{{ $treatment->unit }}</span>
                         </p>
                         <p class="text-xs text-slate-400 mt-0.5">{{ __('treatments.times_per_day_interval', ['count' => $treatment->times_per_day, 'hours' => $intervalH]) }}</p>
                     @elseif($treatment->current_dose !== null && (float)$treatment->current_dose > 0)
-                    @php $scd = (float)$treatment->current_dose; $scddec = $treatment->unit === 'ml' ? 1 : ($scd != (int)$scd ? 1 : 0); @endphp
+                    @php $scd = (float)$treatment->current_dose; $scddec = $treatment->unit === 'ml' ? 1 : ($scd == (int)$scd ? 0 : (fmod($scd * 2, 1) == 0.0 ? 1 : 2)); @endphp
                     <p class="text-xl font-extrabold leading-none" style="color: {{ $treatment->color }};">
                         {{ number_format($scd, $scddec, ',', '') }}
                         <span class="text-sm font-normal text-slate-400">{{ $treatment->unit }}</span>
