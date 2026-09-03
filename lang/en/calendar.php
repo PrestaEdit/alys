@@ -23,4 +23,6 @@ return [
     'moment_evening'     => 'Evening',
     'daypart_skip'       => 'Skip this intake',
     'daypart_restore'    => 'Restore this intake',
+    'skip'               => 'Skip',
+    'skip_confirm'       => 'Skip this occurrence?',
 ];

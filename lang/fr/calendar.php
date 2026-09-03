@@ -23,4 +23,6 @@ return [
     'moment_evening'     => 'Soir',
     'daypart_skip'       => 'Sauter cette prise',
     'daypart_restore'    => 'Restaurer cette prise',
+    'skip'               => 'Faire sauter',
+    'skip_confirm'       => 'Faire sauter cette occurrence ?',
 ];

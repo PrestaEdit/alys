@@ -8,6 +8,7 @@ use App\Services\ActiveProfile;
 use App\Services\BlockShiftService;
 use App\Services\CalendarService;
 use App\Services\EventMoveService;
+use App\Services\EventSkipService;
 use Carbon\Carbon;
 use Livewire\Component;
 
@@ -323,6 +324,15 @@ class Calendar extends Component
         $this->eventEndDate = '';
         $this->eventNotes = '';
         $this->resetErrorBag();
+    }
+
+    public function skipOccurrence(int $eventId, EventSkipService $skipService, CalendarService $calendarService): void
+    {
+        $event = CalendarEvent::findOrFail($eventId);
+        $skipService->skip($event);
+
+        $this->loadMonth($calendarService);
+        $this->loadDay($calendarService);
     }
 
     private function loadMonth(CalendarService $service): void
