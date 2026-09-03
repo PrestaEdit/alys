@@ -151,10 +151,17 @@
                     @endif
                 </div>
                 @if(!empty($event['can_move']) && $event['can_move'])
-                <button wire:click="openMoveModal({{ $event['id'] }})"
-                        class="text-xs text-sky-500 font-semibold border border-sky-200 rounded-lg px-2 py-1 bg-sky-50 hover:bg-sky-100 transition-colors flex-shrink-0">
-                    Déplacer
-                </button>
+                <div class="flex flex-col gap-1 flex-shrink-0">
+                    <button wire:click="openMoveModal({{ $event['id'] }})"
+                            class="text-xs text-sky-500 font-semibold border border-sky-200 rounded-lg px-2 py-1 bg-sky-50 hover:bg-sky-100 transition-colors">
+                        Déplacer
+                    </button>
+                    <button wire:click="skipOccurrence({{ $event['id'] }})"
+                            wire:confirm="Faire sauter cette occurrence ?"
+                            class="text-xs text-slate-500 font-semibold border border-slate-200 rounded-lg px-2 py-1 bg-white hover:bg-slate-50 transition-colors">
+                        Faire sauter
+                    </button>
+                </div>
                 @endif
             </div>
             @endforeach

@@ -149,7 +149,8 @@ class CalendarService
         $end = $start->copy()->endOfMonth();
 
         $events = CalendarEvent::with('treatment')
-            ->whereBetween('scheduled_date', [$start->toDateString(), $end->toDateString()])
+            ->whereDate('scheduled_date', '>=', $start->toDateString())
+            ->whereDate('scheduled_date', '<=', $end->toDateString())
             ->where('is_cancelled', false)
             ->whereHas('treatment', fn($q) => $q->whereNull('archived_at'))
             ->get()
