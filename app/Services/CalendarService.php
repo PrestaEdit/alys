@@ -97,8 +97,14 @@ class CalendarService
         $dateStr = $date->toDateString();
         $events = [];
 
-        // Daily treatments (not stored in calendar_events)
-        $dailyTreatments = Treatment::active()->where('type', 'daily')->with('posologyHistory')->get();
+        // Daily treatments (not stored in calendar_events).
+        // Un traitement lié à un parent n'est pas un vrai quotidien : ses events
+        // sont générés via parent_event_id et ne doivent apparaître que ces jours-là.
+        $dailyTreatments = Treatment::active()
+            ->where('type', 'daily')
+            ->whereNull('parent_treatment_id')
+            ->with('posologyHistory')
+            ->get();
         foreach ($dailyTreatments as $treatment) {
             $events[] = [
                 'kind'            => 'treatment',
