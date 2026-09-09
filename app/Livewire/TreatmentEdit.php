@@ -103,6 +103,14 @@ class TreatmentEdit extends Component
         $this->editParentTreatmentId = $treatment->parent_treatment_id;
         $this->editLinkedDays = $treatment->linked_days ?? 1;
 
+        // Traitement lié : le type est forcément daily. Normalise un état hérité
+        // incohérent (avant la règle d'exclusivité, un traitement pouvait être lié
+        // ET récurrent autonome — on remet à daily pour que la sauvegarde nettoie).
+        if ($this->editParentTreatmentId) {
+            $this->editType = 'daily';
+            $this->editRecurrenceStart = '';
+        }
+
         // Widget
         $this->showWidget = (bool) $treatment->show_widget;
         $this->widgetIcon = $treatment->widget_icon ?? 'pill';
@@ -305,7 +313,7 @@ class TreatmentEdit extends Component
         $parentChanged   = $this->editParentTreatmentId !== $prevParentId;
         $daysChanged     = $this->editLinkedDays !== $prevLinkedDays;
 
-        $this->treatment->update([
+        $updates = [
             'name'                 => $this->editName,
             'commercial_name'      => $this->editCommercialName ?: null,
             'type'                 => $this->editType,
@@ -320,7 +328,29 @@ class TreatmentEdit extends Component
             'dose_evening'         => !$this->editIsMedicalAct ? $this->treatment->dose_evening : null,
             'parent_treatment_id'  => $this->editParentTreatmentId,
             'linked_days'          => $this->editParentTreatmentId ? $this->editLinkedDays : null,
-        ]);
+        ];
+
+        // Traitement lié : efface les résidus de récurrence autonome héritée
+        // (état incohérent avant la règle d'exclusivité).
+        if ($this->editParentTreatmentId) {
+            $updates['recurrence_start'] = null;
+            $updates['frequency_weeks']  = null;
+            $updates['day_of_week']      = null;
+        }
+
+        $this->treatment->update($updates);
+
+        // Traitement lié : purge les futurs events "cycliques autonomes" (sans
+        // parent_event_id) hérités d'une ancienne double génération. Ne touche
+        // qu'aux events futurs non annulés et jamais déplacés manuellement.
+        if ($this->editParentTreatmentId) {
+            $this->treatment->calendarEvents()
+                ->whereNull('parent_event_id')
+                ->where('scheduled_date', '>', Carbon::today()->toDateString())
+                ->where('is_cancelled', false)
+                ->whereNull('original_date')
+                ->delete();
+        }
 
         // Regenerate linked events if parent or duration changed
         if ($parentChanged || $daysChanged) {
