@@ -269,6 +269,21 @@ class TreatmentEdit extends Component
 
     // ── Save info ──────────────────────────────────────────────────────
 
+    public function updatedEditType(): void
+    {
+        if (in_array($this->editType, ['weekly', 'cyclic'], true) && $this->editParentTreatmentId) {
+            $this->editParentTreatmentId = null;
+        }
+    }
+
+    public function updatedEditParentTreatmentId(): void
+    {
+        if ($this->editParentTreatmentId) {
+            $this->editType = 'daily';
+            $this->editRecurrenceStart = '';
+        }
+    }
+
     public function saveInfo(): void
     {
         $this->validate([
@@ -279,6 +294,11 @@ class TreatmentEdit extends Component
             'editParentTreatmentId' => 'nullable|integer|exists:treatments,id',
             'editLinkedDays' => 'required|integer|min:1',
         ]);
+
+        if ($this->editParentTreatmentId && in_array($this->editType, ['weekly', 'cyclic'], true)) {
+            $this->addError('editType', __('treatments.validation_linked_no_recurrence'));
+            return;
+        }
 
         $prevParentId    = $this->treatment->parent_treatment_id;
         $prevLinkedDays  = $this->treatment->linked_days ?? 1;

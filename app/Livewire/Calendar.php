@@ -89,8 +89,10 @@ class Calendar extends Component
         $this->moveMomentOptions = $this->momentOptionsForEvent($event);
         $this->moveToMoment = $this->moveMomentOptions[0] ?? '';
 
-        // Ré-ancrage possible uniquement pour un événement racine d'un traitement récurrent.
+        // Ré-ancrage possible uniquement pour un événement racine d'un traitement
+        // récurrent autonome (les traitements liés suivent le rythme du parent).
         $this->moveCanShiftFuture = $event->parent_event_id === null
+            && $event->treatment->parent_treatment_id === null
             && in_array($event->treatment->type, ['weekly', 'cyclic'], true);
         $this->moveShiftFuture = false;
 

@@ -157,6 +157,8 @@ return [
     'validation_frequency_min'   => 'The frequency must be at least 1 week.',
     'validation_start_date'      => 'The start date is invalid.',
     'validation_parent_exists'   => 'The linked treatment does not exist.',
+    'validation_linked_no_recurrence' => 'A linked treatment follows its parent\'s schedule: pick either a parent treatment or its own recurrence.',
+    'type_locked_by_parent'      => 'This treatment is linked: it follows the parent treatment\'s schedule automatically.',
     'validation_notif_time_required'  => 'The notification time is required.',
     'validation_notif_time_format'    => 'Invalid time format (HH:MM).',
     'validation_notif_time_format_short' => 'Invalid format (HH:MM).',

@@ -173,6 +173,25 @@ class TreatmentCreate extends Component
 
     public function updatedType(): void
     {
+        // Un traitement récurrent autonome ne peut pas être lié à un parent :
+        // c'est l'un ou l'autre. Choisir weekly/cyclic détache le parent.
+        if (in_array($this->type, ['weekly', 'cyclic'], true) && $this->parentTreatmentId) {
+            $this->parentTreatmentId = null;
+        }
+
+        if (!in_array($this->step, $this->applicableSteps())) {
+            $this->step = 1;
+        }
+    }
+
+    public function updatedParentTreatmentId(): void
+    {
+        // Un traitement lié suit le rythme de son parent : pas de récurrence propre.
+        if ($this->parentTreatmentId) {
+            $this->type = 'daily';
+            $this->recurrenceStart = '';
+        }
+
         if (!in_array($this->step, $this->applicableSteps())) {
             $this->step = 1;
         }
@@ -287,6 +306,12 @@ class TreatmentCreate extends Component
             'recurrenceStart.date'       => __('treatments.validation_start_date'),
             'parentTreatmentId.exists'   => __('treatments.validation_parent_exists'),
         ]);
+
+        // Un traitement lié ne peut pas être récurrent autonome.
+        if ($this->parentTreatmentId && in_array($this->type, ['weekly', 'cyclic'], true)) {
+            $this->addError('type', __('treatments.validation_linked_no_recurrence'));
+            return;
+        }
 
         $treatmentData = [
             'name'                => $this->name,

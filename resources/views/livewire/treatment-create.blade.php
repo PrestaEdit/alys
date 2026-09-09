@@ -71,19 +71,25 @@
 
         <div class="mb-4">
             <label class="block text-xs font-semibold text-slate-600 mb-2">{{ __('treatments.type') }} *</label>
-            <div class="grid grid-cols-3 gap-2">
-                @foreach([
-                    ['daily', __('treatments.type_daily')],
-                    ['weekly', __('treatments.type_weekly')],
-                    ['cyclic', __('treatments.type_cyclic')],
-                ] as [$val, $label])
-                <label class="flex items-center justify-center px-2 py-2.5 rounded-xl border cursor-pointer transition-colors
-                              {{ $type === $val ? 'border-sky-400 bg-sky-50 text-sky-700' : 'border-slate-200 text-slate-600 hover:border-slate-300' }}">
-                    <input type="radio" wire:model.live="type" value="{{ $val }}" class="hidden">
-                    <span class="text-xs font-semibold text-center">{{ $label }}</span>
-                </label>
-                @endforeach
-            </div>
+            @if($parentTreatmentId)
+                <p class="text-xs text-slate-500 italic px-3 py-2 rounded-xl bg-slate-50 border border-slate-200">
+                    {{ __('treatments.type_locked_by_parent') }}
+                </p>
+            @else
+                <div class="grid grid-cols-3 gap-2">
+                    @foreach([
+                        ['daily', __('treatments.type_daily')],
+                        ['weekly', __('treatments.type_weekly')],
+                        ['cyclic', __('treatments.type_cyclic')],
+                    ] as [$val, $label])
+                    <label class="flex items-center justify-center px-2 py-2.5 rounded-xl border cursor-pointer transition-colors
+                                  {{ $type === $val ? 'border-sky-400 bg-sky-50 text-sky-700' : 'border-slate-200 text-slate-600 hover:border-slate-300' }}">
+                        <input type="radio" wire:model.live="type" value="{{ $val }}" class="hidden">
+                        <span class="text-xs font-semibold text-center">{{ $label }}</span>
+                    </label>
+                    @endforeach
+                </div>
+            @endif
             @error('type') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
         </div>
 

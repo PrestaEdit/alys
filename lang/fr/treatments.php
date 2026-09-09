@@ -157,6 +157,8 @@ return [
     'validation_frequency_min'   => "La fréquence doit être d'au moins 1 semaine.",
     'validation_start_date'      => 'La date de début est invalide.',
     'validation_parent_exists'   => "Le traitement lié n'existe pas.",
+    'validation_linked_no_recurrence' => "Un traitement lié suit le rythme de son parent : choisis soit un traitement parent, soit une récurrence propre.",
+    'type_locked_by_parent'      => "Ce traitement est lié : il suit automatiquement le rythme du traitement parent.",
     'validation_notif_time_required'  => "L'heure de notification est obligatoire.",
     'validation_notif_time_format'    => "Format d'heure invalide (HH:MM).",
     'validation_notif_time_format_short' => 'Format invalide (HH:MM).',
