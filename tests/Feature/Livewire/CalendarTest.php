@@ -22,14 +22,14 @@ it('starts on current month', function () {
 
 it('can navigate to next month', function () {
     $component = Livewire::test(Calendar::class);
-    $nextMonth = now()->addMonth()->month;
+    $nextMonth = now()->startOfMonth()->addMonth()->month;
     $component->call('nextMonth');
     expect($component->get('month'))->toBe($nextMonth);
 });
 
 it('can navigate to previous month', function () {
     $component = Livewire::test(Calendar::class);
-    $prevMonth = now()->subMonth()->month;
+    $prevMonth = now()->startOfMonth()->subMonth()->month;
     $component->call('previousMonth');
     expect($component->get('month'))->toBe($prevMonth);
 });
