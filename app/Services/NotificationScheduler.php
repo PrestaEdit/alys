@@ -7,6 +7,7 @@ use App\Models\Treatment;
 use Carbon\Carbon;
 use Ikromjon\LocalNotifications\Enums\RepeatInterval;
 use Ikromjon\LocalNotifications\Facades\LocalNotifications;
+use App\Support\Platform;
 
 class NotificationScheduler
 {
@@ -206,6 +207,11 @@ class NotificationScheduler
     {
         if (! function_exists('nativephp_call')) {
             return false;
+        }
+
+        // iOS n'a pas d'optimisation batterie qui tue les alarmes : snooze toujours fiable
+        if (Platform::isIos()) {
+            return true;
         }
 
         $result = nativephp_call('Battery.CheckStatus', '{}');

@@ -22,6 +22,13 @@
     </script>
     <script>
         (function () {
+            var isIos = @json(\App\Support\Platform::isIos());
+
+            // Insets injectés par le shell natif iOS (--inset-top/--inset-bottom)
+            function nativeInset(name) {
+                return parseFloat(document.documentElement.style.getPropertyValue('--inset-' + name)) || 0;
+            }
+
             // Mesure réelle de env(safe-area-inset-*) via un élément test
             var probe = document.createElement('div');
             probe.style.cssText = 'position:fixed;top:0;left:0;width:0;pointer-events:none;visibility:hidden;' +
@@ -30,21 +37,29 @@
 
             function apply() {
                 var top = probe.getBoundingClientRect().height;
-                // Si CSS env() ne retourne rien (0), on tente window.visualViewport
+                // iOS : si env() ne retourne rien, on se fie aux insets natifs.
+                // Jamais le fallback 48 px Android (iPhone sans encoche = 20 px, avec Dynamic Island ≈ 59 px).
+                if (top === 0 && isIos) {
+                    top = nativeInset('top');
+                }
+                // Android : si CSS env() ne retourne rien (0), on tente window.visualViewport
                 // ou on applique un minimum raisonnable pour les encoches Android
-                if (top === 0) {
+                else if (top === 0) {
                     var vvOffset = (window.visualViewport && window.visualViewport.offsetTop) || 0;
                     top = vvOffset > 0 ? vvOffset : 48; // 48 px = encoche standard Android
                 }
                 document.documentElement.style.setProperty('--safe-top', top + 'px');
 
-                // Barre de navigation bas (Android gesture bar)
+                // Barre de navigation bas (Android gesture bar / indicateur d'accueil iOS)
                 var probeBottom = document.createElement('div');
                 probeBottom.style.cssText = 'position:fixed;bottom:0;left:0;width:0;pointer-events:none;visibility:hidden;' +
                     'height:env(safe-area-inset-bottom,0px);';
                 document.documentElement.appendChild(probeBottom);
                 var bottom = probeBottom.getBoundingClientRect().height;
                 document.documentElement.removeChild(probeBottom);
+                if (bottom === 0 && isIos) {
+                    bottom = nativeInset('bottom');
+                }
                 document.documentElement.style.setProperty('--safe-bottom', bottom + 'px');
             }
 
@@ -52,6 +67,20 @@
                 document.addEventListener('DOMContentLoaded', apply);
             } else {
                 apply();
+            }
+
+            // iOS : le shell injecte --inset-* après le chargement de la page.
+            // On remesure dès que la valeur injectée change.
+            if (isIos && window.MutationObserver) {
+                var lastInset = nativeInset('top');
+                new MutationObserver(function () {
+                    var current = nativeInset('top');
+                    if (current !== lastInset) {
+                        lastInset = current;
+                        apply();
+                    }
+                }).observe(document.documentElement, { attributes: true, attributeFilter: ['style'] });
+                window.addEventListener('load', apply);
             }
         })();
     </script>
@@ -72,28 +101,28 @@
             <native:bottom-nav active-color="#0ea5e9">
                 <native:bottom-nav-item
                     id="home"
-                    icon="{{ \Native\Mobile\Facades\System::isIos() ? 'house.fill' : 'home' }}"
+                    icon="{{ \App\Support\Platform::isIos() ? 'house.fill' : 'home' }}"
                     label="{{ __('nav.home') }}"
                     url="{{ route('home') }}"
                     :active="request()->routeIs('home')"
                 />
                 <native:bottom-nav-item
                     id="calendar"
-                    icon="{{ \Native\Mobile\Facades\System::isIos() ? 'calendar' : 'calendar_today' }}"
+                    icon="{{ \App\Support\Platform::isIos() ? 'calendar' : 'calendar_today' }}"
                     label="{{ __('nav.calendar') }}"
                     url="{{ route('calendar') }}"
                     :active="request()->routeIs('calendar')"
                 />
                 <native:bottom-nav-item
                     id="treatments"
-                    icon="{{ \Native\Mobile\Facades\System::isIos() ? 'list.bullet' : 'list' }}"
+                    icon="{{ \App\Support\Platform::isIos() ? 'list.bullet' : 'list' }}"
                     label="{{ __('nav.treatments') }}"
                     url="{{ route('treatments') }}"
                     :active="request()->routeIs('treatments*')"
                 />
                 <native:bottom-nav-item
                     id="settings"
-                    icon="{{ \Native\Mobile\Facades\System::isIos() ? 'gearshape.fill' : 'settings' }}"
+                    icon="{{ \App\Support\Platform::isIos() ? 'gearshape.fill' : 'settings' }}"
                     label="{{ __('nav.settings') }}"
                     url="{{ route('settings') }}"
                     :active="request()->routeIs('settings')"

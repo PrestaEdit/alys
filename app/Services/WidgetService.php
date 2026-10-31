@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Carbon\Carbon;
+use App\Support\Platform;
 
 class WidgetService
 {
@@ -11,6 +12,8 @@ class WidgetService
     public function refresh(): void
     {
         if (!function_exists('nativephp_call')) return;
+        // Widgets d'écran d'accueil : Android uniquement (pas d'équivalent WidgetKit côté iOS)
+        if (!Platform::isAndroid()) return;
 
         $today = Carbon::today();
 

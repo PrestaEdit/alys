@@ -6,6 +6,7 @@ use App\Models\Setting;
 use App\Services\NotificationScheduler;
 use Ikromjon\LocalNotifications\Facades\LocalNotifications;
 use Livewire\Component;
+use App\Support\Platform;
 
 class Settings extends Component
 {
@@ -57,7 +58,8 @@ class Settings extends Component
 
     private function requestBatteryUnrestricted(): void
     {
-        if (! function_exists('nativephp_call')) {
+        // Exemption batterie : Android uniquement
+        if (! function_exists('nativephp_call') || ! Platform::isAndroid()) {
             return;
         }
 
