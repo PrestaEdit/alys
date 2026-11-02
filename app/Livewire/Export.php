@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Events\Native\FileSaved;
 use App\Models\Profile;
 use App\Services\ExportService;
+use App\Support\Platform;
 use Livewire\Component;
 use Native\Mobile\Attributes\OnNative;
 use Native\Mobile\Facades\SecureStorage;
@@ -154,7 +155,13 @@ class Export extends Component
             return;
         }
 
-        Share::file(__('data.export_share_title'), __('data.export_share_text'), $this->generatedPath);
+        // iOS : titre et texte deviennent des éléments partagés à part entière
+        // (« Enregistrer dans Fichiers » créerait des .txt à côté du .alys) → fichier seul.
+        if (Platform::isIos()) {
+            Share::file('', '', $this->generatedPath);
+        } else {
+            Share::file(__('data.export_share_title'), __('data.export_share_text'), $this->generatedPath);
+        }
         $this->success = true;
     }
 

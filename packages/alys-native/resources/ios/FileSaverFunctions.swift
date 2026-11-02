@@ -49,9 +49,13 @@ enum FileSaverFunctions {
                 return [:]
             }
 
-            // Copie sous le nom voulu : le sélecteur iOS reprend le nom du fichier exporté
-            let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(filename)
+            // Copie sous le nom voulu : le sélecteur iOS reprend le nom du fichier exporté.
+            // Dans un sous-dossier dédié : la source vit souvent déjà dans tmp/ sous ce même nom,
+            // et la supprimer casserait la copie (et un partage ultérieur).
+            let exportDir = FileManager.default.temporaryDirectory.appendingPathComponent("FileSaver", isDirectory: true)
+            let tempURL = exportDir.appendingPathComponent(filename)
             do {
+                try FileManager.default.createDirectory(at: exportDir, withIntermediateDirectories: true)
                 try? FileManager.default.removeItem(at: tempURL)
                 try FileManager.default.copyItem(at: source, to: tempURL)
             } catch {
