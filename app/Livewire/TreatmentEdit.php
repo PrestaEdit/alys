@@ -482,6 +482,9 @@ class TreatmentEdit extends Component
 
         if ($recalculate) {
             $this->recalculateFutureEvents();
+            // Les occurrences du parent ont été recréées : les traitements liés
+            // doivent retrouver leur bloc sur les nouvelles dates.
+            app(\App\Services\LinkedEventSync::class)->syncChildrenOf($this->treatment);
         }
 
         $this->dispatch('toast', message: __('treatments.recurrence_updated'));

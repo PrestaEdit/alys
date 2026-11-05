@@ -60,6 +60,40 @@ class ImportService
         $this->importTreatments($data['treatments'], $profileIdMap, $selectedTreatments);
         $this->importHistory($data['posology_history'], $profileIdMap, $selectedTreatments);
         $this->importEvents($data['calendar_events'], $profileIdMap, $selectedTreatments);
+        $this->importLinks($data['treatments'], $profileIdMap, $selectedTreatments);
+    }
+
+    /**
+     * Restaure le lien parent ↔ enfant (par nom, dans le même profil) une fois
+     * tous les traitements importés, puis régénère les blocs liés : le fichier
+     * ne transporte pas parent_event_id, les events enfants importés sont donc
+     * rattachés à nouveau aux occurrences du parent.
+     */
+    private function importLinks(array $treatments, array $profileIdMap, ?array $selectedTreatments): void
+    {
+        $sync = app(LinkedEventSync::class);
+
+        foreach ($treatments as $t) {
+            if (empty($t['parent_treatment_name']) || ! $this->isSelected($t, $selectedTreatments)) {
+                continue;
+            }
+
+            $profileId = $this->resolveProfileId($t, $profileIdMap);
+            $child = Treatment::withoutGlobalScopes()
+                ->where('name', $t['name'])->where('profile_id', $profileId)->first();
+            $parent = Treatment::withoutGlobalScopes()
+                ->where('name', $t['parent_treatment_name'])->where('profile_id', $profileId)->first();
+
+            if (! $child || ! $parent || $child->id === $parent->id) {
+                continue;
+            }
+
+            $child->update([
+                'parent_treatment_id' => $parent->id,
+                'linked_days'         => max(1, (int) ($t['linked_days'] ?? 1)),
+            ]);
+            $sync->syncChild($child);
+        }
     }
 
     private function isSelected(array $item, ?array $selectedTreatments, string $nameKey = 'name'): bool
