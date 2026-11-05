@@ -38,6 +38,10 @@ class ExportService
             'archived_at'     => $p->archived_at?->toIso8601String(),
         ])->toArray();
 
+        $parentNames = Treatment::withoutGlobalScopes()
+            ->whereIn('id', $treatmentModels->pluck('parent_treatment_id')->filter()->unique()->all())
+            ->pluck('name', 'id');
+
         $treatments = $treatmentModels->map(fn($t) => [
             'profile_id'       => $t->profile_id,
             'name'             => $t->name,
@@ -58,6 +62,15 @@ class ExportService
             'show_widget'      => $t->show_widget,
             'widget_icon'      => $t->widget_icon,
             'archived_at'      => $t->archived_at?->toIso8601String(),
+            'parent_treatment_name' => $t->parent_treatment_id ? $parentNames->get($t->parent_treatment_id) : null,
+            'linked_days'      => $t->linked_days,
+            'notification_enabled'       => $t->notification_enabled,
+            'notification_time_morning'  => $t->notification_time_morning,
+            'notification_time_noon'     => $t->notification_time_noon,
+            'notification_time_evening'  => $t->notification_time_evening,
+            'order_reminder_enabled'     => $t->order_reminder_enabled,
+            'order_reminder_days_before' => $t->order_reminder_days_before,
+            'order_reminder_time'        => $t->order_reminder_time,
         ])->toArray();
 
         $activeTreatmentIds = $treatmentModels->pluck('id')->all();

@@ -17,7 +17,9 @@ class EventSkipService
             $this->restoreMtxOnDate($event->scheduled_date->toDateString());
         }
 
-        if ($event->treatment->name === 'VCR') {
+        // Un traitement lié suit son parent : sauter l'occurrence parente
+        // saute aussi son bloc (quel que soit le nom du traitement parent).
+        if ($event->parent_event_id === null) {
             $this->skipChildEvents($event);
         }
     }
@@ -31,7 +33,7 @@ class EventSkipService
             $this->cancelMtxOnDate($event->scheduled_date->toDateString());
         }
 
-        if ($event->treatment->name === 'VCR') {
+        if ($event->parent_event_id === null) {
             $this->restoreChildEvents($event);
         }
     }

@@ -244,6 +244,46 @@
         </div>
         @endif
 
+        {{-- Rappel de commande : uniquement pour un traitement qui a des blocs datés --}}
+        @if($editParentTreatmentId || $editType === 'weekly' || $editType === 'cyclic')
+        <div class="flex items-center justify-between mb-4 pt-4 border-t border-slate-100">
+            <div>
+                <span class="text-sm font-semibold text-slate-700">{{ __('treatments.order_reminder') }}</span>
+                <p class="text-xs text-slate-400">{{ __('treatments.order_reminder_help') }}</p>
+            </div>
+            <button type="button" wire:click="$toggle('orderReminderEnabled')"
+                    style="position:relative;display:inline-block;width:44px;height:24px;border-radius:9999px;background-color:{{ $orderReminderEnabled ? '#0ea5e9' : '#94a3b8' }};border:none;cursor:pointer;flex-shrink:0;transition:background-color .2s;">
+                <span style="position:absolute;top:4px;left:{{ $orderReminderEnabled ? '24px' : '4px' }};width:16px;height:16px;border-radius:9999px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:left .15s;"></span>
+            </button>
+        </div>
+
+        @if($orderReminderEnabled)
+        <div class="space-y-3 mb-5">
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1.5">{{ __('treatments.order_reminder_days_before') }}</label>
+                <div class="flex items-center gap-3">
+                    <button type="button" wire:click="decrementOrderReminderDays"
+                            class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 text-xl font-light hover:bg-slate-200 transition-colors flex items-center justify-center">
+                        −
+                    </button>
+                    <div class="flex-1 text-center">
+                        <p class="text-lg font-extrabold text-slate-800">
+                            {{ $orderReminderDaysBefore }} {{ $orderReminderDaysBefore === 1 ? __('treatments.day') : __('treatments.days') }}
+                        </p>
+                    </div>
+                    <button type="button" wire:click="incrementOrderReminderDays"
+                            class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 text-xl font-light hover:bg-slate-200 transition-colors flex items-center justify-center">
+                        +
+                    </button>
+                </div>
+                @error('orderReminderDaysBefore') <p class="text-xs text-red-500 mt-2">{{ $message }}</p> @enderror
+            </div>
+            <x-time-picker :label="__('treatments.order_reminder_time')" property="orderReminderTime" :value="$orderReminderTime" />
+            @error('orderReminderTime') <p class="text-xs text-red-500 mt-2">{{ $message }}</p> @enderror
+        </div>
+        @endif
+        @endif
+
         <button wire:click="saveNotification"
                 class="w-full py-2.5 rounded-xl text-sm font-semibold text-white transition-colors"
                 style="background: linear-gradient(135deg, #0ea5e9, #6366f1);">

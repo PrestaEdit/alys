@@ -172,4 +172,11 @@ return [
     'notifications_updated' => 'Notifications mises à jour.',
     'widget_updated'        => 'Widget mis à jour.',
     'recurrence_updated'    => 'Récurrence mise à jour.',
+
+    // Rappel de commande
+    'order_reminder' => 'Rappel de commande',
+    'order_reminder_help' => 'Notification avant chaque prochaine prise, pour commander à temps',
+    'order_reminder_days_before' => 'Prévenir combien de jours avant',
+    'order_reminder_time' => 'Heure du rappel',
+    'order_reminder_body' => 'Pensez à commander :name — prochaine prise le :date',
 ];

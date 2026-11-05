@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Services\ActiveProfile;
 use App\Services\CalendarService;
+use App\Services\LinkedEventSync;
 use App\Services\WidgetService;
 use Carbon\Carbon;
 use Livewire\Component;
@@ -21,8 +22,11 @@ class Dashboard extends Component
     public string $treatmentEndLabel = '';
     public ?array $nextEventPreview = null;
 
-    public function mount(CalendarService $service, ActiveProfile $activeProfile, WidgetService $widgetService): void
+    public function mount(CalendarService $service, ActiveProfile $activeProfile, WidgetService $widgetService, LinkedEventSync $linkedSync): void
     {
+        // Auto-réparation des traitements liés dont le bloc a été perdu.
+        $linkedSync->syncAll();
+
         $profile = $activeProfile->get();
         $this->patientName = $profile?->name ?? 'Alys';
 
@@ -48,9 +52,9 @@ class Dashboard extends Component
         $widgetService->refresh();
     }
 
-    public function refresh(CalendarService $service, ActiveProfile $activeProfile, WidgetService $widgetService): void
+    public function refresh(CalendarService $service, ActiveProfile $activeProfile, WidgetService $widgetService, LinkedEventSync $linkedSync): void
     {
-        $this->mount($service, $activeProfile, $widgetService);
+        $this->mount($service, $activeProfile, $widgetService, $linkedSync);
     }
 
     public function render(): \Illuminate\View\View
