@@ -52,9 +52,9 @@ class Dashboard extends Component
         $widgetService->refresh();
     }
 
-    public function refresh(CalendarService $service, ActiveProfile $activeProfile, WidgetService $widgetService): void
+    public function refresh(CalendarService $service, ActiveProfile $activeProfile, WidgetService $widgetService, LinkedEventSync $linkedSync): void
     {
-        $this->mount($service, $activeProfile, $widgetService);
+        $this->mount($service, $activeProfile, $widgetService, $linkedSync);
     }
 
     public function render(): \Illuminate\View\View
