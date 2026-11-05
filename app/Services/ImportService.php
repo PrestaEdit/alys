@@ -61,6 +61,28 @@ class ImportService
         $this->importHistory($data['posology_history'], $profileIdMap, $selectedTreatments);
         $this->importEvents($data['calendar_events'], $profileIdMap, $selectedTreatments);
         $this->importLinks($data['treatments'], $profileIdMap, $selectedTreatments);
+
+        // Les réglages de rappel ont pu changer : reprogramme les notifications.
+        app(NotificationScheduler::class)->rescheduleAll();
+    }
+
+    /**
+     * Réglages de rappel (prise + commande). Absents des anciens exports :
+     * on ne touche alors pas aux réglages locaux existants.
+     */
+    private function reminderFields(array $t): array
+    {
+        $keys = [
+            'notification_enabled', 'notification_time_morning', 'notification_time_noon',
+            'notification_time_evening', 'order_reminder_enabled', 'order_reminder_days_before',
+            'order_reminder_time',
+        ];
+
+        $fields = array_intersect_key($t, array_flip($keys));
+        if (array_key_exists('order_reminder_days_before', $fields) && $fields['order_reminder_days_before'] === null) {
+            unset($fields['order_reminder_days_before']);
+        }
+        return $fields;
     }
 
     /**
@@ -172,7 +194,7 @@ class ImportService
                     'show_widget'      => $t['show_widget'] ?? false,
                     'widget_icon'      => $t['widget_icon'] ?? null,
                     'archived_at'      => $t['archived_at'] ?? null,
-                ]
+                ] + $this->reminderFields($t)
             );
         }
     }

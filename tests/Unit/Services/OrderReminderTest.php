@@ -100,3 +100,55 @@ it('saves the order reminder from the treatment page, 3 days by default', functi
         ->and($other->order_reminder_days_before)->toBe(4)
         ->and($other->order_reminder_time)->toBe('18:30');
 });
+
+it('enables the order reminder from the creation wizard for a linked treatment', function () {
+    Livewire::test(\App\Livewire\TreatmentCreate::class)
+        ->set('name', 'Zophren')
+        ->set('color', '#3b82f6')
+        ->set('parentTreatmentId', $this->parent->id)
+        ->set('linkedDays', 2)
+        ->set('isMedicalAct', true)
+        ->assertSet('orderReminderDaysBefore', 3)
+        ->set('step', 6)
+        ->assertSee(__('treatments.order_reminder'))
+        ->set('orderReminderEnabled', true)
+        ->call('save');
+
+    $t = Treatment::where('name', 'Zophren')->first();
+    expect($t->order_reminder_enabled)->toBeTrue()
+        ->and($t->order_reminder_days_before)->toBe(3)
+        ->and($t->order_reminder_time)->toBe('09:00');
+});
+
+it('does not offer the order reminder at creation for a standalone daily treatment', function () {
+    Livewire::test(\App\Livewire\TreatmentCreate::class)
+        ->set('type', 'daily')
+        ->set('step', 6)
+        ->assertDontSee(__('treatments.order_reminder'));
+});
+
+it('keeps reminder settings through export and import', function () {
+    $this->child->update([
+        'order_reminder_days_before' => 5, 'order_reminder_time' => '18:00',
+        'notification_enabled' => true, 'notification_time_morning' => '08:15',
+    ]);
+
+    $crypto = new \App\Services\CryptoService();
+    $key    = $crypto->generateKey();
+    $alys   = (new \App\Services\ExportService())->generateEncrypted($key);
+
+    $this->child->update([
+        'order_reminder_enabled' => false, 'order_reminder_days_before' => 3,
+        'order_reminder_time' => null, 'notification_enabled' => false,
+        'notification_time_morning' => null,
+    ]);
+
+    (new \App\Services\ImportService($crypto))->restore($alys, $key);
+
+    $this->child->refresh();
+    expect($this->child->order_reminder_enabled)->toBeTrue()
+        ->and($this->child->order_reminder_days_before)->toBe(5)
+        ->and($this->child->order_reminder_time)->toBe('18:00')
+        ->and($this->child->notification_enabled)->toBeTrue()
+        ->and($this->child->notification_time_morning)->toBe('08:15');
+});
