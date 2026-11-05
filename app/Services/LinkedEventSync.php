@@ -38,10 +38,11 @@ class LinkedEventSync
             ->each(fn (Treatment $child) => $this->syncChild($child));
     }
 
-    public function syncChild(Treatment $child): void
+    /** @return bool true si des events ont été créés ou supprimés. */
+    public function syncChild(Treatment $child): bool
     {
         if ($child->parent_treatment_id === null) {
-            return;
+            return false;
         }
 
         $today = Carbon::today();
@@ -51,11 +52,11 @@ class LinkedEventSync
         // 1) Orphelins futurs : un event de traitement lié sans parent_event_id
         //    n'a pas de sens (parent supprimé, ou résidu d'une ancienne
         //    génération autonome). Le passé est conservé comme historique.
-        CalendarEvent::withoutGlobalScopes()
+        $changed = CalendarEvent::withoutGlobalScopes()
             ->where('treatment_id', $child->id)
             ->whereNull('parent_event_id')
             ->whereDate('scheduled_date', '>', $todayStr)
-            ->delete();
+            ->delete() > 0;
 
         // 2) Occurrences du parent dont le bloc touche aujourd'hui ou le futur
         //    et qui n'ont aucun event pour ce traitement lié → on (re)génère
@@ -83,7 +84,15 @@ class LinkedEventSync
                     'parent_event_id' => $parentEvent->id,
                     'is_cancelled'    => false,
                 ]);
+                $changed = true;
             }
         }
+
+        // Les dates ont changé : les rappels (prise, commande) doivent suivre.
+        if ($changed && ($child->notification_enabled || $child->order_reminder_enabled)) {
+            app(NotificationScheduler::class)->scheduleForTreatment($child);
+        }
+
+        return $changed;
     }
 }

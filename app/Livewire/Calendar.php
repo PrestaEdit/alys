@@ -10,6 +10,7 @@ use App\Services\CalendarService;
 use App\Services\EventMoveService;
 use App\Services\EventSkipService;
 use App\Services\LinkedEventSync;
+use App\Services\NotificationScheduler;
 use Carbon\Carbon;
 use Livewire\Component;
 
@@ -129,6 +130,9 @@ class Calendar extends Component
             // traitements liés sur ces nouvelles dates.
             app(LinkedEventSync::class)->syncChildrenOf($event->treatment);
         }
+
+        // Les dates ont changé : reprogramme rappels de prise et de commande.
+        app(NotificationScheduler::class)->rescheduleWithLinked($event->treatment);
 
         $this->showMoveModal = false;
         $this->movingEventId = null;
@@ -339,6 +343,7 @@ class Calendar extends Component
     {
         $event = CalendarEvent::findOrFail($eventId);
         $skipService->skip($event);
+        app(NotificationScheduler::class)->rescheduleWithLinked($event->treatment);
 
         $this->loadMonth($calendarService);
         $this->loadDay($calendarService);

@@ -172,4 +172,11 @@ return [
     'notifications_updated' => 'Notifications updated.',
     'widget_updated'        => 'Widget updated.',
     'recurrence_updated'    => 'Recurrence updated.',
+
+    // Rappel de commande
+    'order_reminder' => 'Order reminder',
+    'order_reminder_help' => 'Notification before each upcoming intake, to order in time',
+    'order_reminder_days_before' => 'How many days before',
+    'order_reminder_time' => 'Reminder time',
+    'order_reminder_body' => 'Remember to order :name — next intake on :date',
 ];
