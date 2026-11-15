@@ -58,7 +58,7 @@ it('schedules an order reminder N days before each future block', function () {
 
     $times = collect($scheduled)
         ->filter(fn ($o) => str_contains($o['id'], '-order-'))
-        ->map(fn ($o) => Carbon::createFromTimestamp($o['at'])->format('Y-m-d H:i'))
+        ->map(fn ($o) => Carbon::createFromTimestamp($o['at'], config('app.timezone'))->format('Y-m-d H:i'))
         ->values()->all();
 
     // Le bloc du 5 nov. est déjà commencé (rappel le 2 nov. passé) : ignoré.
