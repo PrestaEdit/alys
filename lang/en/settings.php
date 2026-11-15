@@ -33,4 +33,5 @@ return [
     'attributions'         => 'Credits',
     'attributions_medical' => 'Medical icons',
     'attributions_emoji'   => 'Emoji icons',
+    'attributions_emoji_owner' => 'Twitter, Inc. and other contributors',
 ];

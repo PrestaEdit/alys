@@ -103,7 +103,7 @@
         <p>{{ __('settings.attributions') }} :</p>
         <ul class="list-disc list-inside mt-1">
             <li>{{ __('settings.attributions_medical') }} : <a href="https://healthicons.org" class="underline">healthicons.org</a> (MIT)</li>
-            <li>{{ __('settings.attributions_emoji') }} : Twemoji (jdecked, CC-BY 4.0)</li>
+            <li>{{ __('settings.attributions_emoji') }} : <a href="https://github.com/jdecked/twemoji" class="underline">Twemoji</a> (© {{ __('settings.attributions_emoji_owner') }}, <a href="https://creativecommons.org/licenses/by/4.0/" class="underline">CC-BY 4.0</a>)</li>
         </ul>
     </div>
 
