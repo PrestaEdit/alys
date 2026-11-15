@@ -52,6 +52,21 @@ class TreatmentCreate extends Component
     public string $notificationTimeNoon = '12:30';
     public string $notificationTimeEvening = '20:00';
 
+    // Rappel de commande (X jours avant chaque bloc de prise)
+    public bool $orderReminderEnabled = false;
+    public int $orderReminderDaysBefore = 3;
+    public string $orderReminderTime = '09:00';
+
+    public function incrementOrderReminderDays(): void
+    {
+        $this->orderReminderDaysBefore = min(60, $this->orderReminderDaysBefore + 1);
+    }
+
+    public function decrementOrderReminderDays(): void
+    {
+        $this->orderReminderDaysBefore = max(1, $this->orderReminderDaysBefore - 1);
+    }
+
     public const WIDGET_ICONS = MedicalIcons::KEYS;
 
     public const COLORS = [
@@ -60,6 +75,11 @@ class TreatmentCreate extends Component
     ];
 
     // ── Wizard navigation ─────────────────────────────────────────────────
+
+    private function hasDatedBlocks(): bool
+    {
+        return $this->parentTreatmentId || in_array($this->type, ['weekly', 'cyclic'], true);
+    }
 
     public function applicableSteps(): array
     {
@@ -121,6 +141,15 @@ class TreatmentCreate extends Component
                 'color.required'  => __('treatments.validation_color_required'),
             ]);
         } elseif ($this->step === 6) {
+            if ($this->orderReminderEnabled) {
+                $this->validate(
+                    [
+                        'orderReminderDaysBefore' => 'required|integer|min:1|max:60',
+                        'orderReminderTime'       => 'required|date_format:H:i',
+                    ],
+                    ['orderReminderTime.date_format' => __('treatments.validation_notif_time_format')]
+                );
+            }
             if ($this->notificationEnabled) {
                 if (!$this->isMedicalAct && $this->dosageMode === 'dayparts') {
                     if (!$this->notificationTimeMorning && !$this->notificationTimeNoon && !$this->notificationTimeEvening) {
@@ -328,6 +357,10 @@ class TreatmentCreate extends Component
             'notification_time_morning' => $this->notificationEnabled ? ($this->notificationTimeMorning ?: null) : null,
             'notification_time_noon'    => ($this->notificationEnabled && $this->dosageMode === 'dayparts') ? ($this->notificationTimeNoon ?: null) : null,
             'notification_time_evening' => ($this->notificationEnabled && $this->dosageMode === 'dayparts') ? ($this->notificationTimeEvening ?: null) : null,
+            // Pas de bloc daté pour un quotidien autonome : le rappel n'y a pas de sens.
+            'order_reminder_enabled'     => $this->orderReminderEnabled && $this->hasDatedBlocks(),
+            'order_reminder_days_before' => $this->orderReminderDaysBefore,
+            'order_reminder_time'        => ($this->orderReminderEnabled && $this->hasDatedBlocks()) ? $this->orderReminderTime : null,
         ];
 
         if (!$this->isMedicalAct) {

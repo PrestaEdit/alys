@@ -58,6 +58,11 @@ class TreatmentEdit extends Component
     public string $notificationTimeNoon = '12:30';
     public string $notificationTimeEvening = '20:00';
 
+    // Rappel de commande (X jours avant chaque bloc de prise)
+    public bool $orderReminderEnabled = false;
+    public int $orderReminderDaysBefore = 3;
+    public string $orderReminderTime = '09:00';
+
     public const WIDGET_ICONS = MedicalIcons::KEYS;
 
     public const COLORS = [
@@ -120,6 +125,9 @@ class TreatmentEdit extends Component
         $this->notificationTimeMorning = $treatment->notification_time_morning ?? '08:00';
         $this->notificationTimeNoon    = $treatment->notification_time_noon    ?? '12:30';
         $this->notificationTimeEvening = $treatment->notification_time_evening ?? '20:00';
+        $this->orderReminderEnabled    = (bool) $treatment->order_reminder_enabled;
+        $this->orderReminderDaysBefore = (int) ($treatment->order_reminder_days_before ?? 3);
+        $this->orderReminderTime       = $treatment->order_reminder_time ?? '09:00';
     }
 
     // ── Dosage mode switch ─────────────────────────────────────────────
@@ -209,6 +217,16 @@ class TreatmentEdit extends Component
     }
 
     public function incrementLinkedDays(): void { $this->editLinkedDays++; }
+
+    public function incrementOrderReminderDays(): void
+    {
+        $this->orderReminderDaysBefore = min(60, $this->orderReminderDaysBefore + 1);
+    }
+
+    public function decrementOrderReminderDays(): void
+    {
+        $this->orderReminderDaysBefore = max(1, $this->orderReminderDaysBefore - 1);
+    }
 
     public function decrementLinkedDays(): void
     {
@@ -355,6 +373,7 @@ class TreatmentEdit extends Component
         // Regenerate linked events if parent or duration changed
         if ($parentChanged || $daysChanged) {
             $this->regenerateLinkedEvents();
+            app(\App\Services\NotificationScheduler::class)->scheduleForTreatment($this->treatment->fresh());
         }
 
         $this->treatment->refresh();
@@ -413,9 +432,22 @@ class TreatmentEdit extends Component
             }
         }
 
+        if ($this->orderReminderEnabled) {
+            $this->validate(
+                [
+                    'orderReminderDaysBefore' => 'required|integer|min:1|max:60',
+                    'orderReminderTime'       => 'required|date_format:H:i',
+                ],
+                ['orderReminderTime.date_format' => __('treatments.validation_notif_time_format_short')]
+            );
+        }
+
         $isDayparts = ! $this->treatment->is_medical_act && $this->dosageMode === 'dayparts';
 
         $this->treatment->update([
+            'order_reminder_enabled'     => $this->orderReminderEnabled,
+            'order_reminder_days_before' => $this->orderReminderDaysBefore,
+            'order_reminder_time'        => $this->orderReminderEnabled ? $this->orderReminderTime : null,
             'notification_enabled'      => $this->notificationEnabled,
             'notification_time_morning' => $this->notificationEnabled ? ($this->notificationTimeMorning ?: null) : null,
             'notification_time_noon'    => ($this->notificationEnabled && $isDayparts) ? ($this->notificationTimeNoon ?: null) : null,
@@ -482,6 +514,10 @@ class TreatmentEdit extends Component
 
         if ($recalculate) {
             $this->recalculateFutureEvents();
+            // Les occurrences du parent ont été recréées : les traitements liés
+            // doivent retrouver leur bloc sur les nouvelles dates.
+            app(\App\Services\LinkedEventSync::class)->syncChildrenOf($this->treatment);
+            app(\App\Services\NotificationScheduler::class)->rescheduleWithLinked($this->treatment);
         }
 
         $this->dispatch('toast', message: __('treatments.recurrence_updated'));

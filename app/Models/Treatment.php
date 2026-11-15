@@ -27,6 +27,9 @@ class Treatment extends Model
         'notification_time_morning',
         'notification_time_noon',
         'notification_time_evening',
+        'order_reminder_enabled',
+        'order_reminder_days_before',
+        'order_reminder_time',
     ];
 
     protected $casts = [
@@ -44,6 +47,8 @@ class Treatment extends Model
         'requires_fasting'      => 'boolean',
         'sort_order'            => 'integer',
         'notification_enabled'  => 'boolean',
+        'order_reminder_enabled'     => 'boolean',
+        'order_reminder_days_before' => 'integer',
     ];
 
     public function scopeActive(Builder $query): void

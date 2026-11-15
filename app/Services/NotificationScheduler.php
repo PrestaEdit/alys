@@ -21,7 +21,7 @@ class NotificationScheduler
         $this->batteryUnrestricted = $this->checkBatteryUnrestricted();
 
         Treatment::active()
-            ->where('notification_enabled', true)
+            ->where(fn ($q) => $q->where('notification_enabled', true)->orWhere('order_reminder_enabled', true))
             ->get()
             ->each(fn (Treatment $t) => $this->scheduleForTreatment($t));
     }
@@ -30,13 +30,21 @@ class NotificationScheduler
     {
         $this->cancelForTreatment($treatment);
 
-        if (! $treatment->notification_enabled) {
+        if (! $treatment->notification_enabled && ! $treatment->order_reminder_enabled) {
             return;
         }
 
         // Initialize battery flag if called directly (not via rescheduleAll).
         if ($this->batteryUnrestricted === null) {
             $this->batteryUnrestricted = $this->checkBatteryUnrestricted();
+        }
+
+        if ($treatment->order_reminder_enabled) {
+            $this->scheduleOrderReminders($treatment);
+        }
+
+        if (! $treatment->notification_enabled) {
+            return;
         }
 
         match ($treatment->type) {
@@ -62,6 +70,97 @@ class NotificationScheduler
 
         foreach ($futureEvents as $eventId) {
             LocalNotifications::cancel($prefix . '-event-' . $eventId);
+            LocalNotifications::cancel($prefix . '-order-' . $eventId);
+        }
+
+        // Rappels de commande d'un traitement lié : identifiés par l'occurrence parente.
+        if ($treatment->parent_treatment_id !== null) {
+            CalendarEvent::where('treatment_id', $treatment->id)
+                ->where('scheduled_date', '>=', today()->toDateString())
+                ->whereNotNull('parent_event_id')
+                ->distinct()
+                ->pluck('parent_event_id')
+                ->each(fn ($id) => LocalNotifications::cancel($prefix . '-order-' . $id));
+        }
+    }
+
+    /**
+     * Reprogramme un traitement et ses traitements liés (dont les dates
+     * suivent celles du parent) après un déplacement / saut / recalcul.
+     */
+    public function rescheduleWithLinked(Treatment $treatment): void
+    {
+        $this->scheduleForTreatment($treatment);
+
+        Treatment::active()
+            ->where('parent_treatment_id', $treatment->id)
+            ->get()
+            ->each(fn (Treatment $child) => $this->scheduleForTreatment($child));
+    }
+
+    /**
+     * Dates de début des prochains blocs de prise, indexées par un identifiant
+     * stable de bloc (id de l'occurrence parente pour un traitement lié, id de
+     * l'occurrence sinon). Un traitement quotidien autonome n'a pas de bloc.
+     *
+     * @return array<int, Carbon>
+     */
+    public function upcomingBlockStarts(Treatment $treatment): array
+    {
+        $today  = today()->toDateString();
+        $cutoff = today()->addYear()->toDateString();
+
+        $events = CalendarEvent::where('treatment_id', $treatment->id)
+            ->where('is_cancelled', false)
+            ->where('scheduled_date', '<=', $cutoff)
+            ->orderBy('scheduled_date')
+            ->get(['id', 'scheduled_date', 'parent_event_id']);
+
+        $starts = [];
+
+        if ($treatment->parent_treatment_id !== null) {
+            foreach ($events->whereNotNull('parent_event_id')->groupBy('parent_event_id') as $parentId => $block) {
+                $first = $block->first()->scheduled_date;
+                // Un bloc déjà commencé n'a plus besoin de rappel de commande.
+                if ($first->toDateString() >= $today) {
+                    $starts[(int) $parentId] = $first->copy();
+                }
+            }
+            return $starts;
+        }
+
+        if ($treatment->type === 'daily') {
+            return [];
+        }
+
+        foreach ($events as $event) {
+            if ($event->scheduled_date->toDateString() >= $today) {
+                $starts[$event->id] = $event->scheduled_date->copy();
+            }
+        }
+        return $starts;
+    }
+
+    private function scheduleOrderReminders(Treatment $treatment): void
+    {
+        $prefix = 'treatment-' . $treatment->id;
+        $days   = max(0, (int) ($treatment->order_reminder_days_before ?? 3));
+        [$h, $m] = explode(':', $treatment->order_reminder_time ?: '09:00');
+
+        foreach ($this->upcomingBlockStarts($treatment) as $blockId => $start) {
+            $at = $start->copy()->subDays($days)->setTime((int) $h, (int) $m);
+            if ($at->isPast()) {
+                continue;
+            }
+
+            $this->push([
+                'id'   => $prefix . '-order-' . $blockId,
+                'body' => __('treatments.order_reminder_body', [
+                    'name' => $treatment->displayName(),
+                    'date' => $start->locale(app()->getLocale())->isoFormat('dddd D MMMM'),
+                ]),
+                'at'   => $at->timestamp,
+            ], $treatment);
         }
     }
 

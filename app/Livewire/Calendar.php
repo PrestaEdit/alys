@@ -9,6 +9,8 @@ use App\Services\BlockShiftService;
 use App\Services\CalendarService;
 use App\Services\EventMoveService;
 use App\Services\EventSkipService;
+use App\Services\LinkedEventSync;
+use App\Services\NotificationScheduler;
 use Carbon\Carbon;
 use Livewire\Component;
 
@@ -45,8 +47,11 @@ class Calendar extends Component
     public bool $showDeleteEventModal = false;
     public ?int $deletingEventId = null;
 
-    public function mount(CalendarService $service): void
+    public function mount(CalendarService $service, LinkedEventSync $linkedSync): void
     {
+        // Auto-réparation des traitements liés dont le bloc a été perdu.
+        $linkedSync->syncAll();
+
         $this->year = now()->year;
         $this->month = now()->month;
         $this->selectedDate = now()->toDateString();
@@ -121,7 +126,13 @@ class Calendar extends Component
 
         if ($this->moveCanShiftFuture && $this->moveShiftFuture) {
             $this->reanchorRecurrence($event->treatment, $this->moveToDate, $event->id);
+            // Les occurrences suivantes ont été recréées : régénère le bloc des
+            // traitements liés sur ces nouvelles dates.
+            app(LinkedEventSync::class)->syncChildrenOf($event->treatment);
         }
+
+        // Les dates ont changé : reprogramme rappels de prise et de commande.
+        app(NotificationScheduler::class)->rescheduleWithLinked($event->treatment);
 
         $this->showMoveModal = false;
         $this->movingEventId = null;
@@ -332,6 +343,7 @@ class Calendar extends Component
     {
         $event = CalendarEvent::findOrFail($eventId);
         $skipService->skip($event);
+        app(NotificationScheduler::class)->rescheduleWithLinked($event->treatment);
 
         $this->loadMonth($calendarService);
         $this->loadDay($calendarService);

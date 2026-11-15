@@ -60,6 +60,62 @@ class ImportService
         $this->importTreatments($data['treatments'], $profileIdMap, $selectedTreatments);
         $this->importHistory($data['posology_history'], $profileIdMap, $selectedTreatments);
         $this->importEvents($data['calendar_events'], $profileIdMap, $selectedTreatments);
+        $this->importLinks($data['treatments'], $profileIdMap, $selectedTreatments);
+
+        // Les réglages de rappel ont pu changer : reprogramme les notifications.
+        app(NotificationScheduler::class)->rescheduleAll();
+    }
+
+    /**
+     * Réglages de rappel (prise + commande). Absents des anciens exports :
+     * on ne touche alors pas aux réglages locaux existants.
+     */
+    private function reminderFields(array $t): array
+    {
+        $keys = [
+            'notification_enabled', 'notification_time_morning', 'notification_time_noon',
+            'notification_time_evening', 'order_reminder_enabled', 'order_reminder_days_before',
+            'order_reminder_time',
+        ];
+
+        $fields = array_intersect_key($t, array_flip($keys));
+        if (array_key_exists('order_reminder_days_before', $fields) && $fields['order_reminder_days_before'] === null) {
+            unset($fields['order_reminder_days_before']);
+        }
+        return $fields;
+    }
+
+    /**
+     * Restaure le lien parent ↔ enfant (par nom, dans le même profil) une fois
+     * tous les traitements importés, puis régénère les blocs liés : le fichier
+     * ne transporte pas parent_event_id, les events enfants importés sont donc
+     * rattachés à nouveau aux occurrences du parent.
+     */
+    private function importLinks(array $treatments, array $profileIdMap, ?array $selectedTreatments): void
+    {
+        $sync = app(LinkedEventSync::class);
+
+        foreach ($treatments as $t) {
+            if (empty($t['parent_treatment_name']) || ! $this->isSelected($t, $selectedTreatments)) {
+                continue;
+            }
+
+            $profileId = $this->resolveProfileId($t, $profileIdMap);
+            $child = Treatment::withoutGlobalScopes()
+                ->where('name', $t['name'])->where('profile_id', $profileId)->first();
+            $parent = Treatment::withoutGlobalScopes()
+                ->where('name', $t['parent_treatment_name'])->where('profile_id', $profileId)->first();
+
+            if (! $child || ! $parent || $child->id === $parent->id) {
+                continue;
+            }
+
+            $child->update([
+                'parent_treatment_id' => $parent->id,
+                'linked_days'         => max(1, (int) ($t['linked_days'] ?? 1)),
+            ]);
+            $sync->syncChild($child);
+        }
     }
 
     private function isSelected(array $item, ?array $selectedTreatments, string $nameKey = 'name'): bool
@@ -138,7 +194,7 @@ class ImportService
                     'show_widget'      => $t['show_widget'] ?? false,
                     'widget_icon'      => $t['widget_icon'] ?? null,
                     'archived_at'      => $t['archived_at'] ?? null,
-                ]
+                ] + $this->reminderFields($t)
             );
         }
     }
