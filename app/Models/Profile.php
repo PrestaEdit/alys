@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Validation\Rule;
 
 class Profile extends Model
 {
@@ -57,5 +58,61 @@ class Profile extends Model
     public function treatments(): HasMany
     {
         return $this->hasMany(Treatment::class);
+    }
+
+    public function weightEntries(): HasMany
+    {
+        return $this->hasMany(WeightEntry::class);
+    }
+
+    /**
+     * Règles et messages de validation de la fiche médicale, pour les noms de
+     * champs du composant appelant.
+     *
+     * @return array{0: array<string, mixed>, 1: array<string, string>}
+     */
+    public static function medicalValidation(string $weight, string $height, string $bloodGroup): array
+    {
+        return [
+            [
+                $weight     => 'nullable|numeric|min:1|max:500',
+                $height     => 'nullable|integer|min:30|max:250',
+                $bloodGroup => ['nullable', Rule::in(self::BLOOD_GROUPS)],
+            ],
+            [
+                "$weight.numeric"   => __('profiles.validation_weight_range'),
+                "$weight.min"       => __('profiles.validation_weight_range'),
+                "$weight.max"       => __('profiles.validation_weight_range'),
+                "$height.integer"   => __('profiles.validation_height_range'),
+                "$height.min"       => __('profiles.validation_height_range'),
+                "$height.max"       => __('profiles.validation_height_range'),
+                "$bloodGroup.in"    => __('profiles.validation_blood_group_in'),
+            ],
+        ];
+    }
+
+    /**
+     * Met à jour la fiche médicale. Un poids qui change est consigné dans
+     * l'historique à la date du jour (une seule pesée par jour).
+     */
+    public function updateMedical(?float $weightKg, ?int $heightCm, ?string $bloodGroup): void
+    {
+        $previous = $this->weight_kg !== null ? round((float) $this->weight_kg, 1) : null;
+        $weightKg = $weightKg !== null ? round($weightKg, 1) : null;
+
+        $this->update([
+            'weight_kg'   => $weightKg,
+            'height_cm'   => $heightCm,
+            'blood_group' => $bloodGroup,
+        ]);
+
+        if ($weightKg !== null && $weightKg !== $previous) {
+            // whereDate : la colonne peut contenir « Y-m-d » ou « Y-m-d H:i:s »
+            // selon qu'elle vient du cast Eloquent ou d'un insert brut.
+            $today = $this->weightEntries()->whereDate('measured_on', today())->first();
+            $today
+                ? $today->update(['weight_kg' => $weightKg])
+                : $this->weightEntries()->create(['weight_kg' => $weightKg, 'measured_on' => today()]);
+        }
     }
 }

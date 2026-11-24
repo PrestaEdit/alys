@@ -6,6 +6,7 @@ use App\Models\CalendarEvent;
 use App\Models\PosologyHistory;
 use App\Models\Profile;
 use App\Models\Treatment;
+use App\Models\WeightEntry;
 
 class ImportService
 {
@@ -61,6 +62,7 @@ class ImportService
         $this->importHistory($data['posology_history'], $profileIdMap, $selectedTreatments);
         $this->importEvents($data['calendar_events'], $profileIdMap, $selectedTreatments);
         $this->importLinks($data['treatments'], $profileIdMap, $selectedTreatments);
+        $this->importWeightEntries($data['weight_entries'] ?? [], $profileIdMap);
 
         // Les réglages de rappel ont pu changer : reprogramme les notifications.
         app(NotificationScheduler::class)->rescheduleAll();
@@ -149,11 +151,54 @@ class ImportService
                     'treatment_start' => $p['treatment_start'] ?? null,
                     'treatment_end'   => $p['treatment_end'] ?? null,
                     'archived_at'     => $p['archived_at'] ?? null,
-                ]
+                ] + $this->medicalFields($p)
             );
             $map[$p['id']] = $profile->id;
         }
         return $map;
+    }
+
+    /**
+     * Fiche médicale, seulement si elle figure dans l'export : un fichier
+     * antérieur ne doit pas effacer le poids ou le groupe sanguin locaux.
+     */
+    private function medicalFields(array $p): array
+    {
+        return array_intersect_key(
+            [
+                'weight_kg'   => $p['weight_kg'] ?? null,
+                'height_cm'   => $p['height_cm'] ?? null,
+                'blood_group' => $p['blood_group'] ?? null,
+            ],
+            $p,
+        );
+    }
+
+    /**
+     * Historique des pesées. Seulement pour les profils importés : sans
+     * correspondance, on ne rattache pas une pesée au profil actif (ce serait
+     * le poids d'une autre personne).
+     */
+    private function importWeightEntries(array $entries, array $profileIdMap): void
+    {
+        foreach ($entries as $w) {
+            $profileId = $profileIdMap[$w['profile_id'] ?? null] ?? null;
+            if ($profileId === null || ! isset($w['weight_kg'], $w['measured_on'])) {
+                continue;
+            }
+
+            $existing = WeightEntry::where('profile_id', $profileId)
+                ->whereDate('measured_on', $w['measured_on'])
+                ->first();
+
+            $existing
+                ? $existing->update(['weight_kg' => $w['weight_kg']])
+                : WeightEntry::create([
+                    'profile_id'  => $profileId,
+                    'weight_kg'   => $w['weight_kg'],
+                    'measured_on' => $w['measured_on'],
+                ]);
+        }
     }
 
     private function resolveProfileId(array $item, array $profileIdMap): ?int

@@ -46,6 +46,8 @@ class Profiles extends Component
 
     public function saveEdit(): void
     {
+        [$medicalRules, $medicalMessages] = Profile::medicalValidation('editWeight', 'editHeight', 'editBloodGroup');
+
         $this->validate(
             [
                 'editName'  => ['required', 'string', 'max:100',
@@ -54,10 +56,7 @@ class Profiles extends Component
                 'editColor'      => ['required', Rule::in(Profile::COLORS)],
                 'editStart'      => 'nullable|date',
                 'editEnd'        => 'nullable|date|after:editStart',
-                'editWeight'     => 'nullable|numeric|min:1|max:500',
-                'editHeight'     => 'nullable|integer|min:30|max:250',
-                'editBloodGroup' => ['nullable', Rule::in(Profile::BLOOD_GROUPS)],
-            ],
+            ] + $medicalRules,
             [
                 'editName.required' => __('profiles.validation_name_required'),
                 'editName.max'      => __('profiles.validation_name_max'),
@@ -67,14 +66,7 @@ class Profiles extends Component
                 'editStart.date'    => __('profiles.validation_start_date'),
                 'editEnd.date'      => __('profiles.validation_end_date'),
                 'editEnd.after'     => __('profiles.validation_end_after'),
-                'editWeight.numeric' => __('profiles.validation_weight_range'),
-                'editWeight.min'     => __('profiles.validation_weight_range'),
-                'editWeight.max'     => __('profiles.validation_weight_range'),
-                'editHeight.integer' => __('profiles.validation_height_range'),
-                'editHeight.min'     => __('profiles.validation_height_range'),
-                'editHeight.max'     => __('profiles.validation_height_range'),
-                'editBloodGroup.in'  => __('profiles.validation_blood_group_in'),
-            ]
+            ] + $medicalMessages
         );
 
         $p = Profile::findOrFail($this->editingId);
@@ -84,10 +76,12 @@ class Profiles extends Component
             'color'           => $this->editColor,
             'treatment_start' => $this->editStart ?: null,
             'treatment_end'   => $this->editEnd ?: null,
-            'weight_kg'       => $this->editWeight !== '' ? (float) $this->editWeight : null,
-            'height_cm'       => $this->editHeight !== '' ? (int) $this->editHeight : null,
-            'blood_group'     => $this->editBloodGroup,
         ]);
+        $p->updateMedical(
+            $this->editWeight !== '' ? (float) $this->editWeight : null,
+            $this->editHeight !== '' ? (int) $this->editHeight : null,
+            $this->editBloodGroup,
+        );
 
         $this->cancelEdit();
     }

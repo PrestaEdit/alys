@@ -34,6 +34,9 @@
     </div>
     @endif
 
+    {{-- Fiche médicale (poids, taille, groupe sanguin) --}}
+    <livewire:medical-card />
+
     {{-- Barre de progression --}}
     @if($progressPercent !== null)
     <div class="bg-white rounded-2xl p-4 mb-4 shadow-sm">

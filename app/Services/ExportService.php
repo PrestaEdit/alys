@@ -7,6 +7,7 @@ use App\Models\PosologyHistory;
 use App\Models\Profile;
 use App\Models\Setting;
 use App\Models\Treatment;
+use App\Models\WeightEntry;
 
 class ExportService
 {
@@ -28,7 +29,8 @@ class ExportService
         if ($filtering) {
             $profilesQuery->whereIn('id', $profileIds);
         }
-        $profiles = $profilesQuery->get()->map(fn($p) => [
+        $profileModels = $profilesQuery->get();
+        $profiles = $profileModels->map(fn($p) => [
             'id'              => $p->id,
             'name'            => $p->name,
             'color'           => $p->color,
@@ -36,7 +38,20 @@ class ExportService
             'treatment_start' => $p->treatment_start?->toDateString(),
             'treatment_end'   => $p->treatment_end?->toDateString(),
             'archived_at'     => $p->archived_at?->toIso8601String(),
+            'weight_kg'       => $p->weight_kg !== null ? (float) $p->weight_kg : null,
+            'height_cm'       => $p->height_cm,
+            'blood_group'     => $p->blood_group,
         ])->toArray();
+
+        $weightEntries = WeightEntry::query()
+            ->whereIn('profile_id', $profileModels->pluck('id'))
+            ->orderBy('measured_on')
+            ->get()
+            ->map(fn($w) => [
+                'profile_id'  => $w->profile_id,
+                'weight_kg'   => (float) $w->weight_kg,
+                'measured_on' => $w->measured_on->toDateString(),
+            ])->toArray();
 
         $parentNames = Treatment::withoutGlobalScopes()
             ->whereIn('id', $treatmentModels->pluck('parent_treatment_id')->filter()->unique()->all())
@@ -115,6 +130,7 @@ class ExportService
             'treatments'       => $treatments,
             'posology_history' => $history,
             'calendar_events'  => $events,
+            'weight_entries'   => $weightEntries,
         ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
     }
 

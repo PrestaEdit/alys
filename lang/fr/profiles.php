@@ -20,6 +20,9 @@ return [
     'height'             => 'Taille (cm)',
     'height_placeholder' => 'ex. 175',
     'blood_group'        => 'Groupe sanguin',
+    'medical_fill'       => 'Renseigner poids, taille et groupe sanguin',
+    'weight_history'     => 'Dernières pesées',
+    'weight_delta'       => ':delta kg depuis le :date',
 
     // Create screen
     'title_create'       => 'Nouveau profil',

@@ -13,6 +13,17 @@ return [
     'start_date'         => 'Start date',
     'end_date'           => 'End date',
 
+    // Medical fiche
+    'medical_section'    => 'Medical record',
+    'weight'             => 'Weight (kg)',
+    'weight_placeholder' => 'e.g. 70',
+    'height'             => 'Height (cm)',
+    'height_placeholder' => 'e.g. 175',
+    'blood_group'        => 'Blood type',
+    'medical_fill'       => 'Add weight, height and blood type',
+    'weight_history'     => 'Latest weigh-ins',
+    'weight_delta'       => ':delta kg since :date',
+
     // Create screen
     'title_create'       => 'New profile',
     'first_name'         => 'First name',
@@ -34,4 +45,7 @@ return [
     'validation_start_date'     => 'The start date must be a valid date.',
     'validation_end_date'       => 'The end date must be a valid date.',
     'validation_end_after'      => 'The end date must be after the start date.',
+    'validation_weight_range'   => 'Weight must be between 1 and 500 kg.',
+    'validation_height_range'   => 'Height must be between 30 and 250 cm.',
+    'validation_blood_group_in' => 'This blood type is not valid.',
 ];
