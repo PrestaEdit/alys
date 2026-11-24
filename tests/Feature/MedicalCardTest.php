@@ -35,26 +35,28 @@ it('shows a compact summary', function () {
 });
 
 it('opens the sheet prefilled with current values', function () {
+    app()->setLocale('fr');
     $this->profile->update(['weight_kg' => 72.5, 'height_cm' => 178, 'blood_group' => 'O+']);
 
     Livewire::test(MedicalCard::class)
         ->call('openSheet')
         ->assertSet('open', true)
-        ->assertSet('weight', '72.5')
+        ->assertSet('weight', '72,5')
         ->assertSet('height', '178')
         ->assertSet('bloodGroup', 'O+');
 });
 
 it('steps the weight by 0.1 kg', function () {
+    app()->setLocale('fr');
     $this->profile->update(['weight_kg' => 72.5]);
 
     Livewire::test(MedicalCard::class)
         ->call('openSheet')
         ->call('stepWeight', 0.1)
-        ->assertSet('weight', '72.6')
+        ->assertSet('weight', '72,6')
         ->call('stepWeight', -0.1)
         ->call('stepWeight', -0.1)
-        ->assertSet('weight', '72.4');
+        ->assertSet('weight', '72,4');
 });
 
 it('saves the record and logs the weight in history', function () {

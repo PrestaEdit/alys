@@ -31,9 +31,10 @@
         </svg>
     </button>
 
-    {{-- Feuille d'édition rapide --}}
+    {{-- Feuille d'édition rapide. z-[60] : au-dessus de la barre de
+         navigation du layout (z-50), qui sinon masque les boutons. --}}
     @if($open)
-    <div class="fixed inset-0 bg-black/50 z-50 flex items-end justify-center">
+    <div class="fixed inset-0 bg-black/50 z-[60] flex items-end justify-center">
         <button type="button" wire:click="close" class="absolute inset-0 cursor-default"
                 aria-label="{{ __('profiles.close') }}"></button>
 

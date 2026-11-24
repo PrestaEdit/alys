@@ -24,7 +24,7 @@ class MedicalCard extends Component
             return;
         }
 
-        $this->weight = $profile->weight_kg !== null ? (string) (float) $profile->weight_kg : '';
+        $this->weight = $profile->weight_kg !== null ? self::inputKg((float) $profile->weight_kg) : '';
         $this->height = $profile->height_cm !== null ? (string) $profile->height_cm : '';
         $this->bloodGroup = $profile->blood_group;
         $this->resetValidation();
@@ -44,7 +44,14 @@ class MedicalCard extends Component
             return;
         }
         $next = min(500, max(1, round((float) $current + $delta, 1)));
-        $this->weight = (string) $next;
+        $this->weight = self::inputKg($next);
+    }
+
+    /** Valeur du champ poids, avec le séparateur décimal de la langue. */
+    private static function inputKg(float $kg): string
+    {
+        $value = (string) round($kg, 1);
+        return app()->getLocale() === 'fr' ? str_replace('.', ',', $value) : $value;
     }
 
     public function toggleBloodGroup(string $group): void
