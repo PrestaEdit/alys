@@ -59,6 +59,21 @@ it('steps the weight by 0.1 kg', function () {
         ->assertSet('weight', '72,4');
 });
 
+it('steps the height by 1 cm within bounds', function () {
+    $this->profile->update(['height_cm' => 133]);
+
+    Livewire::test(MedicalCard::class)
+        ->call('openSheet')
+        ->call('stepHeight', 1)
+        ->assertSet('height', '134')
+        ->call('stepHeight', -1)
+        ->call('stepHeight', -1)
+        ->assertSet('height', '132')
+        ->set('height', '250')
+        ->call('stepHeight', 1)
+        ->assertSet('height', '250');
+});
+
 it('saves the record and logs the weight in history', function () {
     Livewire::test(MedicalCard::class)
         ->call('openSheet')

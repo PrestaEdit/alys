@@ -47,6 +47,14 @@ class MedicalCard extends Component
         $this->weight = self::inputKg($next);
     }
 
+    public function stepHeight(int $delta): void
+    {
+        if (! ctype_digit(trim($this->height))) {
+            return;
+        }
+        $this->height = (string) min(250, max(30, (int) $this->height + $delta));
+    }
+
     /** Valeur du champ poids, avec le séparateur décimal de la langue. */
     private static function inputKg(float $kg): string
     {

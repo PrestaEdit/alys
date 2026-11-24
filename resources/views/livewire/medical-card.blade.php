@@ -73,10 +73,16 @@
 
             {{-- Taille --}}
             <label class="block text-xs font-semibold text-slate-600 mb-1">{{ __('profiles.height') }}</label>
-            <input type="number" step="1" min="30" max="250" inputmode="numeric"
-                   wire:model="height"
-                   placeholder="{{ __('profiles.height_placeholder') }}"
-                   class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm mb-1 focus:outline-none focus:ring-2 focus:ring-sky-400">
+            <div class="flex items-center gap-2 mb-1">
+                <button type="button" wire:click="stepHeight(-1)"
+                        class="w-11 h-11 rounded-xl bg-slate-100 text-slate-700 text-xl font-bold shrink-0">−</button>
+                <input type="text" inputmode="numeric"
+                       wire:model="height"
+                       placeholder="{{ __('profiles.height_placeholder') }}"
+                       class="flex-1 min-w-0 text-center rounded-xl border border-slate-200 px-3 py-2.5 text-lg font-bold focus:outline-none focus:ring-2 focus:ring-sky-400">
+                <button type="button" wire:click="stepHeight(1)"
+                        class="w-11 h-11 rounded-xl bg-slate-100 text-slate-700 text-xl font-bold shrink-0">+</button>
+            </div>
             @error('height')<p class="text-xs text-red-500 mb-2">{{ $message }}</p>@enderror
 
             {{-- Groupe sanguin --}}
