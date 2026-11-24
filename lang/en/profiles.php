@@ -22,6 +22,7 @@ return [
     'blood_group'        => 'Blood type',
     'medical_fill'       => 'Add weight, height and blood type',
     'weight_history'     => 'Latest weigh-ins',
+    'height_history'     => 'Latest measurements',
     'weight_delta'       => ':delta kg since :date',
 
     // Create screen

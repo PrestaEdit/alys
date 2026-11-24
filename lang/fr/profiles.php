@@ -22,6 +22,7 @@ return [
     'blood_group'        => 'Groupe sanguin',
     'medical_fill'       => 'Renseigner poids, taille et groupe sanguin',
     'weight_history'     => 'Dernières pesées',
+    'height_history'     => 'Dernières mesures',
     'weight_delta'       => ':delta kg depuis le :date',
 
     // Create screen

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\CalendarEvent;
+use App\Models\HeightEntry;
 use App\Models\PosologyHistory;
 use App\Models\Profile;
 use App\Models\Treatment;
@@ -62,7 +63,8 @@ class ImportService
         $this->importHistory($data['posology_history'], $profileIdMap, $selectedTreatments);
         $this->importEvents($data['calendar_events'], $profileIdMap, $selectedTreatments);
         $this->importLinks($data['treatments'], $profileIdMap, $selectedTreatments);
-        $this->importWeightEntries($data['weight_entries'] ?? [], $profileIdMap);
+        $this->importMeasurements($data['weight_entries'] ?? [], $profileIdMap, WeightEntry::class, 'weight_kg');
+        $this->importMeasurements($data['height_entries'] ?? [], $profileIdMap, HeightEntry::class, 'height_cm');
 
         // Les réglages de rappel ont pu changer : reprogramme les notifications.
         app(NotificationScheduler::class)->rescheduleAll();
@@ -175,28 +177,30 @@ class ImportService
     }
 
     /**
-     * Historique des pesées. Seulement pour les profils importés : sans
-     * correspondance, on ne rattache pas une pesée au profil actif (ce serait
-     * le poids d'une autre personne).
+     * Historique des mesures (poids ou taille). Seulement pour les profils
+     * importés : sans correspondance, on ne rattache pas une mesure au profil
+     * actif (ce serait celle d'une autre personne).
+     *
+     * @param class-string<\Illuminate\Database\Eloquent\Model> $model
      */
-    private function importWeightEntries(array $entries, array $profileIdMap): void
+    private function importMeasurements(array $entries, array $profileIdMap, string $model, string $field): void
     {
-        foreach ($entries as $w) {
-            $profileId = $profileIdMap[$w['profile_id'] ?? null] ?? null;
-            if ($profileId === null || ! isset($w['weight_kg'], $w['measured_on'])) {
+        foreach ($entries as $m) {
+            $profileId = $profileIdMap[$m['profile_id'] ?? null] ?? null;
+            if ($profileId === null || ! isset($m[$field], $m['measured_on'])) {
                 continue;
             }
 
-            $existing = WeightEntry::where('profile_id', $profileId)
-                ->whereDate('measured_on', $w['measured_on'])
+            $existing = $model::where('profile_id', $profileId)
+                ->whereDate('measured_on', $m['measured_on'])
                 ->first();
 
             $existing
-                ? $existing->update(['weight_kg' => $w['weight_kg']])
-                : WeightEntry::create([
+                ? $existing->update([$field => $m[$field]])
+                : $model::create([
                     'profile_id'  => $profileId,
-                    'weight_kg'   => $w['weight_kg'],
-                    'measured_on' => $w['measured_on'],
+                    $field        => $m[$field],
+                    'measured_on' => $m['measured_on'],
                 ]);
         }
     }

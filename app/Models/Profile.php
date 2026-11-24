@@ -65,6 +65,11 @@ class Profile extends Model
         return $this->hasMany(WeightEntry::class);
     }
 
+    public function heightEntries(): HasMany
+    {
+        return $this->hasMany(HeightEntry::class);
+    }
+
     /**
      * Règles et messages de validation de la fiche médicale, pour les noms de
      * champs du composant appelant.
@@ -92,12 +97,13 @@ class Profile extends Model
     }
 
     /**
-     * Met à jour la fiche médicale. Un poids qui change est consigné dans
-     * l'historique à la date du jour (une seule pesée par jour).
+     * Met à jour la fiche médicale. Un poids ou une taille qui change est
+     * consigné dans son historique à la date du jour (une mesure par jour).
      */
     public function updateMedical(?float $weightKg, ?int $heightCm, ?string $bloodGroup): void
     {
-        $previous = $this->weight_kg !== null ? round((float) $this->weight_kg, 1) : null;
+        $previousWeight = $this->weight_kg !== null ? round((float) $this->weight_kg, 1) : null;
+        $previousHeight = $this->height_cm;
         $weightKg = $weightKg !== null ? round($weightKg, 1) : null;
 
         $this->update([
@@ -106,13 +112,24 @@ class Profile extends Model
             'blood_group' => $bloodGroup,
         ]);
 
-        if ($weightKg !== null && $weightKg !== $previous) {
-            // whereDate : la colonne peut contenir « Y-m-d » ou « Y-m-d H:i:s »
-            // selon qu'elle vient du cast Eloquent ou d'un insert brut.
-            $today = $this->weightEntries()->whereDate('measured_on', today())->first();
-            $today
-                ? $today->update(['weight_kg' => $weightKg])
-                : $this->weightEntries()->create(['weight_kg' => $weightKg, 'measured_on' => today()]);
+        if ($weightKg !== null && $weightKg !== $previousWeight) {
+            self::recordToday($this->weightEntries(), ['weight_kg' => $weightKg]);
         }
+        if ($heightCm !== null && $heightCm !== $previousHeight) {
+            self::recordToday($this->heightEntries(), ['height_cm' => $heightCm]);
+        }
+    }
+
+    /**
+     * Crée ou corrige la mesure du jour. whereDate : la colonne peut contenir
+     * « Y-m-d » ou « Y-m-d H:i:s » selon qu'elle vient du cast Eloquent ou
+     * d'un insert brut (migration de reprise, import).
+     */
+    private static function recordToday(HasMany $entries, array $values): void
+    {
+        $today = (clone $entries)->whereDate('measured_on', today())->first();
+        $today
+            ? $today->update($values)
+            : $entries->create($values + ['measured_on' => today()]);
     }
 }

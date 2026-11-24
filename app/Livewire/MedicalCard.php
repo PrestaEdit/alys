@@ -121,9 +121,14 @@ class MedicalCard extends Component
             ];
         }
 
+        $heightEntries = $profile
+            ? $profile->heightEntries()->orderByDesc('measured_on')->limit(6)->get()
+            : collect();
+
         return view('livewire.medical-card', [
             'profile'     => $profile,
             'entries'     => $entries,
+            'heightEntries' => $heightEntries,
             'delta'       => $delta,
             'bloodGroups' => Profile::BLOOD_GROUPS,
         ]);

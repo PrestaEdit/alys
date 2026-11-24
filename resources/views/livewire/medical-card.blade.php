@@ -85,8 +85,22 @@
             </div>
             @error('height')<p class="text-xs text-red-500 mb-2">{{ $message }}</p>@enderror
 
+            @if($heightEntries->isNotEmpty())
+            <div class="mt-2 mb-4 rounded-xl bg-slate-50 px-3 py-2">
+                <p class="text-[11px] font-semibold text-slate-500 uppercase tracking-wide mb-1">{{ __('profiles.height_history') }}</p>
+                @foreach($heightEntries as $entry)
+                <div class="flex justify-between text-xs py-0.5">
+                    <span class="text-slate-500">{{ $entry->measured_on->isoFormat('D MMM YYYY') }}</span>
+                    <span class="font-semibold text-slate-700">{{ $entry->height_cm }} cm</span>
+                </div>
+                @endforeach
+            </div>
+            @else
+            <div class="mb-4"></div>
+            @endif
+
             {{-- Groupe sanguin --}}
-            <label class="block text-xs font-semibold text-slate-600 mb-1 mt-3">{{ __('profiles.blood_group') }}</label>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">{{ __('profiles.blood_group') }}</label>
             <div class="grid grid-cols-4 gap-2 mb-5">
                 @foreach($bloodGroups as $group)
                 <button type="button" wire:click="toggleBloodGroup('{{ $group }}')"

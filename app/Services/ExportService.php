@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\CalendarEvent;
+use App\Models\HeightEntry;
 use App\Models\PosologyHistory;
 use App\Models\Profile;
 use App\Models\Setting;
@@ -51,6 +52,16 @@ class ExportService
                 'profile_id'  => $w->profile_id,
                 'weight_kg'   => (float) $w->weight_kg,
                 'measured_on' => $w->measured_on->toDateString(),
+            ])->toArray();
+
+        $heightEntries = HeightEntry::query()
+            ->whereIn('profile_id', $profileModels->pluck('id'))
+            ->orderBy('measured_on')
+            ->get()
+            ->map(fn($h) => [
+                'profile_id'  => $h->profile_id,
+                'height_cm'   => $h->height_cm,
+                'measured_on' => $h->measured_on->toDateString(),
             ])->toArray();
 
         $parentNames = Treatment::withoutGlobalScopes()
@@ -131,6 +142,7 @@ class ExportService
             'posology_history' => $history,
             'calendar_events'  => $events,
             'weight_entries'   => $weightEntries,
+            'height_entries'   => $heightEntries,
         ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
     }
 

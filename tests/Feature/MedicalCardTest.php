@@ -2,6 +2,7 @@
 
 use App\Livewire\MedicalCard;
 use App\Livewire\Profiles;
+use App\Models\HeightEntry;
 use App\Models\Profile;
 use App\Models\WeightEntry;
 use App\Services\ActiveProfile;
@@ -105,13 +106,32 @@ it('keeps one weigh-in per day', function () {
         ->and((float) $entries[0]->weight_kg)->toBe(70.4);
 });
 
-it('does not log history when only height changes', function () {
-    $this->profile->update(['weight_kg' => 70]);
+it('logs only the measure that changed', function () {
+    $this->profile->update(['weight_kg' => 70, 'height_cm' => 133]);
 
     Livewire::test(MedicalCard::class)
-        ->call('openSheet')->set('height', '180')->call('save');
+        ->call('openSheet')->set('height', '134')->call('save');
 
     expect(WeightEntry::count())->toBe(0);
+    $heights = $this->profile->heightEntries()->get();
+    expect($heights)->toHaveCount(1)
+        ->and($heights[0]->height_cm)->toBe(134)
+        ->and($heights[0]->measured_on->toDateString())->toBe('2026-11-24');
+});
+
+it('keeps one height measurement per day and lists them', function () {
+    HeightEntry::create(['profile_id' => $this->profile->id, 'height_cm' => 130, 'measured_on' => '2026-06-01']);
+
+    $card = Livewire::test(MedicalCard::class);
+    $card->call('openSheet')->set('height', '133')->call('save');
+    $card->call('openSheet')->set('height', '134')->call('save');
+
+    expect($this->profile->heightEntries()->pluck('height_cm')->sort()->values()->all())->toBe([130, 134]);
+
+    app()->setLocale('fr');
+    $card->call('openSheet')
+        ->assertSee(__('profiles.height_history'))
+        ->assertSee('1 juin 2026');
 });
 
 it('shows the delta since the previous weigh-in', function () {
@@ -142,14 +162,16 @@ it('also logs history when editing from the profiles screen', function () {
 });
 
 it('round-trips the record and history through export and import', function () {
-    $this->profile->update(['height_cm' => 178, 'blood_group' => 'B+']);
     $this->profile->updateMedical(72.5, 178, 'B+');
     WeightEntry::create(['profile_id' => $this->profile->id, 'weight_kg' => 74.0, 'measured_on' => '2026-10-01']);
+    HeightEntry::create(['profile_id' => $this->profile->id, 'height_cm' => 175, 'measured_on' => '2026-10-01']);
 
     $data = json_decode((new ExportService())->generate(), true);
     expect($data['weight_entries'])->toHaveCount(2);
+    expect($data['height_entries'])->toHaveCount(2);
 
     WeightEntry::query()->delete();
+    HeightEntry::query()->delete();
     $this->profile->update(['weight_kg' => null, 'height_cm' => null, 'blood_group' => null]);
 
     app(ImportService::class)->restoreFromData($data);
@@ -158,7 +180,8 @@ it('round-trips the record and history through export and import', function () {
     expect((float) $fresh->weight_kg)->toBe(72.5)
         ->and($fresh->height_cm)->toBe(178)
         ->and($fresh->blood_group)->toBe('B+')
-        ->and($fresh->weightEntries()->count())->toBe(2);
+        ->and($fresh->weightEntries()->count())->toBe(2)
+        ->and($fresh->heightEntries()->count())->toBe(2);
 });
 
 it('keeps local medical data when importing an older export', function () {
