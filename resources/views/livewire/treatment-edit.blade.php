@@ -192,6 +192,54 @@
         </button>
     </div>
 
+    {{-- Panel : Pause temporaire --}}
+    <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
+        <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">{{ __('treatments.pause_panel') }}</p>
+
+        @if($treatment->hasPendingPause())
+            <x-pause-badge :treatment="$treatment" class="mb-4" />
+            <button wire:click="resumeTreatment"
+                    class="w-full py-2.5 rounded-xl text-sm font-semibold text-white transition-colors hover:opacity-90"
+                    style="background: linear-gradient(135deg, #0ea5e9, #6366f1);">
+                {{ $treatment->paused_from->isFuture() ? __('treatments.pause_cancel_scheduled') : __('treatments.pause_resume') }}
+            </button>
+        @else
+            <x-pause-badge :treatment="$treatment" class="mb-3" />
+            <p class="text-xs text-slate-400 mb-4">{{ __('treatments.pause_help') }}</p>
+
+            @if($showPauseForm)
+            <div class="space-y-3 mb-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">{{ __('treatments.pause_from') }}</label>
+                    <x-datepicker model="pauseFrom" :value="$pauseFrom"/>
+                    @error('pauseFrom') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">{{ __('treatments.pause_until_inclusive') }}</label>
+                    <x-datepicker model="pauseUntil" :value="$pauseUntil ?: null"/>
+                    <p class="text-xs text-slate-400 mt-1">{{ __('treatments.pause_until_help') }}</p>
+                    @error('pauseUntil') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <button wire:click="cancelPauseForm"
+                        class="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors">
+                    {{ __('common.cancel') }}
+                </button>
+                <button wire:click="pauseTreatment"
+                        class="flex-1 py-2.5 rounded-xl bg-amber-500 text-sm font-semibold text-white hover:bg-amber-600 transition-colors">
+                    {{ __('treatments.pause_confirm') }}
+                </button>
+            </div>
+            @else
+            <button wire:click="openPauseForm"
+                    class="w-full py-2.5 rounded-xl border border-amber-200 bg-amber-50 text-sm font-semibold text-amber-700 hover:bg-amber-100 transition-colors">
+                {{ __('treatments.pause_action') }}
+            </button>
+            @endif
+        @endif
+    </div>
+
     {{-- Panel : Notifications --}}
     <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
         <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-4">{{ __('treatments.panel_notifications') }}</p>

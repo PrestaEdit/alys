@@ -60,7 +60,7 @@ class Treatments extends Component
     {
         return view('livewire.treatments', [
             'treatments' => Treatment::active()
-                ->with('posologyHistory')
+                ->with(['posologyHistory', 'parentTreatment'])
                 ->orderBy('sort_order')
                 ->orderBy('id')
                 ->get(),

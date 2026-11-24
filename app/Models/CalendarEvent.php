@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\BelongsToActiveProfile;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -34,6 +35,16 @@ class CalendarEvent extends Model
             'evening' => (bool) $this->skip_evening,
             default   => false,
         };
+    }
+
+    /**
+     * Exclut les occurrences tombant pendant la pause de leur traitement
+     * (ou du traitement parent, pour un traitement lié).
+     */
+    public function scopeNotPaused(Builder $query): void
+    {
+        $query->whereDoesntHave('treatment', fn (Builder $q) => $q->pauseCovers('calendar_events.scheduled_date'))
+            ->whereDoesntHave('treatment.parentTreatment', fn (Builder $q) => $q->pauseCovers('calendar_events.scheduled_date'));
     }
 
     public function treatment(): BelongsTo

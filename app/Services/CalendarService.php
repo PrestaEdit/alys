@@ -45,6 +45,7 @@ class CalendarService
             ->withCount(['calendarEvents as future_count' => fn($q) => $q
                 ->whereDate('scheduled_date', '>', $fromDate)
                 ->where('is_cancelled', false)
+                ->notPaused()
             ])
             ->get()
             ->keyBy('name');
@@ -65,6 +66,7 @@ class CalendarService
             ->withCount(['calendarEvents as future_count' => fn($q) => $q
                 ->whereDate('scheduled_date', '>', $fromDate)
                 ->where('is_cancelled', false)
+                ->notPaused()
             ])
             ->orderBy('sort_order')
             ->orderBy('id')
@@ -86,6 +88,7 @@ class CalendarService
         $event = CalendarEvent::where('treatment_id', $hopital->id)
             ->whereDate('scheduled_date', '>', $from->toDateString())
             ->where('is_cancelled', false)
+            ->notPaused()
             ->orderBy('scheduled_date')
             ->first();
 
@@ -106,6 +109,8 @@ class CalendarService
             ->with('posologyHistory')
             ->get();
         foreach ($dailyTreatments as $treatment) {
+            if ($treatment->ownPauseCovers($date)) continue;
+
             $events[] = [
                 'kind'            => 'treatment',
                 'id'              => null,
@@ -128,6 +133,7 @@ class CalendarService
             ->whereDate('scheduled_date', $dateStr)
             ->where('is_cancelled', false)
             ->whereHas('treatment', fn($q) => $q->whereNull('archived_at'))
+            ->notPaused()
             ->get();
 
         // "Porteur" du bloc = jour à partir duquel on peut décaler le bloc.
@@ -215,6 +221,7 @@ class CalendarService
             ->whereDate('scheduled_date', '<=', $end->toDateString())
             ->where('is_cancelled', false)
             ->whereHas('treatment', fn($q) => $q->whereNull('archived_at'))
+            ->notPaused()
             ->get()
             ->groupBy(fn($e) => $e->scheduled_date->toDateString());
 

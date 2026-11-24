@@ -128,6 +128,8 @@
                 </span>
             </div>
 
+            <x-pause-badge :treatment="$treatment" class="mt-2" />
+
             {{-- Dernier changement de posologie --}}
             @if($treatment->posologyHistory->count() > 1)
             <div class="mt-2 pt-2 border-t border-slate-100 flex items-center gap-1.5">

@@ -22,6 +22,8 @@ class Treatment extends Model
         'show_widget', 'widget_icon',
         'parent_treatment_id', 'linked_days',
         'archived_at',
+        'paused_from',
+        'paused_until',
         'sort_order',
         'notification_enabled',
         'notification_time_morning',
@@ -40,6 +42,8 @@ class Treatment extends Model
         'times_per_day'    => 'integer',
         'recurrence_start' => 'date',
         'archived_at'      => 'datetime',
+        'paused_from'      => 'date',
+        'paused_until'     => 'date',
         'frequency_weeks'  => 'integer',
         'day_of_week'      => 'integer',
         'linked_days'      => 'integer',
@@ -69,6 +73,103 @@ class Treatment extends Model
     public function unarchive(): void
     {
         $this->update(['archived_at' => null]);
+    }
+
+    /**
+     * Met le traitement en pause du $from au $until inclus ($until null =
+     * jusqu'à reprise manuelle). Une seule pause est mémorisée : une nouvelle
+     * pause remplace la précédente.
+     */
+    public function pause(Carbon $from, ?Carbon $until = null): void
+    {
+        $this->update([
+            'paused_from'  => $from->copy()->startOfDay(),
+            'paused_until' => $until?->copy()->startOfDay(),
+        ]);
+    }
+
+    /**
+     * Reprend le traitement aujourd'hui. Une pause déjà commencée est close
+     * hier, pour que les jours sautés restent visibles comme tels dans
+     * l'historique ; une pause pas encore commencée est simplement annulée.
+     */
+    public function resume(): void
+    {
+        if ($this->paused_from === null) return;
+
+        if ($this->paused_from->lt(Carbon::today())) {
+            $this->update(['paused_until' => Carbon::yesterday()]);
+        } else {
+            $this->update(['paused_from' => null, 'paused_until' => null]);
+        }
+    }
+
+    /** La pause propre à ce traitement couvre-t-elle cette date ? */
+    public function ownPauseCovers(Carbon $date): bool
+    {
+        if ($this->paused_from === null) return false;
+
+        $day = $date->toDateString();
+
+        return $this->paused_from->toDateString() <= $day
+            && ($this->paused_until === null || $this->paused_until->toDateString() >= $day);
+    }
+
+    /** En pause ce jour-là, directement ou via son traitement parent. */
+    public function isPausedOn(Carbon $date): bool
+    {
+        if ($this->ownPauseCovers($date)) return true;
+
+        return $this->parent_treatment_id !== null
+            && (bool) $this->parentTreatment?->ownPauseCovers($date);
+    }
+
+    public function isPaused(): bool
+    {
+        return $this->isPausedOn(Carbon::today());
+    }
+
+    /** Pause en cours ou à venir (pas une pause déjà terminée). */
+    public function hasPendingPause(): bool
+    {
+        return $this->paused_from !== null
+            && ($this->paused_until === null || $this->paused_until->gte(Carbon::today()));
+    }
+
+    /**
+     * Premier jour après la pause en cours ou à venir, à partir de $from :
+     * null si la pause n'a pas de date de reprise. Renvoie $from s'il n'est
+     * pas couvert par une pause.
+     */
+    public function resumeDateFrom(Carbon $from): ?Carbon
+    {
+        $parent = $this->parent_treatment_id !== null ? $this->parentTreatment : null;
+        $day = $from->copy()->startOfDay();
+
+        // Les deux pauses (propre / parent) peuvent se chevaucher : on avance
+        // jusqu'à un jour couvert par aucune des deux.
+        for ($i = 0; $i < 3; $i++) {
+            foreach ([$this, $parent] as $t) {
+                if ($t && $t->ownPauseCovers($day)) {
+                    if ($t->paused_until === null) return null;
+                    $day = $t->paused_until->copy()->addDay()->startOfDay();
+                }
+            }
+        }
+
+        return $day;
+    }
+
+    /**
+     * Contrainte SQL : la pause de ce traitement couvre la date $dateColumn
+     * (colonne de la requête englobante, ex. calendar_events.scheduled_date).
+     */
+    public function scopePauseCovers(Builder $query, string $dateColumn): void
+    {
+        $query->whereNotNull('paused_from')
+            ->whereRaw("DATE(paused_from) <= DATE({$dateColumn})")
+            ->where(fn (Builder $q) => $q->whereNull('paused_until')
+                ->orWhereRaw("DATE(paused_until) >= DATE({$dateColumn})"));
     }
 
     public function posologyHistory(): HasMany

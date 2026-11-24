@@ -164,6 +164,18 @@ class ImportService
         return app(ActiveProfile::class)->id();
     }
 
+    /**
+     * Champs de pause, seulement s'ils figurent dans l'export : un fichier
+     * antérieur à la fonctionnalité ne doit pas lever une pause existante.
+     */
+    private function pauseFields(array $t): array
+    {
+        return array_intersect_key(
+            ['paused_from' => $t['paused_from'] ?? null, 'paused_until' => $t['paused_until'] ?? null],
+            $t,
+        );
+    }
+
     private function importTreatments(array $treatments, array $profileIdMap, ?array $selectedTreatments): void
     {
         foreach ($treatments as $t) {
@@ -194,7 +206,7 @@ class ImportService
                     'show_widget'      => $t['show_widget'] ?? false,
                     'widget_icon'      => $t['widget_icon'] ?? null,
                     'archived_at'      => $t['archived_at'] ?? null,
-                ] + $this->reminderFields($t)
+                ] + $this->reminderFields($t) + $this->pauseFields($t)
             );
         }
     }

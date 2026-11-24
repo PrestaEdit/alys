@@ -62,6 +62,8 @@ class ExportService
             'show_widget'      => $t->show_widget,
             'widget_icon'      => $t->widget_icon,
             'archived_at'      => $t->archived_at?->toIso8601String(),
+            'paused_from'      => $t->paused_from?->toDateString(),
+            'paused_until'     => $t->paused_until?->toDateString(),
             'parent_treatment_name' => $t->parent_treatment_id ? $parentNames->get($t->parent_treatment_id) : null,
             'linked_days'      => $t->linked_days,
             'notification_enabled'       => $t->notification_enabled,

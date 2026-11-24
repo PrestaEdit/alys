@@ -63,6 +63,14 @@ class TreatmentEdit extends Component
     public int $orderReminderDaysBefore = 3;
     public string $orderReminderTime = '09:00';
 
+    // Pause temporaire
+    public bool $showPauseForm = false;
+    public string $pauseFrom = '';
+    public string $pauseUntil = '';
+
+    /** Une pause peut démarrer au plus tard N jours après aujourd'hui. */
+    public const PAUSE_MAX_START_DAYS = 14;
+
     public const WIDGET_ICONS = MedicalIcons::KEYS;
 
     public const COLORS = [
@@ -457,6 +465,61 @@ class TreatmentEdit extends Component
         $this->treatment->refresh();
         app(\App\Services\NotificationScheduler::class)->scheduleForTreatment($this->treatment);
         $this->dispatch('toast', message: __('treatments.notifications_updated'));
+    }
+
+    // ── Pause ──────────────────────────────────────────────────────────
+
+    public function openPauseForm(): void
+    {
+        $this->pauseFrom  = today()->toDateString();
+        $this->pauseUntil = '';
+        $this->resetErrorBag(['pauseFrom', 'pauseUntil']);
+        $this->showPauseForm = true;
+    }
+
+    public function cancelPauseForm(): void
+    {
+        $this->showPauseForm = false;
+    }
+
+    public function pauseTreatment(): void
+    {
+        $this->pauseUntil = trim($this->pauseUntil);
+
+        $this->validate([
+            'pauseFrom'  => [
+                'required', 'date',
+                'after_or_equal:' . today()->toDateString(),
+                'before_or_equal:' . today()->addDays(self::PAUSE_MAX_START_DAYS)->toDateString(),
+            ],
+            'pauseUntil' => ['nullable', 'date', 'after_or_equal:pauseFrom'],
+        ], [
+            'pauseFrom.required'        => __('treatments.pause_validation_from'),
+            'pauseFrom.date'            => __('treatments.pause_validation_from'),
+            'pauseFrom.after_or_equal'  => __('treatments.pause_validation_from_past'),
+            'pauseFrom.before_or_equal' => __('treatments.pause_validation_from_far', ['days' => self::PAUSE_MAX_START_DAYS]),
+            'pauseUntil.date'           => __('treatments.pause_validation_until'),
+            'pauseUntil.after_or_equal' => __('treatments.pause_validation_until'),
+        ]);
+
+        $this->treatment->pause(
+            Carbon::parse($this->pauseFrom),
+            $this->pauseUntil !== '' ? Carbon::parse($this->pauseUntil) : null,
+        );
+        $this->treatment->refresh();
+        $this->showPauseForm = false;
+
+        app(\App\Services\NotificationScheduler::class)->rescheduleWithLinked($this->treatment);
+        $this->dispatch('toast', message: __('treatments.pause_saved'));
+    }
+
+    public function resumeTreatment(): void
+    {
+        $this->treatment->resume();
+        $this->treatment->refresh();
+
+        app(\App\Services\NotificationScheduler::class)->rescheduleWithLinked($this->treatment);
+        $this->dispatch('toast', message: __('treatments.pause_resumed'));
     }
 
     // ── Save widget ────────────────────────────────────────────────────

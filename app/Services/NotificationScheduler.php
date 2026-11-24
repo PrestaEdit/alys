@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\CalendarEvent;
+use App\Models\Setting;
 use App\Models\Treatment;
 use Carbon\Carbon;
 use Ikromjon\LocalNotifications\Enums\RepeatInterval;
@@ -11,6 +12,15 @@ use App\Support\Platform;
 
 class NotificationScheduler
 {
+    /**
+     * Pendant une pause datée, les rappels répétés sont remplacés par des
+     * rappels ponctuels (iOS ne sait pas différer le départ d'un rappel
+     * répété). On en programme jusqu'à N jours après la reprise ; l'ouverture
+     * de l'app (refreshPausedTreatments) prolonge puis rebascule en répété.
+     */
+    private const PAUSE_DAYS_AFTER_RESUME = 14;
+    private const PAUSE_REFRESH_MARGIN_DAYS = 7;
+
     /** null = not yet checked, false/true = result of Battery.CheckStatus */
     private ?bool $batteryUnrestricted = null;
 
@@ -47,6 +57,11 @@ class NotificationScheduler
             return;
         }
 
+        if ($this->hasRepeatingReminders($treatment) && $this->pauseAffects($treatment)) {
+            $this->schedulePausedRepeating($treatment);
+            return;
+        }
+
         match ($treatment->type) {
             'daily'  => $this->scheduleDaily($treatment),
             'weekly' => $this->scheduleWeekly($treatment),
@@ -72,6 +87,8 @@ class NotificationScheduler
             LocalNotifications::cancel($prefix . '-event-' . $eventId);
             LocalNotifications::cancel($prefix . '-order-' . $eventId);
         }
+
+        $this->cancelPausedRepeating($treatment);
 
         // Rappels de commande d'un traitement lié : identifiés par l'occurrence parente.
         if ($treatment->parent_treatment_id !== null) {
@@ -112,6 +129,7 @@ class NotificationScheduler
 
         $events = CalendarEvent::where('treatment_id', $treatment->id)
             ->where('is_cancelled', false)
+            ->notPaused()
             ->where('scheduled_date', '<=', $cutoff)
             ->orderBy('scheduled_date')
             ->get(['id', 'scheduled_date', 'parent_event_id']);
@@ -139,6 +157,162 @@ class NotificationScheduler
             }
         }
         return $starts;
+    }
+
+    /**
+     * À appeler à l'ouverture de l'app : prolonge les rappels ponctuels des
+     * traitements en pause, et rebascule en rappels répétés une fois la
+     * pause terminée.
+     */
+    public function refreshPausedTreatments(): void
+    {
+        $limit = today()->addDays(self::PAUSE_REFRESH_MARGIN_DAYS)->toDateString();
+
+        Setting::where('key', 'like', 'pause_notif_%')->get()->each(function (Setting $marker) use ($limit) {
+            $data = json_decode($marker->value, true) ?: [];
+            $treatment = Treatment::withoutGlobalScopes()->find((int) substr($marker->key, strlen('pause_notif_')));
+
+            if (! $treatment || $treatment->archived_at !== null) {
+                $this->cancelPausedRepeatingFromMarker($marker);
+                return;
+            }
+
+            $stale = ! $this->pauseAffects($treatment)
+                || ($data['through'] ?? '') <= $limit;
+
+            if ($stale) {
+                $this->scheduleForTreatment($treatment);
+            }
+        });
+    }
+
+    /** Le traitement a-t-il des rappels répétés (quotidiens / hebdo simples) ? */
+    private function hasRepeatingReminders(Treatment $treatment): bool
+    {
+        return $treatment->type === 'daily'
+            || ($treatment->type === 'weekly' && $treatment->frequency_weeks === 1);
+    }
+
+    /** Une pause en cours ou à venir (propre ou du parent) concerne ce traitement. */
+    private function pauseAffects(Treatment $treatment): bool
+    {
+        return $treatment->hasPendingPause()
+            || ($treatment->parent_treatment_id !== null && (bool) $treatment->parentTreatment?->hasPendingPause());
+    }
+
+    /** Début de la pause en cours ou à venir (propre ou du parent), la plus proche. */
+    private function pauseStart(Treatment $treatment): Carbon
+    {
+        $parent = $treatment->parent_treatment_id !== null ? $treatment->parentTreatment : null;
+
+        return collect([$treatment, $parent])
+            ->filter(fn (?Treatment $t) => $t?->hasPendingPause())
+            ->map(fn (Treatment $t) => $t->paused_from->copy())
+            ->sort()
+            ->first() ?? today();
+    }
+
+    /**
+     * Créneaux des rappels répétés : [clé, heure de départ, moment, décalage en secondes].
+     *
+     * @return array<int, array{0: string, 1: string, 2: string, 3: int}>
+     */
+    private function repeatingSlots(Treatment $treatment): array
+    {
+        if ($treatment->type === 'weekly' || $treatment->is_medical_act
+            || (! $treatment->hasDayPartDoses() && ! $treatment->hasIntervalDose())) {
+            return $treatment->notification_time_morning
+                ? [['morning', $treatment->notification_time_morning, 'morning', 0]]
+                : [];
+        }
+
+        if ($treatment->hasIntervalDose()) {
+            if (! $treatment->notification_time_morning || $treatment->times_per_day <= 0) return [];
+            $step = (int) (86400 / $treatment->times_per_day);
+            $slots = [];
+            for ($i = 0; $i < $treatment->times_per_day; $i++) {
+                $slots[] = ['i' . $i, $treatment->notification_time_morning, 'interval', $i * $step];
+            }
+            return $slots;
+        }
+
+        $slots = [];
+        if ($treatment->notification_time_morning) {
+            $slots[] = ['morning', $treatment->notification_time_morning, 'morning', 0];
+        }
+        if ($treatment->notification_time_noon && $treatment->dose_noon !== null) {
+            $slots[] = ['noon', $treatment->notification_time_noon, 'noon', 0];
+        }
+        if ($treatment->notification_time_evening && $treatment->dose_evening !== null) {
+            $slots[] = ['evening', $treatment->notification_time_evening, 'evening', 0];
+        }
+        return $slots;
+    }
+
+    private function schedulePausedRepeating(Treatment $treatment): void
+    {
+        $slots = $this->repeatingSlots($treatment);
+        if ($slots === []) return;
+
+        $today = today();
+        // Sans date de reprise : rien à programmer après le début de la pause.
+        $resume = $treatment->resumeDateFrom($this->pauseStart($treatment)->max($today->copy()));
+        // Carbon::max() renvoie l'une des deux instances : on copie avant de muter.
+        $through = ($resume !== null && $resume->gt($today) ? $resume->copy() : $today->copy())
+            ->addDays(self::PAUSE_DAYS_AFTER_RESUME);
+
+        $prefix = 'treatment-' . $treatment->id . '-pause-';
+        // day_of_week : 0=lundi…6=dimanche ; Carbon dayOfWeekIso : 1=lundi…7=dimanche
+        $weekday = $treatment->type === 'weekly' ? (($treatment->day_of_week ?? 0) + 1) : null;
+
+        for ($day = $today->copy(); $day->lte($through); $day->addDay()) {
+            if ($treatment->isPausedOn($day)) continue;
+            if ($weekday !== null && $day->dayOfWeekIso !== $weekday) continue;
+
+            foreach ($slots as [$key, $time, $moment, $offset]) {
+                [$h, $m] = explode(':', $time);
+                $at = $day->copy()->setTime((int) $h, (int) $m)->addSeconds($offset);
+                if ($at->isPast()) continue;
+
+                $this->push([
+                    'id'   => $prefix . $key . '-' . $day->format('Ymd'),
+                    'body' => $this->buildBody($treatment, $moment),
+                    'at'   => $at->timestamp,
+                ], $treatment);
+            }
+        }
+
+        Setting::set('pause_notif_' . $treatment->id, json_encode([
+            'from'    => $today->toDateString(),
+            'through' => $through->toDateString(),
+            'slots'   => array_column($slots, 0),
+        ]));
+    }
+
+    private function cancelPausedRepeating(Treatment $treatment): void
+    {
+        $marker = Setting::find('pause_notif_' . $treatment->id);
+        if ($marker) {
+            $this->cancelPausedRepeatingFromMarker($marker);
+        }
+    }
+
+    private function cancelPausedRepeatingFromMarker(Setting $marker): void
+    {
+        $data   = json_decode($marker->value, true) ?: [];
+        $prefix = 'treatment-' . substr($marker->key, strlen('pause_notif_')) . '-pause-';
+
+        if (isset($data['from'], $data['through'])) {
+            $from = Carbon::parse($data['from']);
+            if ($from->lt(today())) $from = today();
+            for ($day = $from; $day->toDateString() <= $data['through']; $day->addDay()) {
+                foreach ($data['slots'] ?? [] as $key) {
+                    LocalNotifications::cancel($prefix . $key . '-' . $day->format('Ymd'));
+                }
+            }
+        }
+
+        $marker->delete();
     }
 
     private function scheduleOrderReminders(Treatment $treatment): void
@@ -262,6 +436,7 @@ class NotificationScheduler
             ->where('scheduled_date', '>=', today()->toDateString())
             ->where('scheduled_date', '<=', $cutoff)
             ->where('is_cancelled', false)
+            ->notPaused()
             ->get(['id', 'scheduled_date']);
 
         [$h, $m] = explode(':', $treatment->notification_time_morning);

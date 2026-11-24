@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Services\ActiveProfile;
 use App\Services\CalendarService;
 use App\Services\LinkedEventSync;
+use App\Services\NotificationScheduler;
 use App\Services\WidgetService;
 use Carbon\Carbon;
 use Livewire\Component;
@@ -26,6 +27,10 @@ class Dashboard extends Component
     {
         // Auto-réparation des traitements liés dont le bloc a été perdu.
         $linkedSync->syncAll();
+
+        // Rappels ponctuels des traitements en pause : prolongés, ou rebasculés
+        // en rappels répétés une fois la pause terminée.
+        app(NotificationScheduler::class)->refreshPausedTreatments();
 
         $profile = $activeProfile->get();
         $this->patientName = $profile?->name ?? 'Alys';
