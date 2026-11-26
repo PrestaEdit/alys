@@ -35,6 +35,9 @@
         }
     },
     "ios": {
-        "min_version": "18.2"
+        "min_version": "18.2",
+        "info_plist": {
+            "CFBundleLocalizations": ["fr", "en"]
+        }
     }
 }
